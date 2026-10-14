@@ -1,7 +1,7 @@
 import {
   AlarmClock, Archive, ArrowLeft, BellOff, CalendarCheck, CalendarX, Check, ChevronDown, Clock, Coffee, Download, Eye, FileText, FolderInput,
   Forward, Image as ImageIcon, Languages, Mail, MoreHorizontal, Paperclip, Pin, PinOff, Repeat, Reply, ReplyAll, ShieldCheck, ShieldX, Sparkles,
-  Star, Tag, Trash2, TriangleAlert, Undo2, X, Code2, Inbox,
+  Star, Tag, Trash2, TriangleAlert, Undo2, X, Zap, Code2, Inbox,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AttachmentInfo, MessageView, ThreadView as TV } from '../../../shared/types'
@@ -14,7 +14,7 @@ import { extraThreadItems, sendAgain } from '../lib/thread-actions'
 import Composer from './Composer'
 import MessageFrame from './MessageFrame'
 import { NoSelection } from './illustrations'
-import { Avatar, Button, cx, Empty, IconButton, Menu, type MenuItem, Modal, Spinner } from './ui'
+import { Avatar, Button, cx, Empty, IconButton, Menu, type MenuItem, Modal, Spinner, Tip, TipButton } from './ui'
 import { dateLocale, t, tp } from '../../../shared/i18n'
 
 function useDark() {
@@ -343,16 +343,23 @@ export default function ThreadView() {
   ]
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col bg-bg">
-      <div className="flex h-12 shrink-0 items-center gap-0.5 border-b border-line bg-surface px-3 max-md:px-1">
-        {one && !s.standalone && <IconButton title={t('Back to list')} onClick={goBack}><ArrowLeft size={18} /></IconButton>}
-        <IconButton title={t('Done (E)')} onClick={() => void act('archive', ids)}><Check size={17} /></IconButton>
-        <IconButton title={thread.pinned ? t('Unpin (S)') : t('Pin (S)')} active={thread.pinned} onClick={() => void act(thread.pinned ? 'unpin' : 'pin', ids)}>{thread.pinned ? <PinOff size={16} /> : <Pin size={16} />}</IconButton>
-        <IconButton title={t('Snooze (H)')} active={!!thread.snoozed_until} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'snooze' })}><Clock size={16} /></IconButton>
-        <IconButton title={t('Set a reminder')} active={!!thread.reminder_at} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'remind' })}><AlarmClock size={16} /></IconButton>
-        <IconButton title={t('Move (V)')} onClick={() => useStore.setState({ moveFor: ids })}><FolderInput size={16} /></IconButton>
-        <IconButton title={t('Move to Trash (#)')} onClick={() => void act('trash', ids)}><Trash2 size={16} /></IconButton>
-        <IconButton title={t('More')} onClick={(e) => setMore({ x: e.clientX, y: e.clientY + 12 })}><MoreHorizontal size={16} /></IconButton>
+    <div className="flex h-full min-w-0 flex-1 flex-col bg-surface">
+      <div className="flex h-16 shrink-0 items-center gap-0.5 px-6 max-md:h-12 max-md:px-1">
+        {one && !s.standalone && (
+          <Tip label={t('Back to list')} kbd="Esc">
+            <button aria-label={t('Back to list')} onClick={goBack} className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-line text-muted transition-colors hover:bg-hover hover:text-fg max-md:mr-1 max-md:border-0">
+              <ArrowLeft size={16} />
+            </button>
+          </Tip>
+        )}
+        <TipButton label={t('Done')} kbd="E" onClick={() => void act('archive', ids)}><Check size={17} /></TipButton>
+        <TipButton label={thread.priority ? t('Remove priority') : t('Mark as priority')} kbd="P" active={thread.priority} onClick={() => void act(thread.priority ? 'unpriority' : 'priority', ids)}><Zap size={16} /></TipButton>
+        <TipButton label={thread.pinned ? t('Unpin') : t('Pin')} kbd="S" active={thread.pinned} onClick={() => void act(thread.pinned ? 'unpin' : 'pin', ids)}>{thread.pinned ? <PinOff size={16} /> : <Pin size={16} />}</TipButton>
+        <TipButton label={t('Snooze')} kbd="H" active={!!thread.snoozed_until} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'snooze' })}><Clock size={16} /></TipButton>
+        <TipButton label={t('Set a reminder')} active={!!thread.reminder_at} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'remind' })}><AlarmClock size={16} /></TipButton>
+        <TipButton label={t('Move to folder…')} kbd="V" onClick={() => useStore.setState({ moveFor: ids })}><FolderInput size={16} /></TipButton>
+        <TipButton label={t('Move to Trash')} kbd="#" onClick={() => void act('trash', ids)}><Trash2 size={16} /></TipButton>
+        <TipButton label={t('More')} onClick={(e) => setMore({ x: e.clientX, y: e.clientY + 12 })}><MoreHorizontal size={16} /></TipButton>
         <span className="flex-1" />
         {thread.snoozed_until && <span className="mr-2 flex max-md:hidden items-center gap-1 text-[12px] text-muted"><Clock size={13} /> {formatWhen(thread.snoozed_until)} <button title={t('Cancel snooze')} onClick={() => void act('unsnooze', ids)}><Undo2 size={13} /></button></span>}
         {thread.reminder_at && <span className="mr-2 flex max-md:hidden items-center gap-1 text-[12px] text-muted"><AlarmClock size={13} /> {formatWhen(thread.reminder_at)} <button title={t('Remove reminder')} onClick={() => void act('unremind', ids)}><X size={13} /></button></span>}
@@ -361,7 +368,7 @@ export default function ThreadView() {
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-6 py-5 max-md:px-2.5 max-md:py-3">
         <div className="mx-auto max-w-[920px]">
           <div className="mb-3 flex items-start gap-3">
-            <h1 className="selectable flex-1 text-[19px] font-semibold leading-snug">{thread.subject}</h1>
+            <h1 className="selectable flex-1 text-[22px] font-semibold leading-snug tracking-tight max-md:text-[19px]">{thread.subject}</h1>
             {summaryFor !== thread.thread_id && (
               <Button size="sm" variant="soft" onClick={() => setSummaryFor(thread.thread_id)}>
                 <Sparkles size={13} className="text-accent" /> {t('Summarize')}

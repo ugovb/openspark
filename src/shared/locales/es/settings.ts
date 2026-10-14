@@ -45,7 +45,6 @@ const dict: Dictionary = {
     'Send (+ calendar)': 'Envío (+ calendario)',
 
     // accounts
-    'Mail accounts': 'Cuentas de correo',
     'Passwords are stored {where}, not in the app database.': 'Las contraseñas se guardan {where}, no en la base de datos de la aplicación.',
     'password': 'contraseña',
     'synced {when}': 'sincronizada {when}',

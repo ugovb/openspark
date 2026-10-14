@@ -513,7 +513,8 @@ export default function Composer({ request }: { request: ComposerRequest }) {
         if (mode === 'introduce') {
           const who = await askText(t('Who are you introducing, and to whom?'), '', t('e.g. Marta, our designer, to Tom from the print shop'))
           if (!who) return
-          prompt = t('Write a short, friendly email that introduces two people to each other: {who}. Say in a sentence or two why they should talk and suggest how they could get in touch.', { who })
+          // prompts sent to the AI stay in English; the reply language follows the AI settings
+          prompt = `Write a short, friendly email that introduces two people to each other: ${who}. Say in a sentence or two why they should talk and suggest how they could get in touch.`
         } else {
           prompt = await askText(t('What should the message be about?'), '', t('e.g. thank them for the meeting and send a summary of what we agreed'))
         }

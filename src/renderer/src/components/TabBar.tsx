@@ -25,10 +25,10 @@ export default function TabBar() {
   const mail = view === 'mail'
   return (
     <nav aria-label={t('Navigation')} className="flex h-14 shrink-0 items-stretch border-t border-line bg-surface">
-      <Tab label={t('Inbox')} active={mail && mailbox.kind === 'smart' && accountFilter === null} badge={counts?.inboxUnread} onClick={() => setMailbox({ kind: 'smart' })}><Inbox size={21} /></Tab>
+      <Tab label={t('Mail')} active={mail && mailbox.kind === 'smart' && accountFilter === null} badge={counts?.inboxUnread} onClick={() => setMailbox({ kind: 'smart' })}><Inbox size={21} /></Tab>
       <Tab label={t('Pins')} active={mail && mailbox.kind === 'pinned'} onClick={() => setMailbox({ kind: 'pinned' })}><Pin size={21} /></Tab>
       <Tab label={t('Search')} active={view === 'search' || (mail && mailbox.kind === 'search')} onClick={() => setView('search')}><Search size={21} /></Tab>
-      <Tab label={t('Ask AI')} active={view === 'ask'} onClick={() => setView('ask')}><Sparkles size={21} /></Tab>
+      <Tab label={t('AI')} active={view === 'ask'} onClick={() => setView('ask')}><Sparkles size={21} /></Tab>
       <Tab label={t('More')} onClick={() => useStore.setState({ drawer: true })}><Menu size={21} /></Tab>
     </nav>
   )

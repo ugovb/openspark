@@ -20,7 +20,7 @@ type Tab =
 
 const TAB_INFO: Record<Tab, { label: string; icon: ReactNode }> = {
   accounts: { label: t('Accounts'), icon: <AtSign size={15} className="text-people" /> },
-  ai: { label: 'AI', icon: <Sparkles size={15} className="text-newsletter" /> },
+  ai: { label: t('AI'), icon: <Sparkles size={15} className="text-newsletter" /> },
   agents: { label: t('AI agents & CLI'), icon: <Bot size={15} className="text-notification" /> },
   general: { label: t('Appearance & general'), icon: <Palette size={15} className="text-accent" /> },
   notifications: { label: t('Notifications'), icon: <Bell size={15} className="text-danger" /> },
