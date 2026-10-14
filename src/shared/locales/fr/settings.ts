@@ -3,6 +3,25 @@ import type { Dictionary } from '../../i18n'
 
 const dict: Dictionary = {
   strings: {
+    'Anthropic-compatible API (custom address)': 'API compatible Anthropic (adresse personnalisée)',
+    'Anthropic-compatible API': 'API compatible Anthropic',
+    'Used by default': 'Utilisé par défaut',
+    'Use by default': 'Utiliser par défaut',
+    'For services that offer the Anthropic messages API under their own address. The key is stored {where}. Email content is sent to that service.': 'Pour les services qui proposent l’API Messages d’Anthropic sous leur propre adresse. La clé est stockée {where}. Le contenu des e-mails est envoyé à ce service.',
+    'Base address without /v1/messages, as given in the service documentation.': 'Adresse de base sans /v1/messages, comme indiquée dans la documentation du service.',
+    'Writing instructions': 'Instructions de rédaction',
+    'How the AI writes reply drafts. Empty = built-in default. Language, tone, plain-text output and the rule that email content is never treated as instructions always apply.': 'Comment l’IA rédige les brouillons de réponse. Vide = instruction intégrée. La langue, le ton, le texte brut en sortie et la règle selon laquelle le contenu des e-mails n’est jamais une instruction s’appliquent toujours.',
+    'Show default': 'Afficher l’instruction par défaut',
+    'Hide default': 'Masquer l’instruction par défaut',
+    'Restore default': 'Rétablir l’instruction par défaut',
+    'Pairing code (one-time, expires in {time})': 'Code d’appairage (à usage unique, expire dans {time})',
+    'Device name (optional)': 'Nom de l’appareil (facultatif)',
+    'Create code': 'Créer le code',
+    'New code': 'Nouveau code',
+    'The code has expired': 'Le code a expiré',
+    'Could not create a code': 'Impossible de créer un code',
+    'or ask from a paired device': 'ou demandez-le depuis un appareil déjà appairé',
+    'Set the URL, model and key in Settings → AI.': 'Renseignez l’adresse, le modèle et la clé dans Paramètres → IA.',
     // tabs and window
     'Accounts': 'Comptes',
     'Appearance & general': 'Apparence et général',
@@ -290,7 +309,6 @@ const dict: Dictionary = {
     'Revoke access for the device “{name}”?': 'Révoquer l’accès de l’appareil « {name} » ?',
     'Revoke access': 'Révoquer l’accès',
     'Add device': 'Ajouter un appareil',
-    'Pairing code (one-time, valid until {time})': 'Code de jumelage (à usage unique, valable jusqu’à {time})',
     'Computer: Settings → Home server. Phone or browser: open {url} and enter the code.':
       'Ordinateur : Paramètres → Serveur domestique. Téléphone ou navigateur : ouvrez {url} et saisissez le code.',
     'Claude Code with a home server': 'Claude Code avec un serveur domestique',

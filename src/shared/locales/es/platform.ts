@@ -22,7 +22,7 @@ const dict: Dictionary = {
     'The app is not connected to a home server': 'La aplicación no está conectada a un servidor doméstico',
     'Open Octopus Mail': 'Abrir Octopus Mail',
     'View': 'Ver',
-    'New message': 'Mensaje nuevo',
+    'New message': 'Nuevo mensaje',
     'Sync now': 'Sincronizar ahora',
     Quit: 'Salir',
 

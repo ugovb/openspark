@@ -13,7 +13,7 @@ const dict: Dictionary = {
     // App / sidebar / navigation
     'Ask AI about your mail': 'Pregunta a la IA sobre tu correo',
     'Commands (Ctrl+K)': 'Comandos (Ctrl+K)',
-    'New message': 'Mensaje nuevo',
+    'New message': 'Nuevo mensaje',
     'Sync now': 'Sincronizar ahora',
     'Always sync in the background': 'Sincronizar siempre en segundo plano',
     'Don’t sync': 'No sincronizar',
