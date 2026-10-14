@@ -38,6 +38,17 @@
   /* tooltips */
   --tip: #2b2d32;
   --scrim: rgba(17, 20, 26, 0.32);
+  /* empty-state landscape (flat layers, far to near) */
+  --art-sky: #dcecfa;
+  --art-sun: #ffc65c;
+  --art-cloud: #f7fbff;
+  --art-hill-1: #a8cbe9;
+  --art-hill-2: #6fa6d6;
+  --art-hill-3: #3d7fc0;
+  --art-lake: #bfdcf4;
+  --art-glint: #ffe2a3;
+  --art-sail: #ffffff;
+  --art-bird: #3d7fc0;
   color-scheme: light;
 }
 
@@ -73,6 +84,16 @@
   --palette-active: #22528d;
   --tip: #3a3c42;
   --scrim: rgba(0, 0, 0, 0.5);
+  --art-sky: #1c2b49;
+  --art-sun: #f2c66d;
+  --art-cloud: #2e426c;
+  --art-hill-1: #3a5585;
+  --art-hill-2: #2a4170;
+  --art-hill-3: #172744;
+  --art-lake: #253b63;
+  --art-glint: #c9a65a;
+  --art-sail: #d6e1f5;
+  --art-bird: #93acd8;
   color-scheme: dark;
 }
 
@@ -243,6 +264,14 @@ button {
 }
 .ai-text p {
   margin: 0 0 0.45em;
+}
+.ai-text ul {
+  list-style: disc;
+  margin: 0 0 0.45em;
+  padding-left: 1.25em;
+}
+.ai-text a {
+  color: var(--accent);
 }
 
 @keyframes octo-in {

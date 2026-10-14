@@ -14,8 +14,8 @@ import { useOnePane, useStore } from '../lib/store'
 import { extraThreadItems } from '../lib/thread-actions'
 import DraftList from './DraftList'
 import DrawerButton from './DrawerButton'
-import { InboxZero, NoResults } from './illustrations'
-import { Avatar, cx, Empty, IconButton, Menu, type MenuItem, RoundCheck, Spinner, Tip, TipButton } from './ui'
+import { MailboxEmpty } from './EmptyState'
+import { Avatar, cx, IconButton, Menu, type MenuItem, RoundCheck, Spinner, Tip, TipButton } from './ui'
 import { t, tp } from '../../../shared/i18n'
 
 type Row =
@@ -547,9 +547,9 @@ export default function ThreadList() {
   return (
     <section className={cx('flex h-full shrink-0 flex-col bg-surface', one ? 'min-w-0 flex-1' : 'w-[420px] border-r border-line')}>
       <ListHeader loading={loading} bulk={bulk} scrolled={scrolled} />
-      <div ref={parentRef} onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 24)} className="min-h-0 flex-1 overflow-y-auto pb-24">
+      <div ref={parentRef} onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 24)} className={cx('min-h-0 flex-1 overflow-y-auto', rows.length > 0 && 'pb-24')}>
         {!loading && rows.length === 0 ? (
-          <Empty icon={mailbox.kind === 'smart' ? <InboxZero /> : <NoResults />} title={mailbox.kind === 'smart' ? t('All done!') : mailbox.kind === 'search' ? t('Nothing found') : t('Nothing here')} hint={mailbox.kind === 'smart' ? t('Nothing left to deal with in your inbox.') : mailbox.kind === 'search' ? t('Try other words or operators, e.g. from:, newer_than:30d, in:anywhere.') : undefined} />
+          <MailboxEmpty />
         ) : (
           <div style={{ height: virt.getTotalSize(), position: 'relative' }}>
             {virt.getVirtualItems().map((vi) => {

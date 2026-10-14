@@ -173,3 +173,37 @@ export function AskAI() {
     </Scene>
   )
 }
+
+/** "Nothing left" scene: a calm lake landscape in flat colour layers, cut into a circle that floats over the
+ *  page. 240px, 180px on phones. Colours come from the --art-* tokens (light and dark variants). */
+export function AllDone() {
+  return (
+    <div className="h-[240px] w-[240px] shrink-0 overflow-hidden rounded-full max-md:h-[180px] max-md:w-[180px]" style={{ boxShadow: 'var(--shadow)' }}>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" height="100%" aria-hidden="true" focusable="false" style={{ display: 'block' }}>
+        <rect width="240" height="240" fill="var(--art-sky)" />
+        <circle cx="158" cy="96" r="26" fill="var(--art-sun)" />
+        <g fill="var(--art-cloud)">
+          <rect x="44" y="66" width="58" height="14" rx="7" />
+          <circle cx="62" cy="66" r="10" />
+          <circle cx="80" cy="62" r="13" />
+          <rect x="168" y="58" width="38" height="10" rx="5" />
+          <circle cx="184" cy="58" r="8" />
+        </g>
+        <path d="M92 100Q96 95 100 100Q104 95 108 100M114 86Q117 82.5 120 86Q123 82.5 126 86" stroke="var(--art-bird)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <path d="M0 146C28 128 52 122 78 131C100 139 118 116 146 112C172 108 198 126 240 118V240H0Z" fill="var(--art-hill-1)" />
+        <path d="M0 162C24 149 46 145 70 153C94 161 112 141 140 139C168 137 188 155 240 145V240H0Z" fill="var(--art-hill-2)" />
+        <rect y="172" width="240" height="68" fill="var(--art-lake)" />
+        <path d="M0 172H240V179C196 177 172 184 140 186C112 188 96 178 70 182C46 186 24 180 0 178Z" fill="var(--art-hill-2)" opacity=".35" />
+        <g fill="var(--art-glint)">
+          <rect x="139" y="180" width="38" height="3" rx="1.5" />
+          <rect x="146" y="188" width="24" height="3" rx="1.5" />
+          <rect x="152" y="196" width="12" height="3" rx="1.5" />
+        </g>
+        <path d="M110 194V176L122 194Z" fill="var(--art-sail)" />
+        <path d="M98 196H126L121 202H103Z" fill="var(--art-hill-3)" />
+        <path d="M0 198C30 187 62 191 90 207C108 217 120 229 127 240H0Z" fill="var(--art-hill-3)" />
+        <path d="M240 205C216 203 197 213 186 240H240Z" fill="var(--art-hill-3)" />
+      </svg>
+    </div>
+  )
+}

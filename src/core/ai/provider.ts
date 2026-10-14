@@ -181,8 +181,8 @@ async function completeOpenai(opts: CompleteOptions): Promise<AiResult> {
   if (r.status === 429) throw new Error(t('API rate limit or credit limit reached — try again later.'))
   if (!r.ok) throw new Error(`API (${r.status}): ${(await r.text()).slice(0, 300)}`)
   if (!stream) {
-    const j = (await r.json()) as { choices?: { message?: { content?: string } }[] }
-    return { text: stripThink(j.choices?.[0]?.message?.content || ''), provider: 'openai', model }
+    const j = (await r.json()) as { choices?: { message?: { content?: unknown } }[] }
+    return { text: stripThink(contentText(j.choices?.[0]?.message?.content)), provider: 'openai', model }
   }
   let text = ''
   const reader = r.body!.getReader()
@@ -200,7 +200,7 @@ async function completeOpenai(opts: CompleteOptions): Promise<AiResult> {
       const data = line.slice(5).trim()
       if (!data || data === '[DONE]') continue
       try {
-        const piece = (JSON.parse(data) as { choices?: { delta?: { content?: string } }[] }).choices?.[0]?.delta?.content || ''
+        const piece = contentText((JSON.parse(data) as { choices?: { delta?: { content?: unknown } }[] }).choices?.[0]?.delta?.content)
         if (piece) {
           text += piece
           opts.onDelta?.(piece)
@@ -298,6 +298,14 @@ async function readOllama(r: Response, streaming: boolean, onDelta: ((t: string)
     }
   }
   return { text: stripThink(text), provider: 'ollama', model }
+}
+
+/** Message content from an OpenAI-compatible API: a string, or (some providers) a list of parts
+ *  [{ type: 'text', text }]; null or anything else counts as no text. */
+function contentText(c: unknown): string {
+  if (typeof c === 'string') return c
+  if (Array.isArray(c)) return c.map((p) => (typeof p === 'string' ? p : typeof p?.text === 'string' ? p.text : '')).join('')
+  return ''
 }
 
 function stripThink(s: string): string {

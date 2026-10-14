@@ -5,8 +5,8 @@ import { formatWhen } from '../../../shared/when'
 import { api, errorText } from '../lib/api'
 import { listDate } from '../lib/format'
 import { useStore } from '../lib/store'
-import { cx, Empty, IconButton } from './ui'
-import { NoDrafts, NoScheduled } from './illustrations'
+import { cx, IconButton } from './ui'
+import { MailboxEmpty } from './EmptyState'
 import { t } from '../../../shared/i18n'
 
 export default function DraftList({ kind }: { kind: 'scheduled' | 'local-drafts' }) {
@@ -39,7 +39,7 @@ export default function DraftList({ kind }: { kind: 'scheduled' | 'local-drafts'
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {items.length === 0 ? (
-          <Empty icon={kind === 'scheduled' ? <NoScheduled /> : <NoDrafts />} title={kind === 'scheduled' ? t('Nothing waiting to be sent') : t('No drafts')} />
+          <MailboxEmpty mailbox={{ kind }} />
         ) : (
           items.map((d) => (
             <div key={d.id} onClick={() => compose({ mode: 'edit', draftId: d.id, inline: false })} className="group relative cursor-default border-b border-line/60 px-4 py-2.5 hover:bg-hover">

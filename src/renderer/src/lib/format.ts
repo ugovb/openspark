@@ -76,8 +76,10 @@ export function stripSignatureHtml(html: string): string {
   return html.replace(/<div class="octo-signature">[\s\S]*<\/div>\s*$/i, '')
 }
 
-/** Minimal markdown (AI output) → HTML for display and for the composer. */
-export function mdToHtml(md: string): string {
+/** Minimal markdown (AI output) → HTML for display and for the composer. Anything that is not a string
+ *  (a missing or malformed AI result) renders as nothing instead of throwing. */
+export function mdToHtml(input: string | null | undefined): string {
+  const md = typeof input === 'string' ? input : typeof input === 'number' ? String(input) : ''
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const inline = (s: string) =>
     esc(s)

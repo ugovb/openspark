@@ -1,7 +1,10 @@
 import { PenSquare } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef } from 'react'
+import AskPanel from './components/AskPanel'
+import AskPill from './components/AskPill'
 import CommandPalette from './components/CommandPalette'
 import Composer from './components/Composer'
+import ErrorBoundary from './components/ErrorBoundary'
 import { LabelPicker, MovePicker, SnoozePicker } from './components/Pickers'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
@@ -260,9 +263,11 @@ export default function App() {
           {view === 'contacts' && <ContactsView />}
           {view === 'search' && <SearchView />}
         </Suspense>
-        {view === 'ask' && <AskView />}
+        {view === 'ask' && <ErrorBoundary><AskView /></ErrorBoundary>}
         {narrow && !phoneThread && (view === 'mail' || view === 'search' || view === 'ask') && <TabBar />}
       </main>
+      <AskPanel />
+      <AskPill />
       {overlays}
     </div>
   )

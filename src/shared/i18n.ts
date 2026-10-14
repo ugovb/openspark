@@ -48,9 +48,20 @@ export function detectLang(locale: string | undefined | null): Lang {
   return 'en'
 }
 
+/** A locale Intl accepts, or null. Browsers on Linux can report POSIX-style tags such as "en-US@posix" or
+ *  "en_US.UTF-8"; passing those to toLocaleString / localeCompare throws a RangeError and blanks the UI. */
+function cleanLocale(locale: string): string | null {
+  const tag = locale.trim().replace(/[.@].*$/, '').replace(/_/g, '-')
+  try {
+    return Intl.getCanonicalLocales(tag)[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 /** Pick the UI language from the setting, the OCTO_LANG override and the system locale. */
 export function initLang(setting: LangSetting | undefined, locale: string | undefined | null): Lang {
-  if (locale) systemLocale = locale
+  if (locale) systemLocale = cleanLocale(locale) || systemLocale
   const env = typeof process !== 'undefined' ? process.env?.OCTO_LANG : undefined
   const forced = isLang(env) ? env : null
   lang = forced ?? (isLang(setting) ? setting : detectLang(locale))
