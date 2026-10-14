@@ -172,7 +172,9 @@ export default function App() {
   )
 
   // a reply composer for a conversation that is not on screen shows as a window instead
-  const floatingComposer = composer && (!composer.inline || composer.threadId !== selected || view !== 'mail')
+  // Settings floats over the mail view, which stays rendered behind it
+  const mailBehind = view === 'mail' || view === 'settings'
+  const floatingComposer = composer && (!composer.inline || composer.threadId !== selected || !mailBehind)
 
   const phoneThread = one && selected !== null
 
@@ -187,7 +189,7 @@ export default function App() {
         </div>
       )}
       <main className="flex min-w-0 flex-1 flex-col">
-        {view === 'mail' && (
+        {mailBehind && (
           <>
             <div className="relative flex min-h-0 flex-1 bg-surface">
               {!phoneThread && <ThreadList />}

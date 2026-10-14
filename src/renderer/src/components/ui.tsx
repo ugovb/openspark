@@ -324,3 +324,69 @@ export function RoundCheck({ done, onClick, label, kbd }: { done?: boolean; onCl
     </Tip>
   )
 }
+
+// ---------- popover anchored to an element ----------
+
+/**
+ * Floating panel under (or above) an element, e.g. a dropdown with custom rows. Closes on a click outside,
+ * Esc (without closing whatever is behind it) and window blur. The trigger should stop mousedown propagation
+ * so that clicking it again toggles the panel instead of reopening it.
+ */
+export function Popover({ anchor, onClose, children, align = 'start', above, className }: {
+  anchor: DOMRect | null
+  onClose: () => void
+  children: ReactNode
+  align?: 'start' | 'end'
+  above?: boolean
+  className?: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!anchor || !ref.current) return setPos(null)
+    const r = ref.current.getBoundingClientRect()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    let x = align === 'end' ? anchor.right - r.width : anchor.left
+    let y = above ? anchor.top - r.height - 6 : anchor.bottom + 6
+    if (!above && y + r.height > vh - 8) y = anchor.top - r.height - 6
+    if (above && y < 8) y = anchor.bottom + 6
+    x = Math.max(8, Math.min(x, vw - r.width - 8))
+    y = Math.max(8, Math.min(y, vh - r.height - 8))
+    setPos({ x, y })
+  }, [anchor, align, above])
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+  useEffect(() => {
+    if (!anchor) return
+    const close = () => closeRef.current()
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      e.preventDefault()
+      closeRef.current()
+    }
+    window.addEventListener('mousedown', close)
+    window.addEventListener('keydown', key, true)
+    window.addEventListener('blur', close)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('mousedown', close)
+      window.removeEventListener('keydown', key, true)
+      window.removeEventListener('blur', close)
+      window.removeEventListener('resize', close)
+    }
+  }, [anchor])
+  if (!anchor) return null
+  return createPortal(
+    <div
+      ref={ref}
+      className={cx('anim-in fixed z-[60] rounded-xl border border-line bg-surface py-1.5', className)}
+      style={{ left: pos?.x ?? -9999, top: pos?.y ?? -9999, boxShadow: 'var(--shadow)' }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>,
+    document.body,
+  )
+}

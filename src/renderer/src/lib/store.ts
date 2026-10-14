@@ -37,6 +37,8 @@ export type ThreadAction =
 interface State {
   ready: boolean
   view: View
+  /** tab to show when Settings opens (null = the default one) */
+  settingsTab: string | null
   accounts: Account[]
   folders: Folder[]
   settings: AppSettings | null
@@ -100,6 +102,7 @@ const PAGE = 120
 export const useStore = create<State>((set, get) => ({
   ready: false,
   view: 'mail',
+  settingsTab: null,
   accounts: [],
   folders: [],
   settings: null,
@@ -183,7 +186,7 @@ export const useStore = create<State>((set, get) => ({
   },
 
   setView(v) {
-    set({ view: v })
+    set({ view: v, settingsTab: null })
   },
 
   setMailbox(m, accountFilter = null) {
@@ -407,6 +410,11 @@ export function useOnePane(): boolean {
   const narrow = useNarrow()
   const split = useStore((s) => s.settings?.ui?.layout === 'split')
   return narrow || !split
+}
+
+/** Open Settings on a given tab (e.g. 'signatures'). */
+export function openSettings(tab: string): void {
+  useStore.setState({ view: 'settings', settingsTab: tab })
 }
 
 /** Save a UI preference (sidebar, layout, pinned folders, recent searches). */
