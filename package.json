@@ -219,12 +219,6 @@
       "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "extraFiles": [
-        {
-          "from": "resources/mac/octo",
-          "to": "MacOS/octo"
-        }
-      ],
       "artifactName": "Octopus-Mail-${version}-${arch}.${ext}",
       "extendInfo": {
         "CFBundleURLTypes": [
@@ -235,7 +229,13 @@
             ]
           }
         ]
-      }
+      },
+      "extraResources": [
+        {
+          "from": "resources/mac/octo",
+          "to": "octo"
+        }
+      ]
     },
     "dmg": {
       "title": "Octopus Mail ${version}"

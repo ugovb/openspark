@@ -327,7 +327,11 @@ function registerIpc(): void {
   ipcMain.handle('cli-path', () => {
     // installed: the octo wrapper next to the executable runs the CLI with Electron's own Node; dev: plain node + bundle
     const wrapper = process.platform === 'win32' ? 'octo.cmd' : 'octo'
-    if (app.isPackaged) return { script: path.join(path.dirname(process.execPath), wrapper), node: '', packaged: true }
+    if (app.isPackaged) {
+      // macOS: the wrapper sits in Contents/Resources (a script next to the binary would break code signing)
+      const dir = process.platform === 'darwin' ? process.resourcesPath : path.dirname(process.execPath)
+      return { script: path.join(dir, wrapper), node: '', packaged: true }
+    }
     return { script: path.join(app.getAppPath(), 'out', 'cli', 'octo.js'), node: 'node', packaged: false }
   })
   ipcMain.handle('set-badge', (_e, dataUrl: string | null, count: number) => {

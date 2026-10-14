@@ -25,7 +25,7 @@ jobs:
         run: |
           APP="dist/mac-arm64/Octopus Mail.app"
           codesign --verify --deep --strict "$APP" || codesign -dv "$APP"
-          OCTO_HOME="$RUNNER_TEMP/octo" OCTO_SECRETS=memory "$APP/Contents/MacOS/octo" help | head -5
+          OCTO_HOME="$RUNNER_TEMP/octo" OCTO_SECRETS=memory "$APP/Contents/Resources/octo" help | head -5
       - uses: actions/upload-artifact@v4
         with:
           name: octopus-mail-macos-arm64
