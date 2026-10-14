@@ -276,6 +276,17 @@ export function createService(actor: ServiceActor) {
       return drafts.cancelSend(id, actor)
     },
     scheduled: () => drafts.scheduledDrafts().filter((d) => readable().has(d.account_id)),
+    /** "Send again": a new draft copying a sent message (recipients, subject, body, attachments). */
+    async sendAgain(messageId: number) {
+      const m = get<{ account_id: number; body_state: number }>('SELECT account_id, body_state FROM messages WHERE id = ?', messageId)
+      if (!m) throw new Error(t('Message does not exist'))
+      need('triage', [m.account_id])
+      if (m.body_state !== 1) await sync.get(m.account_id).fetchBody(messageId)
+      const d = drafts.sendAgainDraft(messageId)
+      if (!agent) drafts.scheduleRemoteDraftSave(d.id)
+      else record(actor, 'draft-create', d.id, { subject: d.subject })
+      return d
+    },
     adoptServerDraft: (messageId: number) => (need('triage', accountsOfMessages([messageId])), drafts.adoptServerDraft(messageId)),
     /** Save pasted/dropped bytes as a temporary file the draft can reference. */
     stageAttachment(filename: string, data: Uint8Array) {
@@ -316,10 +327,13 @@ export function createService(actor: ServiceActor) {
     testRule: (r: Pick<Rule, 'match' | 'conditions'>) => rules.testRule(r),
     applyRule: (id: number) => (need('triage', 'any'), rules.applyRuleToExisting(id)),
     listSmartFolders: () => all('SELECT * FROM smart_folders ORDER BY sort, id') as SmartFolder[],
-    saveSmartFolder(sf: { id?: number; name: string; query: string; icon?: string }) {
-      if (sf.id) update('smart_folders', sf.id, { name: sf.name, query: sf.query, icon: sf.icon ?? null })
-      else insert('smart_folders', { name: sf.name, query: sf.query, icon: sf.icon ?? null, created_at: now() })
+    /** Create or update a smart folder; returns its id. */
+    saveSmartFolder(sf: { id?: number; name: string; query: string; icon?: string }): number {
+      let id = sf.id
+      if (id) update('smart_folders', id, { name: sf.name, query: sf.query, icon: sf.icon ?? null })
+      else id = insert('smart_folders', { name: sf.name, query: sf.query, icon: sf.icon ?? null, created_at: now() })
       bus.emitEvent({ type: 'mailbox-changed' })
+      return id
     },
     deleteSmartFolder: (id: number) => {
       run('DELETE FROM smart_folders WHERE id = ?', id)

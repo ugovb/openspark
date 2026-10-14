@@ -134,7 +134,7 @@ export function Menu({ items, anchor, onClose }: { items: MenuItem[]; anchor: { 
   return createPortal(
     <div
       ref={ref}
-      className="anim-in fixed z-[60] min-w-[200px] rounded-xl border border-line bg-surface py-1.5"
+      className="anim-in fixed z-[60] max-h-[calc(100vh-16px)] min-w-[200px] overflow-y-auto rounded-xl border border-line bg-surface py-1.5"
       style={{ left: pos?.x ?? anchor.x, top: pos?.y ?? anchor.y, boxShadow: 'var(--shadow)' }}
       onMouseDown={(e) => e.stopPropagation()}
     >

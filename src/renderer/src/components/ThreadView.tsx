@@ -1,7 +1,7 @@
 import {
   AlarmClock, Archive, ArrowLeft, BellOff, CalendarCheck, CalendarX, Check, ChevronDown, Clock, Coffee, Download, Eye, FileText, FolderInput,
-  Forward, Image as ImageIcon, Languages, Mail, MoreHorizontal, Paperclip, Pin, PinOff, Reply, ReplyAll, ShieldCheck, ShieldX, Sparkles,
-  Star, Trash2, TriangleAlert, Undo2, X, Code2, Inbox,
+  Forward, Image as ImageIcon, Languages, Mail, MoreHorizontal, Paperclip, Pin, PinOff, Repeat, Reply, ReplyAll, ShieldCheck, ShieldX, Sparkles,
+  Star, Tag, Trash2, TriangleAlert, Undo2, X, Code2, Inbox,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AttachmentInfo, MessageView, ThreadView as TV } from '../../../shared/types'
@@ -10,6 +10,7 @@ import { api, errorText, stream } from '../lib/api'
 import { displayName, fileSize, fullDate, listDate, mdToHtml } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
 import { goBack, useOnePane, useStore } from '../lib/store'
+import { extraThreadItems, sendAgain } from '../lib/thread-actions'
 import Composer from './Composer'
 import MessageFrame from './MessageFrame'
 import { NoSelection } from './illustrations'
@@ -128,6 +129,7 @@ function MessageCard({
     { label: t('Reply'), icon: <Reply size={14} />, onClick: () => compose({ mode: 'reply', messageId: m.id, threadId: thread.thread.thread_id }) },
     { label: t('Reply to all'), icon: <ReplyAll size={14} />, onClick: () => compose({ mode: 'replyall', messageId: m.id, threadId: thread.thread.thread_id }) },
     { label: t('Forward message'), icon: <Forward size={14} />, onClick: () => compose({ mode: 'forward', messageId: m.id, threadId: thread.thread.thread_id }) },
+    ...(m.is_outgoing ? [{ label: t('Send again'), icon: <Repeat size={14} />, onClick: () => void sendAgain(thread.thread.thread_id, m.id) }] : []),
     { separator: true, label: '' },
     { label: t('Translate to Polish'), icon: <Languages size={14} />, onClick: () => void translate('polski') },
     { label: t('Translate to English'), icon: <Languages size={14} />, onClick: () => void translate('angielski') },
@@ -333,6 +335,9 @@ export default function ThreadView() {
     { label: t('Mark as unread'), icon: <Mail size={14} />, onClick: () => void act('unread', ids) },
     { label: t('Move to Inbox'), icon: <Inbox size={14} />, onClick: () => void act('moveToInbox', ids) },
     { label: t('Spam'), icon: <TriangleAlert size={14} />, onClick: () => void act('spam', ids) },
+    ...(s.accounts.find((a) => a.id === thread.account_id)?.is_gmail ? [{ label: t('Add a label'), icon: <Tag size={14} />, hint: 'L', onClick: () => useStore.setState({ labelFor: ids }) }] : []),
+    { separator: true, label: '' },
+    ...extraThreadItems(thread),
     { separator: true, label: '' },
     { label: t('Block {email}', { email: thread.from.email }), icon: <ShieldX size={14} />, danger: true, onClick: () => void s.senders('block', [thread.from.email]) },
   ]
@@ -340,7 +345,7 @@ export default function ThreadView() {
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col bg-bg">
       <div className="flex h-12 shrink-0 items-center gap-0.5 border-b border-line bg-surface px-3 max-md:px-1">
-        {one && <IconButton title={t('Back to list')} onClick={goBack}><ArrowLeft size={18} /></IconButton>}
+        {one && !s.standalone && <IconButton title={t('Back to list')} onClick={goBack}><ArrowLeft size={18} /></IconButton>}
         <IconButton title={t('Done (E)')} onClick={() => void act('archive', ids)}><Check size={17} /></IconButton>
         <IconButton title={thread.pinned ? t('Unpin (S)') : t('Pin (S)')} active={thread.pinned} onClick={() => void act(thread.pinned ? 'unpin' : 'pin', ids)}>{thread.pinned ? <PinOff size={16} /> : <Pin size={16} />}</IconButton>
         <IconButton title={t('Snooze (H)')} active={!!thread.snoozed_until} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'snooze' })}><Clock size={16} /></IconButton>

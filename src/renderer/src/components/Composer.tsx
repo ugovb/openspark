@@ -182,7 +182,7 @@ export default function Composer({ request }: { request: ComposerRequest }) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ link: { openOnClick: false, autolink: true }, heading: { levels: [2, 3] } }),
-      Placeholder.configure({ placeholder: request.mode === 'new' ? t('Write your message…') : t('Write a reply…') }),
+      Placeholder.configure({ placeholder: request.mode === 'new' || request.mode === 'again' ? t('Write your message…') : t('Write a reply…') }),
     ],
     content: '',
     onUpdate: () => {
@@ -210,13 +210,14 @@ export default function Composer({ request }: { request: ComposerRequest }) {
         const pre = request.prefill
         // replying in a conversation that already has an unsent reply continues that draft
         const existing =
-          request.mode !== 'new' && request.mode !== 'edit' && request.threadId && !pre?.html
+          request.mode !== 'new' && request.mode !== 'edit' && request.mode !== 'again' && request.threadId && !pre?.html
             ? (await api.getThread(request.threadId))?.drafts.find((x) => x.status === 'draft' && (x.reply_kind === 'forward') === (request.mode === 'forward'))
             : undefined
         if (request.mode === 'edit' && request.draftId) d = await api.getDraft(request.draftId)
         else if (existing) d = existing
         else if (request.mode === 'reply' || request.mode === 'replyall') d = await api.saveDraft({ reply_to_message_id: request.messageId, reply_all: request.mode === 'replyall', html: pre?.html })
         else if (request.mode === 'forward') d = await api.saveDraft({ forward_of_message_id: request.messageId })
+        else if (request.mode === 'again' && request.messageId) d = await api.sendAgain(request.messageId)
         else d = await api.saveDraft({ to: pre?.to, subject: pre?.subject, html: pre?.html })
         if (cancelled) return
         setDraft(d)

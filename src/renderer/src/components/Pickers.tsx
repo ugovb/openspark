@@ -1,6 +1,7 @@
-import { CalendarClock, Folder as FolderIcon, Search } from 'lucide-react'
+import { CalendarClock, Check, Folder as FolderIcon, Plus, Search, Tag } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { availablePresets, formatWhen, parseWhen, presetLabel, presetTime, SOMEDAY } from '../../../shared/when'
+import { api, errorText } from '../lib/api'
 import { useStore } from '../lib/store'
 import { cx, inputCls, Modal } from './ui'
 import { t } from '../../../shared/i18n'
@@ -116,6 +117,93 @@ export function MovePicker() {
           ))}
           {!list.length && <div className="p-3 text-center text-muted">{t('No folders')}</div>}
         </div>
+      </div>
+    </Modal>
+  )
+}
+
+/** Gmail labels: add or remove a label on the conversations in `labelFor` (or create a new one). */
+export function LabelPicker() {
+  const { labelFor, folders, accounts, threads, toast, refreshList } = useStore()
+  const [q, setQ] = useState('')
+  const [hi, setHi] = useState(0)
+  const open = !!labelFor?.length
+  const close = () => useStore.setState({ labelFor: null })
+  useEffect(() => {
+    setQ('')
+    setHi(0)
+  }, [open])
+  const ids = labelFor || []
+  const targets = ids.map((id) => threads.find((x) => x.thread_id === id)).filter((x) => !!x)
+  // conversations missing from the loaded list: offer the labels of every Gmail account
+  const accIds = new Set(targets.map((x) => x.account_id))
+  const gmail = accounts.filter((a) => a.is_gmail && (accIds.size ? accIds.has(a.id) : true))
+  const gmailIds = new Set(gmail.map((a) => a.id))
+  const all = useMemo(() => {
+    const names = new Set<string>()
+    for (const th of threads) if (gmailIds.has(th.account_id)) th.labels.forEach((l) => names.add(l))
+    for (const f of folders) {
+      if (!gmailIds.has(f.account_id) || f.role) continue
+      if (f.path === 'INBOX' || f.path.startsWith('[Gmail]') || f.path.startsWith('[Google Mail]')) continue
+      names.add(f.path)
+    }
+    return [...names].sort((a, b) => a.localeCompare(b))
+  }, [open, threads, folders, accounts])
+  const has = (label: string) => targets.length > 0 && targets.length === ids.length && targets.every((x) => x.labels.includes(label))
+  const needle = q.trim().toLowerCase()
+  const matches = all.filter((l) => !needle || l.toLowerCase().includes(needle)).slice(0, 80)
+  const exact = all.some((l) => l.toLowerCase() === needle)
+  const options: { label: string; create?: boolean }[] = [...(needle && !exact ? [{ label: q.trim(), create: true }] : []), ...matches.map((label) => ({ label }))]
+  const pick = async (label: string, create = false) => {
+    close()
+    const on = create || !has(label)
+    try {
+      const r = await api.setLabel(ids, label, on)
+      toast({ level: 'info', message: r.message || (on ? t('Label added') : t('Label removed')), undo: r.undo })
+    } catch (e) {
+      toast({ level: 'error', message: errorText(e) })
+    }
+    await refreshList(true)
+  }
+  return (
+    <Modal open={open} onClose={close} title={t('Labels')} width={420}>
+      <div className="p-3">
+        {!gmail.length ? (
+          <div className="p-3 text-center text-muted">{t('Labels are available for Gmail accounts.')}</div>
+        ) : (
+          <>
+            <div className="relative mb-2">
+              <Search size={15} className="absolute left-3 top-2.5 text-muted" />
+              <input
+                autoFocus
+                className={cx(inputCls, 'pl-9')}
+                placeholder={t('Find or create a label…')}
+                value={q}
+                onChange={(e) => (setQ(e.target.value), setHi(0))}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') (e.preventDefault(), setHi((h) => Math.min(h + 1, options.length - 1)))
+                  if (e.key === 'ArrowUp') (e.preventDefault(), setHi((h) => Math.max(h - 1, 0)))
+                  if (e.key === 'Enter' && options[hi]) void pick(options[hi].label, options[hi].create)
+                }}
+              />
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto">
+              {options.map((o, i) => (
+                <button
+                  key={(o.create ? '+' : '') + o.label}
+                  onMouseEnter={() => setHi(i)}
+                  onClick={() => void pick(o.label, o.create)}
+                  className={cx('flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13.5px]', i === hi ? 'bg-accent-soft text-accent' : 'hover:bg-hover')}
+                >
+                  {o.create ? <Plus size={14} className="text-muted" /> : <Tag size={14} className="text-muted" />}
+                  <span className="flex-1 truncate">{o.create ? t('Create label “{name}”', { name: o.label }) : o.label}</span>
+                  {!o.create && has(o.label) && <Check size={14} className="text-accent" />}
+                </button>
+              ))}
+              {!options.length && <div className="p-3 text-center text-muted">{t('No labels yet — type a name to create one')}</div>}
+            </div>
+          </>
+        )}
       </div>
     </Modal>
   )

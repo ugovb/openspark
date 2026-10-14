@@ -66,13 +66,10 @@ function iconPath(filename = 'icon.png'): string {
   return candidates.find((p) => fs.existsSync(p)) || ''
 }
 
-function createWindow(show = true): void {
+function appWindow(opts: { width: number; height: number; minWidth: number; minHeight: number }): BrowserWindow {
   const icon = iconPath()
-  win = new BrowserWindow({
-    width: 1440,
-    height: 900,
-    minWidth: 960,
-    minHeight: 600,
+  const w = new BrowserWindow({
+    ...opts,
     show: false,
     title: 'Octopus Mail',
     icon: icon || undefined,
@@ -90,10 +87,44 @@ function createWindow(show = true): void {
   })
   if (isolatedProfile) {
     // make test/demo windows obviously different from the real app
-    win.setTitle(demoTitle())
-    win.on('page-title-updated', (e) => e.preventDefault())
+    w.setTitle(demoTitle())
+    w.on('page-title-updated', (e) => e.preventDefault())
   }
-  win.webContents.session.setSpellCheckerLanguages(['pl', 'en-US'])
+  w.webContents.session.setSpellCheckerLanguages(['pl', 'en-US'])
+  // every link from an e-mail or the UI opens in the default browser, never inside the app
+  w.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^(https?|mailto):/i.test(url)) void shell.openExternal(url)
+    return { action: 'deny' }
+  })
+  w.webContents.on('will-navigate', (e, url) => {
+    if (!url.startsWith('http://localhost') && !url.startsWith('file://')) {
+      e.preventDefault()
+      if (/^(https?|mailto):/i.test(url)) void shell.openExternal(url)
+    }
+  })
+  w.webContents.on('context-menu', (_e, params) => {
+    const items: MenuItemConstructorOptions[] = []
+    for (const s of params.dictionarySuggestions.slice(0, 5)) items.push({ label: s, click: () => w.webContents.replaceMisspelling(s) })
+    if (params.misspelledWord) items.push({ label: t('Add to dictionary'), click: () => w.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord) }, { type: 'separator' })
+    if (params.linkURL) items.push({ label: t('Copy link'), click: () => clipboard.writeText(params.linkURL) })
+    if (params.isEditable) items.push({ role: 'cut', label: t('Cut') }, { role: 'copy', label: t('Copy') }, { role: 'paste', label: t('Paste') }, { role: 'pasteAndMatchStyle', label: t('Paste as plain text') })
+    else if (params.selectionText) items.push({ role: 'copy', label: t('Copy') })
+    if (items.length) Menu.buildFromTemplate(items).popup()
+  })
+  return w
+}
+
+/** Load the renderer, optionally with query parameters (e.g. ?thread=12 for a conversation window). */
+function loadRenderer(w: BrowserWindow, query?: Record<string, string>): void {
+  if (process.env.ELECTRON_RENDERER_URL) {
+    const u = new URL(process.env.ELECTRON_RENDERER_URL)
+    for (const [k, v] of Object.entries(query || {})) u.searchParams.set(k, v)
+    void w.loadURL(u.toString())
+  } else void w.loadFile(path.join(__dirname, '../renderer/index.html'), { query })
+}
+
+function createWindow(show = true): void {
+  win = appWindow({ width: 1440, height: 900, minWidth: 960, minHeight: 600 })
   win.once('ready-to-show', () => show && win?.show())
   win.on('close', (e) => {
     if (!quitting && backend.settings().minimizeToTray) {
@@ -101,30 +132,37 @@ function createWindow(show = true): void {
       win?.hide()
     }
   })
-  // every link from an e-mail or the UI opens in the default browser, never inside the app
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^(https?|mailto):/i.test(url)) void shell.openExternal(url)
-    return { action: 'deny' }
-  })
-  win.webContents.on('will-navigate', (e, url) => {
-    if (!url.startsWith('http://localhost') && !url.startsWith('file://')) {
-      e.preventDefault()
-      if (/^(https?|mailto):/i.test(url)) void shell.openExternal(url)
-    }
-  })
-  win.webContents.on('context-menu', (_e, params) => {
-    const items: MenuItemConstructorOptions[] = []
-    for (const s of params.dictionarySuggestions.slice(0, 5)) items.push({ label: s, click: () => win?.webContents.replaceMisspelling(s) })
-    if (params.misspelledWord) items.push({ label: t('Add to dictionary'), click: () => win?.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord) }, { type: 'separator' })
-    if (params.linkURL) items.push({ label: t('Copy link'), click: () => clipboard.writeText(params.linkURL) })
-    if (params.isEditable) items.push({ role: 'cut', label: t('Cut') }, { role: 'copy', label: t('Copy') }, { role: 'paste', label: t('Paste') }, { role: 'pasteAndMatchStyle', label: t('Paste as plain text') })
-    else if (params.selectionText) items.push({ role: 'copy', label: t('Copy') })
-    if (items.length) Menu.buildFromTemplate(items).popup()
-  })
-
   if (process.env.OCTO_SCREENSHOT) scheduleScreenshots(win)
-  if (process.env.ELECTRON_RENDERER_URL) void win.loadURL(process.env.ELECTRON_RENDERER_URL)
-  else void win.loadFile(path.join(__dirname, '../renderer/index.html'))
+  loadRenderer(win)
+}
+
+/** Extra windows that show a single conversation ("Open in a new window"). */
+const threadWindows = new Set<BrowserWindow>()
+
+function openThreadWindow(threadId: number): void {
+  const w = appWindow({ width: 980, height: 820, minWidth: 520, minHeight: 420 })
+  threadWindows.add(w)
+  w.on('closed', () => threadWindows.delete(w))
+  w.once('ready-to-show', () => w.show())
+  loadRenderer(w, { thread: String(threadId) })
+}
+
+/** Print an HTML document (built and sanitized by the renderer) from a hidden window, with scripts off. */
+async function printHtml(html: string): Promise<void> {
+  const file = path.join(app.getPath('temp'), `octo-print-${Date.now()}-${Math.random().toString(36).slice(2)}.html`)
+  fs.writeFileSync(file, html, 'utf8')
+  const w = new BrowserWindow({ show: false, webPreferences: { javascript: false, sandbox: true, contextIsolation: true, nodeIntegration: false } })
+  w.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  w.webContents.on('will-navigate', (e) => e.preventDefault())
+  try {
+    await w.loadFile(file)
+    await new Promise<void>((resolve, reject) =>
+      w.webContents.print({ printBackground: true }, (ok, reason) => (ok || reason === 'cancelled' ? resolve() : reject(new Error(reason)))),
+    )
+  } finally {
+    if (!w.isDestroyed()) w.destroy()
+    fs.rm(file, { force: true }, () => undefined)
+  }
 }
 
 /**
@@ -163,6 +201,8 @@ function showWindow(): void {
 
 function send(channel: string, payload: unknown): void {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload)
+  // conversation windows only need to follow data changes
+  if (channel === 'core-event') for (const w of threadWindows) if (!w.isDestroyed()) w.webContents.send(channel, payload)
 }
 
 function openDeepLink(link: string): void {
@@ -345,10 +385,15 @@ function registerIpc(): void {
     else win.setOverlayIcon(nativeImage.createFromDataURL(dataUrl), tp(count, '{n} unread', '{n} unread'))
   })
   ipcMain.handle('set-login-item', (_e, on: boolean) => setLaunchAtLogin(on))
-  ipcMain.handle('window', (_e, cmd: 'minimize' | 'close' | 'reload') => {
-    if (cmd === 'minimize') win?.minimize()
-    if (cmd === 'close') win?.close()
-    if (cmd === 'reload') win?.reload()
+  ipcMain.handle('window', (e, cmd: 'minimize' | 'close' | 'reload') => {
+    const w = BrowserWindow.fromWebContents(e.sender) || win
+    if (cmd === 'minimize') w?.minimize()
+    if (cmd === 'close') w?.close()
+    if (cmd === 'reload') w?.reload()
+  })
+  ipcMain.handle('print-html', (_e, html: string) => printHtml(String(html)))
+  ipcMain.handle('open-thread-window', (_e, threadId: number) => {
+    if (Number.isInteger(threadId) && threadId > 0) openThreadWindow(threadId)
   })
 }
 

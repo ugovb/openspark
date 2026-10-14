@@ -37,9 +37,13 @@ function textToHtml(text: string): string {
   return `<div class="octo-plain">${out.join('<br>')}</div>`
 }
 
-const QUOTE_SELECTORS = ['.gmail_quote', 'blockquote[type="cite"]', '.octo-quote', '.yahoo_quoted', '#divRplyFwdMsg', 'div.moz-cite-prefix', '.protonmail_quote']
+export const QUOTE_SELECTORS = ['.gmail_quote', 'blockquote[type="cite"]', '.octo-quote', '.yahoo_quoted', '#divRplyFwdMsg', 'div.moz-cite-prefix', '.protonmail_quote']
 
-export function prepareHtml(m: MessageView, allowRemote: boolean, blockTrackers: boolean, dark: boolean): Prepared {
+/**
+ * Sanitized body HTML of a message (no scripts, forms, remote images unless allowed, no trackers).
+ * Quoted history is collapsed behind "•••" or, for print/copy, removed.
+ */
+export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers: boolean, quotes: 'collapse' | 'remove' = 'collapse'): Prepared {
   const source = m.html || textToHtml(m.text || m.snippet || '')
   let remoteCount = 0
   let trackers = 0
@@ -99,11 +103,20 @@ export function prepareHtml(m: MessageView, allowRemote: boolean, blockTrackers:
 
   // collapse quoted history behind "•••" (only when the message has something else to show)
   const doc = new DOMParser().parseFromString(`<body>${clean}</body>`, 'text/html')
+  if (quotes === 'remove') {
+    doc.querySelectorAll('details.octo-q').forEach((d) => {
+      if ((doc.body.textContent || '').replace(d.textContent || '', '').trim().length >= 2) d.remove()
+    })
+  }
   for (const sel of QUOTE_SELECTORS) {
     for (const q of Array.from(doc.querySelectorAll(sel))) {
       if (q.closest('details.octo-q')) continue
       const before = (doc.body.textContent || '').replace(q.textContent || '', '').trim()
       if (before.length < 2) continue
+      if (quotes === 'remove') {
+        q.remove()
+        continue
+      }
       const d = doc.createElement('details')
       d.className = 'octo-q'
       d.innerHTML = '<summary>•••</summary>'
@@ -112,13 +125,23 @@ export function prepareHtml(m: MessageView, allowRemote: boolean, blockTrackers:
     }
   }
 
-  const csp = [
+  return { html: doc.body.innerHTML, remoteCount, trackers }
+}
+
+/** Content-Security-Policy for a rendered e-mail: never scripts; remote content only when allowed. */
+export function mailCsp(allowRemote: boolean): string {
+  return [
     "default-src 'none'",
     `img-src octo-cid: data: ${window.__OCTO_WEB__ ? "'self'" : ''} ${allowRemote ? 'https: http:' : ''}`,
     `style-src 'unsafe-inline' ${allowRemote ? 'https:' : ''}`,
     `font-src data: ${allowRemote ? 'https:' : ''}`,
     `media-src ${allowRemote ? 'https:' : "'none'"}`,
   ].join('; ')
+}
+
+export function prepareHtml(m: MessageView, allowRemote: boolean, blockTrackers: boolean, dark: boolean): Prepared {
+  const { html: body, remoteCount, trackers } = sanitizeMail(m, allowRemote, blockTrackers)
+  const csp = mailCsp(allowRemote)
   const plain = !m.html
   const fg = plain && dark ? '#e8e8ee' : '#1c1c22'
   // plain-text mail follows the app theme; HTML mail keeps the white canvas it was designed for
@@ -136,7 +159,7 @@ a{color:${plain && dark ? '#a99fff' : '#4f46e5'};}
 blockquote{margin:6px 0 6px 2px;border-left:3px solid #d4d4dc;padding-left:10px;color:${plain && dark ? '#a0a0ad' : '#555'};}
 details.octo-q>summary{display:inline-block;list-style:none;cursor:default;padding:0 8px;margin:6px 0;border-radius:8px;background:${plain && dark ? '#2e2e37' : '#ececf1'};color:#888;font-size:13px;line-height:18px;letter-spacing:1px;}
 details.octo-q>summary::-webkit-details-marker{display:none;}
-</style></head><body>${doc.body.innerHTML}</body></html>`
+</style></head><body>${body}</body></html>`
   return { html, remoteCount, trackers }
 }
 
