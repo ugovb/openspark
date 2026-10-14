@@ -14,10 +14,12 @@ process.env.OCTO_NO_AUTORUN = '1'
 import { insert, now } from '../src/core/db'
 import * as drafts from '../src/core/drafts'
 
+let seq = 0
 function seed(opts: { html?: string | null; text?: string | null; withAttachments?: boolean }) {
   const ts = now()
+  const uniq = `${ts}-${++seq}` // two seeds in the same millisecond must not share an address
   const accountId =
-    insert('accounts', { email: `me${ts}@example.test`, name: 'Me', username: 'me', imap_host: 'imap.example.test', smtp_host: 'smtp.example.test', created_at: ts }) as number
+    insert('accounts', { email: `me${uniq}@example.test`, name: 'Me', username: 'me', imap_host: 'imap.example.test', smtp_host: 'smtp.example.test', created_at: ts }) as number
   const folderId = insert('folders', { account_id: accountId, path: 'Sent', name: 'Sent', role: 'sent' }) as number
   const threadId = insert('threads', { account_id: accountId, subject: 'Quarterly report', last_date: ts }) as number
   const messageId = insert('messages', {
@@ -28,7 +30,7 @@ function seed(opts: { html?: string | null; text?: string | null; withAttachment
     msgid: '<orig@example.test>',
     subject: 'Quarterly report',
     from_name: 'Me',
-    from_email: `me${ts}@example.test`,
+    from_email: `me${uniq}@example.test`,
     to_json: JSON.stringify([{ name: 'Ann', email: 'ann@example.test' }]),
     cc_json: JSON.stringify([{ email: 'bob@example.test' }]),
     bcc_json: JSON.stringify([{ email: 'boss@example.test' }]),
@@ -43,7 +45,7 @@ function seed(opts: { html?: string | null; text?: string | null; withAttachment
     insert('attachments', { message_id: messageId, part: '2', filename: 'report.pdf', mime: 'application/pdf', size: 1234, inline: 0 })
     insert('attachments', { message_id: messageId, part: '3', filename: 'logo.png', mime: 'image/png', size: 50, inline: 1, content_id: 'logo' })
   }
-  return { accountId, messageId, threadId, me: `me${ts}@example.test` }
+  return { accountId, messageId, threadId, me: `me${uniq}@example.test` }
 }
 
 describe('send again', () => {
