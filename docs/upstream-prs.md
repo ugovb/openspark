@@ -53,7 +53,6 @@ Fourth AI provider next to Ollama / Claude / off: any endpoint with `POST {base}
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-
 ---
 
 # Second batch
