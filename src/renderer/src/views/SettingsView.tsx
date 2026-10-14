@@ -1,34 +1,49 @@
 import {
-  Bell, Bot, CalendarDays, ChevronLeft, Server, Smartphone, Unplug, Copy, Inbox, Keyboard, Mail, Palette, PenLine, Plus, RefreshCw, Sparkles, Trash2, Wand2, Workflow, X, Info, FileText,
+  ArrowLeftRight, AtSign, Bell, BellRing, Bot, CalendarDays, ChevronLeft, ChevronRight, Columns2, Copy, Download, FileText, Image, Inbox, Info, Keyboard, Languages,
+  MoveLeft, MoveRight, Newspaper, Palette, PanelLeft, PenLine, Plus, Power, RefreshCw, Rows3, Send, Server, ShieldCheck, ShieldOff, Smartphone, Sparkles, SunMoon,
+  Trash2, Undo2, Unplug, Volume2, Wand2, Workflow, X, Eye, Sunrise, Sunset, MonitorDown,
 } from 'lucide-react'
 import { Fragment, type ReactNode, useEffect, useState } from 'react'
 import type { Account, AgentAccess, AppSettings, Rule, RuleAction, RuleCondition, Signature, Template } from '../../../shared/types'
 import { DEFAULT_DRAFT_PROMPT, MAX_DRAFT_PROMPT } from '../../../shared/draft-prompt'
 import { getLang, LANGUAGES, t, tp } from '../../../shared/i18n'
 import { api, errorText } from '../lib/api'
-import { copyText, fullDate } from '../lib/format'
+import { copyText, fullDate, initials } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
-import { useStore } from '../lib/store'
+import { setUi, useStore } from '../lib/store'
 import AccountWizard from './AccountWizard'
-import { Button, cx, Field, IconButton, inputCls, Modal, Select, Spinner, Toggle } from '../components/ui'
+import { Avatar, Button, cx, Field, IconButton, inputCls, Modal, Select, Spinner, Toggle } from '../components/ui'
 import { APP_VERSION } from '../../../shared/version'
 
-type Tab = 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
+type Tab =
+  | 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'swipes' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
 
-const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
-  { id: 'accounts', label: t('Accounts'), icon: <Mail size={15} /> },
-  { id: 'general', label: t('Appearance & general'), icon: <Palette size={15} /> },
-  { id: 'inbox', label: t('Inbox & Gatekeeper'), icon: <Inbox size={15} /> },
-  { id: 'notifications', label: t('Notifications'), icon: <Bell size={15} /> },
-  { id: 'signatures', label: t('Signatures'), icon: <PenLine size={15} /> },
-  { id: 'templates', label: t('Templates'), icon: <FileText size={15} /> },
-  { id: 'rules', label: t('Rules'), icon: <Workflow size={15} /> },
-  { id: 'ai', label: 'AI', icon: <Sparkles size={15} /> },
-  { id: 'agents', label: t('AI agents & CLI'), icon: <Bot size={15} /> },
-  { id: 'calendars', label: t('Calendars'), icon: <CalendarDays size={15} /> },
-  { id: 'server', label: t('Home server'), icon: <Server size={15} /> },
-  { id: 'shortcuts', label: t('Keyboard shortcuts'), icon: <Keyboard size={15} /> },
-  { id: 'about', label: t('About'), icon: <Info size={15} /> },
+const TAB_INFO: Record<Tab, { label: string; icon: ReactNode }> = {
+  accounts: { label: t('Accounts'), icon: <AtSign size={15} className="text-people" /> },
+  ai: { label: 'AI', icon: <Sparkles size={15} className="text-newsletter" /> },
+  agents: { label: t('AI agents & CLI'), icon: <Bot size={15} className="text-notification" /> },
+  general: { label: t('Appearance & general'), icon: <Palette size={15} className="text-accent" /> },
+  notifications: { label: t('Notifications'), icon: <Bell size={15} className="text-danger" /> },
+  inbox: { label: t('Inbox & Gatekeeper'), icon: <Inbox size={15} className="text-people" /> },
+  rules: { label: t('Rules'), icon: <Workflow size={15} className="text-warning" /> },
+  swipes: { label: t('Swipes'), icon: <ArrowLeftRight size={15} className="text-success" /> },
+  signatures: { label: t('Signatures'), icon: <PenLine size={15} className="text-notification" /> },
+  templates: { label: t('Templates'), icon: <FileText size={15} className="text-newsletter" /> },
+  calendars: { label: t('Calendars'), icon: <CalendarDays size={15} className="text-danger" /> },
+  server: { label: t('Home server'), icon: <Server size={15} className="text-success" /> },
+  shortcuts: { label: t('Keyboard shortcuts'), icon: <Keyboard size={15} className="text-muted" /> },
+  about: { label: t('About'), icon: <Info size={15} className="text-accent" /> },
+}
+
+/** Tabs in the left column; a gap separates the groups. */
+const GROUPS: Tab[][] = [
+  ['accounts'],
+  ['ai', 'agents'],
+  ['general', 'notifications'],
+  ['inbox', 'rules', 'swipes'],
+  ['signatures', 'templates'],
+  ['calendars'],
+  ['server', 'shortcuts', 'about'],
 ]
 
 /** Puts JSX (e.g. <code>) into the {slots} of an already translated text, so the translation decides the word order. */
@@ -36,15 +51,32 @@ function rich(text: string, slots: Record<string, ReactNode>): ReactNode {
   return text.split(/\{(\w+)\}/).map((part, i) => (i % 2 ? <Fragment key={i}>{slots[part]}</Fragment> : part))
 }
 
-function Section({ title, children, hint }: { title: ReactNode; children: ReactNode; hint?: ReactNode }) {
+/** A group of rows on a settings page; an optional small heading and help text above it. */
+function Section({ title, children, hint }: { title?: ReactNode; children: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="mb-6">
-      <div className="mb-1 text-[14px] font-semibold">{title}</div>
-      {hint && <div className="mb-2 text-[12.5px] text-muted">{hint}</div>}
-      <div className="rounded-xl border border-line bg-surface px-4 py-2">{children}</div>
+    <section className="mb-7 last:mb-0">
+      {title && <div className="mb-0.5 text-[13px] font-semibold text-muted">{title}</div>}
+      {hint && <div className="mb-1 text-[12.5px] text-muted">{hint}</div>}
+      <div className="flex flex-col">{children}</div>
+    </section>
+  )
+}
+
+/** One line of a settings list: icon, bold title with help text under it, the control on the right. */
+function SettingRow({ icon, title, hint, children, select }: { icon?: ReactNode; title: ReactNode; hint?: ReactNode; children?: ReactNode; select?: boolean }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-line py-3 last:border-b-0 max-md:flex-wrap">
+      {icon && <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted">{icon}</span>}
+      <div className="min-w-0 flex-1">
+        <div className="text-[13.5px] font-semibold">{title}</div>
+        {hint && <div className="mt-0.5 text-[12.5px] leading-snug text-muted">{hint}</div>}
+      </div>
+      {children && <div className={cx('flex shrink-0 items-center justify-end gap-2', select ? 'w-72 max-md:w-full max-md:pl-11' : 'max-w-full')}>{children}</div>}
     </div>
   )
 }
+
+const numCls = inputCls.replace('w-full', 'w-24 text-right')
 
 function useSettings(): [AppSettings, (p: Partial<AppSettings>) => void] {
   const { settings, updateSettings } = useStore()
@@ -58,48 +90,49 @@ const ACCESS: { value: AgentAccess; label: string }[] = [
   { value: 'send', label: t('Send (+ calendar)') },
 ]
 
+type IdentityRow = { id: number; account_id: number; email: string; name: string; signature_id: number | null; is_default: number }
+
 function AccountsTab() {
   const { accounts, sync, refreshMeta, toast } = useStore()
   const [adding, setAdding] = useState(false)
   const [edit, setEdit] = useState<Account | null>(null)
   const [signatures, setSignatures] = useState<Signature[]>([])
-  const [identities, setIdentities] = useState<{ id: number; account_id: number; email: string; name: string; signature_id: number | null; is_default: number }[]>([])
+  const [identities, setIdentities] = useState<IdentityRow[]>([])
   const load = async () => {
     setSignatures(await api.listSignatures())
-    setIdentities((await api.listIdentities()) as typeof identities)
+    setIdentities((await api.listIdentities()) as IdentityRow[])
   }
   useEffect(() => void load(), [accounts])
   return (
     <>
-      <Section title={t('Mail accounts')} hint={t('Passwords are stored {where}, not in the app database.', { where: useStore.getState().secretStore })}>
-        {accounts.map((a) => {
-          const st = sync[a.id]
-          const ids = identities.filter((i) => i.account_id === a.id)
-          return (
-            <div key={a.id} className="flex items-center gap-3 border-b border-line py-3 last:border-0">
-              <span className="h-3 w-3 rounded-full" style={{ background: a.color || 'var(--accent)' }} />
-              <div className="min-w-0 flex-1">
-                <div className="font-medium">{a.name} <span className="font-normal text-muted">&lt;{a.email}&gt;</span></div>
-                <div className="text-[12px] text-muted">
-                  {a.imap_host} · {a.auth === 'password' ? t('password') : 'OAuth'} · {st?.state === 'error' ? <span className="text-danger">{st.error}</span> : a.last_sync ? t('synced {when}', { when: fullDate(a.last_sync) }) : t('not synced yet')}
+      <Section hint={t('Passwords are stored {where}, not in the app database.', { where: useStore.getState().secretStore })}>
+        <div className="flex flex-col">
+          {accounts.map((a) => {
+            const st = sync[a.id]
+            const ids = identities.filter((i) => i.account_id === a.id)
+            const aliases = ids.filter((i) => !i.is_default).map((i) => i.email)
+            return (
+              <button key={a.id} onClick={() => setEdit(a)} className="-mx-2 flex items-center gap-3 rounded-lg border-b border-line px-2 py-2.5 text-left last:border-b-0 hover:bg-hover">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: a.color || 'var(--accent)' }}>
+                  {initials({ email: a.email, name: a.name })}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[13.5px] font-semibold">{a.email}</div>
+                  <div className="truncate text-[12.5px] text-muted">
+                    {a.name}
+                    {st?.state === 'error' ? <span className="text-danger"> · {st.error}</span> : !a.enabled ? ` · ${t('Account disabled')}` : ''}
+                    {aliases.length > 0 && ` · ${t('Aliases:')} ${aliases.join(', ')}`}
+                  </div>
                 </div>
-                {ids.length > 1 && <div className="text-[12px] text-faint">{t('Aliases:')} {ids.filter((i) => !i.is_default).map((i) => i.email).join(', ')}</div>}
-              </div>
-              <select
-                className="h-8 rounded-lg border border-line bg-surface px-2 text-[12.5px]"
-                value={ids.find((i) => i.is_default)?.signature_id ?? ''}
-                onChange={async (e) => (await api.setDefaultSignature(a.id, e.target.value ? Number(e.target.value) : null), void load())}
-                title={t('Signature')}
-              >
-                <option value="">{t('No signature')}</option>
-                {signatures.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <Button size="sm" onClick={() => setEdit(a)}>{t('Edit')}</Button>
-            </div>
-          )
-        })}
-        <div className="py-2">
-          <Button variant="ghost" size="sm" onClick={() => setAdding(true)}><Plus size={14} /> {t('Add account')}</Button>
+                <ChevronRight size={16} className="shrink-0 text-faint" />
+              </button>
+            )
+          })}
+        </div>
+        <div className="pt-3">
+          <button onClick={() => setAdding(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-4 text-[13px] font-medium text-fg transition-colors hover:bg-hover">
+            <Plus size={14} /> {t('Add an account')}
+          </button>
         </div>
       </Section>
       <Section title={t('OAuth sign-in (optional)')} hint={t('Your own Google/Microsoft app IDs for signing in without a password and for Google Calendar access.')}>
@@ -108,7 +141,17 @@ function AccountsTab() {
       <Modal open={adding} onClose={() => setAdding(false)} title={t('Add account')} width={620}>
         <AccountWizard onDone={() => setAdding(false)} />
       </Modal>
-      {edit && <EditAccount account={edit} onClose={() => (setEdit(null), void refreshMeta(), void load())} onError={(m) => toast({ level: 'error', message: m })} />}
+      {edit && (
+        <EditAccount
+          account={edit}
+          status={sync[edit.id]?.state === 'error' ? <span className="text-danger">{sync[edit.id]?.error}</span> : edit.last_sync ? t('synced {when}', { when: fullDate(edit.last_sync) }) : t('not synced yet')}
+          signatures={signatures}
+          signatureId={identities.find((i) => i.account_id === edit.id && i.is_default)?.signature_id ?? null}
+          onSignature={async (id) => (await api.setDefaultSignature(edit.id, id), void load())}
+          onClose={() => (setEdit(null), void refreshMeta(), void load())}
+          onError={(m) => toast({ level: 'error', message: m })}
+        />
+      )}
     </>
   )
 }
@@ -140,7 +183,15 @@ function OAuthClients() {
   )
 }
 
-function EditAccount({ account, onClose, onError }: { account: Account; onClose: () => void; onError: (m: string) => void }) {
+function EditAccount({ account, status, signatures, signatureId, onSignature, onClose, onError }: {
+  account: Account
+  status: ReactNode
+  signatures: Signature[]
+  signatureId: number | null
+  onSignature: (id: number | null) => void
+  onClose: () => void
+  onError: (m: string) => void
+}) {
   const [a, setA] = useState(account)
   const [password, setPassword] = useState('')
   const [alias, setAlias] = useState('')
@@ -174,6 +225,9 @@ function EditAccount({ account, onClose, onError }: { account: Account; onClose:
       </>
     }>
       <div className="grid grid-cols-2 max-md:grid-cols-1 gap-x-4 p-5">
+        <div className="col-span-2 max-md:col-span-1 pb-2 text-[12.5px] text-muted">
+          {account.imap_host} · {account.auth === 'password' ? t('password') : 'OAuth'} · {status}
+        </div>
         <Field label={t('Sender name')}><input className={inputCls} value={a.name} onChange={(e) => setA({ ...a, name: e.target.value })} /></Field>
         <Field label={t('Color')}><input type="color" className="h-9 w-20 rounded-lg border border-line bg-surface" value={a.color || '#5b4cf0'} onChange={(e) => setA({ ...a, color: e.target.value })} /></Field>
         <Field label={t('New password (leave empty to keep the current one)')}><input className={inputCls} type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
@@ -182,6 +236,9 @@ function EditAccount({ account, onClose, onError }: { account: Account; onClose:
           <Select value={a.notify} onChange={(v) => setA({ ...a, notify: v })} options={[{ value: 'smart', label: t('Smart (people and priority senders)') }, { value: 'all', label: t('All') }, { value: 'none', label: t('Off') }]} />
         </Field>
         <Field label={t('Add alias (sender address)')}><input className={inputCls} placeholder={t('e.g. office@yourcompany.com')} value={alias} onChange={(e) => setAlias(e.target.value)} /></Field>
+        <Field label={t('Signature')}>
+          <Select value={String(signatureId ?? '')} onChange={(v) => onSignature(v ? Number(v) : null)} options={[{ value: '', label: t('No signature') }, ...signatures.map((x) => ({ value: String(x.id), label: x.name }))]} />
+        </Field>
         <div className="col-span-2"><Toggle checked={a.enabled} onChange={(v) => setA({ ...a, enabled: v })} label={t('Account enabled')} hint={t('A disabled account is not synced.')} /></div>
         <div className="col-span-2 mt-2 text-[12.5px] font-semibold text-muted">{t('Servers')}</div>
         <Field label="IMAP"><input className={inputCls} value={a.imap_host} onChange={(e) => setA({ ...a, imap_host: e.target.value })} /></Field>
@@ -204,23 +261,37 @@ function GeneralTab() {
   return (
     <>
       <Section title={t('Appearance')}>
-        <Field label={t('Language')} hint={t('The window reloads to apply the language.')}>
+        <SettingRow select icon={<Languages size={16} />} title={t('Language')} hint={t('The window reloads to apply the language.')}>
           <Select value={s.language} onChange={(v) => set({ language: v })} options={LANGUAGES.map((l) => ({ value: l.value, label: l.value === 'auto' ? t('Automatic (system language)') : l.label }))} />
-        </Field>
-        <Field label={t('Theme')}><Select value={s.theme} onChange={(v) => set({ theme: v })} options={[{ value: 'system', label: t('Match system') }, { value: 'light', label: t('Light') }, { value: 'dark', label: t('Dark') }]} /></Field>
-        <Field label={t('List density')}><Select value={s.density} onChange={(v) => set({ density: v })} options={[{ value: 'comfortable', label: t('Comfortable (with preview)') }, { value: 'compact', label: t('Compact') }]} /></Field>
+        </SettingRow>
+        <SettingRow select icon={<SunMoon size={16} />} title={t('Theme')}>
+          <Select value={s.theme} onChange={(v) => set({ theme: v })} options={[{ value: 'system', label: t('Match system') }, { value: 'light', label: t('Light') }, { value: 'dark', label: t('Dark') }]} />
+        </SettingRow>
+        <SettingRow select icon={<Columns2 size={16} />} title={t('Layout')} hint={t('On a phone the conversation always replaces the list.')}>
+          <Select value={s.ui.layout} onChange={(v) => setUi({ layout: v })} options={[{ value: 'full', label: t('One pane — the conversation replaces the list') }, { value: 'split', label: t('List and conversation side by side') }]} />
+        </SettingRow>
+        <SettingRow select icon={<PanelLeft size={16} />} title={t('Sidebar')}>
+          <Select value={s.ui.sidebar} onChange={(v) => setUi({ sidebar: v })} options={[{ value: 'rail', label: t('Icons only') }, { value: 'full', label: t('Full') }]} />
+        </SettingRow>
+        <SettingRow select icon={<Rows3 size={16} />} title={t('List density')}>
+          <Select value={s.density} onChange={(v) => set({ density: v })} options={[{ value: 'comfortable', label: t('Comfortable (with preview)') }, { value: 'compact', label: t('Compact') }]} />
+        </SettingRow>
       </Section>
       <Section title={t('Startup')}>
-        <Toggle checked={s.launchAtLogin} onChange={(v) => (set({ launchAtLogin: v }), void window.octo.setLoginItem(v))} label={t('Launch when Windows starts')} hint={t('Snoozed messages, reminders and scheduled sends then work without opening the window.')} />
-        <Toggle checked={s.minimizeToTray} onChange={(v) => set({ minimizeToTray: v })} label={t('Closing the window keeps the app running in the tray')} />
+        <SettingRow icon={<Power size={16} />} title={t('Launch when Windows starts')} hint={t('Snoozed messages, reminders and scheduled sends then work without opening the window.')}>
+          <Toggle checked={s.launchAtLogin} onChange={(v) => (set({ launchAtLogin: v }), void window.octo.setLoginItem(v))} />
+        </SettingRow>
+        <SettingRow icon={<MonitorDown size={16} />} title={t('Closing the window keeps the app running in the tray')}>
+          <Toggle checked={s.minimizeToTray} onChange={(v) => set({ minimizeToTray: v })} />
+        </SettingRow>
       </Section>
       <Section title={t('Sending')}>
-        <Field label={t('Default sending account')}>
+        <SettingRow select icon={<Send size={16} />} title={t('Default sending account')}>
           <Select value={String(s.defaultAccountId ?? '')} onChange={(v) => set({ defaultAccountId: v ? Number(v) : null })} options={[{ value: '', label: t('Last used') }, ...accounts.map((a) => ({ value: String(a.id), label: a.email }))]} />
-        </Field>
-        <Field label={t('Undo send window: {n} s', { n: s.undoSendSeconds })}>
-          <input type="range" min={0} max={30} value={s.undoSendSeconds} onChange={(e) => set({ undoSendSeconds: Number(e.target.value) })} />
-        </Field>
+        </SettingRow>
+        <SettingRow select icon={<Undo2 size={16} />} title={t('Undo send window: {n} s', { n: s.undoSendSeconds })}>
+          <input className="w-full" type="range" min={0} max={30} value={s.undoSendSeconds} onChange={(e) => set({ undoSendSeconds: Number(e.target.value) })} />
+        </SettingRow>
       </Section>
     </>
   )
@@ -231,30 +302,44 @@ function InboxTab() {
   return (
     <>
       <Section title="Smart Inbox" hint={t('Automatically sorts mail into People, Notifications and Newsletters (based on headers, Gmail categories and your choices).')}>
-        <Toggle checked={s.smartInbox} onChange={(v) => set({ smartInbox: v })} label={t('Turn on Smart Inbox')} />
-        <Toggle checked={s.groupNotifications} onChange={(v) => set({ groupNotifications: v })} label={t('Group notifications into one card')} />
-        <Toggle checked={s.groupNewsletters} onChange={(v) => set({ groupNewsletters: v })} label={t('Group newsletters into one card')} />
-        <Toggle checked={s.markReadOnOpen} onChange={(v) => set({ markReadOnOpen: v })} label={t('Mark as read when opened')} />
+        <SettingRow icon={<Inbox size={16} />} title={t('Turn on Smart Inbox')}>
+          <Toggle checked={s.smartInbox} onChange={(v) => set({ smartInbox: v })} />
+        </SettingRow>
+        <SettingRow icon={<Bell size={16} />} title={t('Group notifications into one card')}>
+          <Toggle checked={s.groupNotifications} onChange={(v) => set({ groupNotifications: v })} />
+        </SettingRow>
+        <SettingRow icon={<Newspaper size={16} />} title={t('Group newsletters into one card')}>
+          <Toggle checked={s.groupNewsletters} onChange={(v) => set({ groupNewsletters: v })} />
+        </SettingRow>
+        <SettingRow icon={<Eye size={16} />} title={t('Mark as read when opened')}>
+          <Toggle checked={s.markReadOnOpen} onChange={(v) => set({ markReadOnOpen: v })} />
+        </SettingRow>
       </Section>
-      <Section title={t('Gatekeeper')} hint={t('New senders (people who have never received an email from you) wait in a separate section until you accept or block them.')}>
-        <Toggle checked={s.gatekeeper === 'on'} onChange={(v) => set({ gatekeeper: v ? 'on' : 'off' })} label={t('Screen new senders before they reach the Inbox')} />
+      <Section title={t('Gatekeeper')}>
+        <SettingRow icon={<ShieldCheck size={16} />} title={t('Screen new senders before they reach the Inbox')} hint={t('New senders (people who have never received an email from you) wait in a separate section until you accept or block them.')}>
+          <Toggle checked={s.gatekeeper === 'on'} onChange={(v) => set({ gatekeeper: v ? 'on' : 'off' })} />
+        </SettingRow>
       </Section>
       <Section title={t('Privacy')}>
-        <Field label={t('Remote images in messages')}>
+        <SettingRow select icon={<Image size={16} />} title={t('Remote images in messages')}>
           <Select value={s.loadRemoteImages} onChange={(v) => set({ loadRemoteImages: v })} options={[{ value: 'contacts', label: t('Only from people I know') }, { value: 'always', label: t('Always') }, { value: 'never', label: t('Never (ask)') }]} />
-        </Field>
-        <Toggle checked={s.blockTrackers} onChange={(v) => set({ blockTrackers: v })} label={t('Block tracking pixels')} hint={t('Removes the invisible images senders use to check whether you have read their message.')} />
+        </SettingRow>
+        <SettingRow icon={<ShieldOff size={16} />} title={t('Block tracking pixels')} hint={t('Removes the invisible images senders use to check whether you have read their message.')}>
+          <Toggle checked={s.blockTrackers} onChange={(v) => set({ blockTrackers: v })} />
+        </SettingRow>
       </Section>
       <Section title={t('Snooze & reminders')}>
-        <div className="grid grid-cols-2 max-md:grid-cols-1 gap-x-4">
-          <Field label={t('“Morning” hour')}><input className={inputCls} type="number" min={5} max={12} value={s.snoozeMorningHour} onChange={(e) => set({ snoozeMorningHour: Number(e.target.value) })} /></Field>
-          <Field label={t('“Evening” hour')}><input className={inputCls} type="number" min={15} max={23} value={s.snoozeEveningHour} onChange={(e) => set({ snoozeEveningHour: Number(e.target.value) })} /></Field>
-        </div>
+        <SettingRow icon={<Sunrise size={16} />} title={t('“Morning” hour')}>
+          <input className={numCls} type="number" min={5} max={12} value={s.snoozeMorningHour} onChange={(e) => set({ snoozeMorningHour: Number(e.target.value) })} />
+        </SettingRow>
+        <SettingRow icon={<Sunset size={16} />} title={t('“Evening” hour')}>
+          <input className={numCls} type="number" min={15} max={23} value={s.snoozeEveningHour} onChange={(e) => set({ snoozeEveningHour: Number(e.target.value) })} />
+        </SettingRow>
       </Section>
       <Section title={t('Downloading')}>
-        <Field label={t('Download message content from the last (days)')} hint={t('For full-text search and offline AI. Older content is downloaded when you open a message.')}>
-          <input className={inputCls} type="number" min={0} max={365} value={s.bodyPrefetchDays} onChange={(e) => set({ bodyPrefetchDays: Number(e.target.value) })} />
-        </Field>
+        <SettingRow icon={<Download size={16} />} title={t('Download message content from the last (days)')} hint={t('For full-text search and offline AI. Older content is downloaded when you open a message.')}>
+          <input className={numCls} type="number" min={0} max={365} value={s.bodyPrefetchDays} onChange={(e) => set({ bodyPrefetchDays: Number(e.target.value) })} />
+        </SettingRow>
       </Section>
     </>
   )
@@ -266,18 +351,46 @@ function NotificationsTab() {
   return (
     <>
       <Section title={t('System notifications')}>
-        <Toggle checked={s.notifications} onChange={(v) => set({ notifications: v })} label={t('Show notifications for new mail')} />
-        <Toggle checked={s.notificationSound} onChange={(v) => set({ notificationSound: v })} label={t('Notification sound')} />
+        <SettingRow icon={<BellRing size={16} />} title={t('Show notifications for new mail')}>
+          <Toggle checked={s.notifications} onChange={(v) => set({ notifications: v })} />
+        </SettingRow>
+        <SettingRow icon={<Volume2 size={16} />} title={t('Notification sound')}>
+          <Toggle checked={s.notificationSound} onChange={(v) => set({ notificationSound: v })} />
+        </SettingRow>
       </Section>
       <Section title={t('Mode per account')} hint={t('“Smart” = only messages from people and priority senders, no newsletters or automated mail.')}>
         {accounts.map((a) => (
-          <div key={a.id} className="flex items-center gap-3 py-1.5">
-            <span className="flex-1 text-[13.5px]">{a.email}</span>
-            <Select value={a.notify} onChange={async (v) => (await api.updateAccount(a.id, { notify: v }), void refreshMeta())} className="w-64" options={[{ value: 'smart', label: t('Smart') }, { value: 'all', label: t('All') }, { value: 'none', label: t('Off') }]} />
-          </div>
+          <SettingRow select key={a.id} icon={<Avatar addr={{ email: a.email, name: a.name }} size={28} />} title={a.email} hint={a.name}>
+            <Select value={a.notify} onChange={async (v) => (await api.updateAccount(a.id, { notify: v }), void refreshMeta())} options={[{ value: 'smart', label: t('Smart') }, { value: 'all', label: t('All') }, { value: 'none', label: t('Off') }]} />
+          </SettingRow>
         ))}
       </Section>
     </>
+  )
+}
+
+const SWIPE_ACTIONS: { value: string; label: string }[] = [
+  { value: 'archive', label: t('Done') },
+  { value: 'trash', label: t('Move to Trash') },
+  { value: 'pin', label: t('Pin') },
+  { value: 'snooze', label: t('Snooze') },
+  { value: 'read', label: t('Read / unread') },
+  { value: 'aside', label: t('Set aside') },
+  { value: 'priority', label: t('Priority') },
+  { value: 'none', label: t('Nothing') },
+]
+
+function SwipesTab() {
+  const [s, set] = useSettings()
+  return (
+    <Section hint={t('What happens when you swipe a conversation in the list on a phone or touch screen.')}>
+      <SettingRow select icon={<MoveRight size={16} />} title={t('Swipe right')}>
+        <Select value={s.swipeRight} onChange={(v) => set({ swipeRight: v })} options={SWIPE_ACTIONS} />
+      </SettingRow>
+      <SettingRow select icon={<MoveLeft size={16} />} title={t('Swipe left')}>
+        <Select value={s.swipeLeft} onChange={(v) => set({ swipeLeft: v })} options={SWIPE_ACTIONS} />
+      </SettingRow>
+    </Section>
   )
 }
 
@@ -287,7 +400,7 @@ function SignaturesTab() {
   const load = async () => setList(await api.listSignatures())
   useEffect(() => void load(), [])
   return (
-    <Section title={t('Signatures')} hint={t('Choose the default signature for an account in the Accounts tab. You can use plain text or HTML.')}>
+    <Section hint={t('Choose the default signature for an account in the Accounts tab. You can use plain text or HTML.')}>
       {list.map((s) => (
         <div key={s.id} className="flex items-center gap-3 border-b border-line py-2 last:border-0">
           <div className="min-w-0 flex-1">
@@ -337,7 +450,7 @@ function TemplatesTab() {
     auto3: <code>{getLang() === 'pl' ? '{{imię odbiorcy}}' : '{{recipient name}}'}</code>,
   })
   return (
-    <Section title={t('Templates')} hint={hint}>
+    <Section hint={hint}>
       {list.map((tpl) => (
         <div key={tpl.id} className="flex items-center gap-3 border-b border-line py-2 last:border-0">
           <div className="min-w-0 flex-1">
@@ -400,7 +513,7 @@ function RulesTab() {
   const load = async () => setList(await api.listRules())
   useEffect(() => void load(), [])
   return (
-    <Section title={t('Rules')} hint={t('They run on new messages arriving in the Inbox (e.g. “from invoices@… → label Accounting and done”).')}>
+    <Section hint={t('They run on new messages arriving in the Inbox (e.g. “from invoices@… → label Accounting and done”).')}>
       {list.map((r) => (
         <div key={r.id} className="flex items-center gap-3 border-b border-line py-2 last:border-0">
           <Toggle checked={r.enabled} onChange={async (v) => (await api.saveRule({ ...r, enabled: v }), void load())} />
@@ -589,10 +702,9 @@ function AgentsTab() {
     <>
       <Section title={t('AI agent access level')} hint={t('Applies to the `octo` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.')}>
         {accounts.map((a) => (
-          <div key={a.id} className="flex items-center gap-3 py-1.5">
-            <span className="flex-1 text-[13.5px]">{a.email}</span>
-            <Select className="w-72" value={a.agent_access} onChange={async (v) => (await api.setAgentAccess(a.id, v), void refreshMeta())} options={ACCESS} />
-          </div>
+          <SettingRow key={a.id} select icon={<Avatar addr={{ email: a.email, name: a.name }} size={28} />} title={a.email} hint={a.name}>
+            <Select value={a.agent_access} onChange={async (v) => (await api.setAgentAccess(a.id, v), void refreshMeta())} options={ACCESS} />
+          </SettingRow>
         ))}
       </Section>
       <Section title={t('Connect to Claude Code')} hint={t('Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.')}>
@@ -880,52 +992,123 @@ function AboutTab() {
 
 export default function SettingsView() {
   const narrow = useNarrow()
-  // on a phone the tab list and the tab content are two screens
-  const [picked, setTab] = useState<Tab | null>(narrow ? null : 'accounts')
-  const tab = picked ?? (narrow ? null : 'accounts')
+  const asked = useStore((s) => s.settingsTab) as Tab | null
+  const accounts = useStore((s) => s.accounts)
   const setView = useStore((s) => s.setView)
-  return (
-    <div className="flex h-full min-w-0 flex-1 bg-bg">
-      <div className={cx('w-[230px] shrink-0 overflow-y-auto border-r border-line bg-surface p-2', narrow && (tab ? 'hidden' : 'w-full border-r-0'))}>
-        <div className="flex items-center justify-between px-2 pb-2 pt-1">
-          <div className="text-[15px] font-semibold">{t('Settings')}</div>
-          <IconButton title={t('Close')} onClick={() => setView('mail')}><X size={15} /></IconButton>
-        </div>
-        {TABS.map((x) => (
-          <button key={x.id} onClick={() => setTab(x.id)} className={cx('flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13.5px] max-md:h-11 max-md:text-[15px]', tab === x.id ? 'bg-accent-soft font-medium text-accent' : 'hover:bg-hover')}>
-            <span className="text-muted">{x.icon}</span> {x.label}
-          </button>
-        ))}
+  // on a phone the tab list and the tab content are two screens
+  const [picked, setTab] = useState<Tab | null>(asked)
+  useEffect(() => void (asked && setTab(asked)), [asked])
+  const tab = picked ?? (narrow ? null : 'accounts')
+  const close = () => setView('mail')
+
+  // Esc closes Settings; dialogs opened inside it stop the key before it gets here
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      e.preventDefault()
+      useStore.getState().setView('mail')
+    }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [])
+
+  const me = accounts[0]
+  const profile = me && (
+    <div className="flex items-center gap-3 px-2 pb-3 pt-1">
+      <Avatar addr={{ email: me.email, name: me.name }} size={40} />
+      <div className="min-w-0">
+        <div className="truncate text-[14px] font-semibold">{me.name || me.email}</div>
+        <div className="truncate text-[12px] text-muted">{me.email}</div>
       </div>
-      <div className={cx('min-w-0 flex-1 overflow-y-auto px-8 py-6 max-md:px-3 max-md:py-3', narrow && !tab && 'hidden')}>
-        {narrow && (
-          <button className="mb-2 flex h-9 items-center gap-1 text-[14px] text-accent" onClick={() => setTab(null)}>
-            <ChevronLeft size={18} /> {t('Settings')}
-          </button>
-        )}
-        <div className="mx-auto max-w-[760px]">
-          {tab === 'accounts' && <AccountsTab />}
-          {tab === 'general' && <GeneralTab />}
-          {tab === 'inbox' && <InboxTab />}
-          {tab === 'notifications' && <NotificationsTab />}
-          {tab === 'signatures' && <SignaturesTab />}
-          {tab === 'templates' && <TemplatesTab />}
-          {tab === 'rules' && <RulesTab />}
-          {tab === 'ai' && <AiTab />}
-          {tab === 'agents' && <AgentsTab />}
-          {tab === 'calendars' && <CalendarsTab />}
-          {tab === 'server' && <ServerTab />}
-          {tab === 'shortcuts' && (
-            <Section title={t('Keyboard shortcuts')}>
-              {SHORTCUTS.map(([k, d]) => (
-                <div key={k} className="flex items-center gap-3 border-b border-line py-1.5 last:border-0">
-                  <span className="w-64 shrink-0"><span className="kbd">{k}</span></span>
-                  <span className="text-[13px]">{d}</span>
-                </div>
-              ))}
-            </Section>
+    </div>
+  )
+
+  const nav = (
+    <nav className="flex flex-col gap-3">
+      {GROUPS.map((g, i) => (
+        <div key={i} className="flex flex-col gap-px">
+          {g.map((id) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={cx(
+                'flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13.5px] max-md:h-11 max-md:text-[15px]',
+                tab === id ? 'bg-accent-soft font-medium text-accent' : 'hover:bg-hover',
+              )}
+            >
+              {TAB_INFO[id].icon}
+              <span className="min-w-0 flex-1 truncate">{TAB_INFO[id].label}</span>
+              {narrow && <ChevronRight size={16} className="text-faint" />}
+            </button>
+          ))}
+        </div>
+      ))}
+    </nav>
+  )
+
+  const page = tab && (
+    <>
+      {tab === 'accounts' && <AccountsTab />}
+      {tab === 'general' && <GeneralTab />}
+      {tab === 'inbox' && <InboxTab />}
+      {tab === 'notifications' && <NotificationsTab />}
+      {tab === 'swipes' && <SwipesTab />}
+      {tab === 'signatures' && <SignaturesTab />}
+      {tab === 'templates' && <TemplatesTab />}
+      {tab === 'rules' && <RulesTab />}
+      {tab === 'ai' && <AiTab />}
+      {tab === 'agents' && <AgentsTab />}
+      {tab === 'calendars' && <CalendarsTab />}
+      {tab === 'server' && <ServerTab />}
+      {tab === 'shortcuts' && (
+        <Section>
+          {SHORTCUTS.map(([k, d]) => (
+            <div key={k} className="flex items-center gap-3 border-b border-line py-2 last:border-0">
+              <span className="w-64 shrink-0 max-md:w-40"><span className="kbd">{k}</span></span>
+              <span className="text-[13px]">{d}</span>
+            </div>
+          ))}
+        </Section>
+      )}
+      {tab === 'about' && <AboutTab />}
+    </>
+  )
+
+  // phone: a full-screen sheet, list of tabs → one tab
+  if (narrow) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-surface max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]">
+        <div className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-1.5">
+          <IconButton aria-label={tab ? t('Settings') : t('Close')} onClick={() => (tab ? setTab(null) : close())}><ChevronLeft size={20} /></IconButton>
+          <div className="min-w-0 flex-1 truncate text-[16px] font-semibold">{tab ? TAB_INFO[tab].label : t('Settings')}</div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+          {tab ? page : (
+            <>
+              {profile}
+              {nav}
+            </>
           )}
-          {tab === 'about' && <AboutTab />}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-6 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && close()}>
+      <div className="anim-in flex h-full max-h-[700px] w-full max-w-[1000px] overflow-hidden rounded-2xl bg-surface" style={{ boxShadow: 'var(--shadow)' }} role="dialog" aria-label={t('Settings')}>
+        <div className="flex w-[230px] shrink-0 flex-col overflow-y-auto border-r border-line bg-panel p-3">
+          <div className="-ml-1 mb-2">
+            <IconButton aria-label={t('Close')} title={t('Close (Esc)')} onClick={close}><X size={16} /></IconButton>
+          </div>
+          {profile}
+          {nav}
+        </div>
+        <div className="min-w-0 flex-1 overflow-y-auto px-8 py-6">
+          <div className="mx-auto max-w-[700px]">
+            {tab && <h2 className="mb-4 text-[17px] font-semibold">{TAB_INFO[tab].label}</h2>}
+            {page}
+          </div>
         </div>
       </div>
     </div>
