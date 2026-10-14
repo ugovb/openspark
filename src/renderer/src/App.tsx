@@ -172,7 +172,7 @@ export default function App() {
       {!narrow && <Sidebar />}
       {narrow && drawer && (
         <div className="fixed inset-0 z-40 flex bg-black/40" onMouseDown={() => useStore.setState({ drawer: false })}>
-          <div className="anim-drawer h-full max-w-[85vw]" onMouseDown={(e) => e.stopPropagation()}>
+          <div className="anim-drawer box-border h-full max-w-[85vw]" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingLeft: 'env(safe-area-inset-left)' }} onMouseDown={(e) => e.stopPropagation()}>
             <Sidebar />
           </div>
         </div>

@@ -546,7 +546,7 @@ export default function Composer({ request }: { request: ComposerRequest }) {
 
   if (request.inline) return <div className="anim-in">{body}</div>
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/25" onMouseDown={() => !isNarrow() && void close()}>
+    <div className="fixed inset-0 z-40 box-border flex items-center justify-center bg-black/25 max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]" onMouseDown={() => !isNarrow() && void close()}>
       <div
         className={cx('anim-in flex flex-col', expanded ? 'h-[92vh] w-[92vw]' : 'h-[78vh] w-[780px] max-w-[94vw]', 'max-md:h-full max-md:w-full max-md:max-w-none')}
         style={{ boxShadow: 'var(--shadow)' }}
