@@ -9,7 +9,6 @@ import { LabelPicker, MovePicker, SnoozePicker } from './components/Pickers'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
 import ThreadView from './components/ThreadView'
-import TabBar from './components/TabBar'
 import Toasts from './components/Toasts'
 import { PromptHost, Spinner } from './components/ui'
 import { api } from './lib/api'
@@ -264,7 +263,6 @@ export default function App() {
           {view === 'search' && <SearchView />}
         </Suspense>
         {view === 'ask' && <ErrorBoundary><AskView /></ErrorBoundary>}
-        {narrow && !phoneThread && (view === 'mail' || view === 'search' || view === 'ask') && <TabBar />}
       </main>
       <AskPanel />
       <AskPill />

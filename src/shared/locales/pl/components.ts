@@ -400,8 +400,11 @@ const dict: Dictionary = {
     'Your inbox is clear.': 'Skrzynka odbiorcza jest pusta.',
     'attachment': 'załącznik',
     'e.g. Marta, our designer, to Tom from the print shop': 'np. Martę, naszą projektantkę, Tomkowi z drukarni',
-    'Mail': 'Poczta',
     'AI': 'AI',
+    'Personalization': 'Personalizacja',
+    'Writing': 'Pisanie',
+    'Other': 'Inne',
+    'Edit list': 'Edytuj listę',
   },
   plurals: {
     '{n} new': ['{n} nowa', '{n} nowe', '{n} nowych'],

@@ -37,6 +37,9 @@
   --palette-active: #2a63a8;
   /* tooltips */
   --tip: #2b2d32;
+  /* phone drawer icons */
+  --violet: #8e3fd6;
+  --folder: #4fb6ea;
   --scrim: rgba(17, 20, 26, 0.32);
   /* empty-state landscape (flat layers, far to near) */
   --art-sky: #dcecfa;
@@ -83,6 +86,8 @@
   --palette-fg: #ffffff;
   --palette-active: #22528d;
   --tip: #3a3c42;
+  --violet: #b67af0;
+  --folder: #6cc6f2;
   --scrim: rgba(0, 0, 0, 0.5);
   --art-sky: #1c2b49;
   --art-sun: #f2c66d;
@@ -127,6 +132,8 @@
   --color-palette-fg: var(--palette-fg);
   --color-palette-active: var(--palette-active);
   --color-tip: var(--tip);
+  --color-violet: var(--violet);
+  --color-folder: var(--folder);
   --color-scrim: var(--scrim);
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   --radius-card: 14px;

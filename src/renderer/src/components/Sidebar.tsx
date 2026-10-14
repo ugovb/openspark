@@ -7,6 +7,7 @@ import { type ReactNode, useMemo, useState } from 'react'
 import type { Account, Folder, MailboxRef } from '../../../shared/types'
 import { api } from '../lib/api'
 import { useNarrow } from '../lib/narrow'
+import PhoneDrawer from './PhoneDrawer'
 import { setUi, useStore } from '../lib/store'
 import { askText, cx, Menu, type MenuItem, Spinner, Tip } from './ui'
 import { dateLocale, t } from '../../../shared/i18n'
@@ -42,7 +43,7 @@ function AccountDot({ a, size = 16 }: { a: Account; size?: number }) {
   )
 }
 
-const accountLabel = (a: Account) => (a.name && a.name !== a.email.split('@')[0] ? a.name : a.email)
+export const accountLabel = (a: Account) => (a.name && a.name !== a.email.split('@')[0] ? a.name : a.email)
 
 // ---------- expanded sidebar (dark column) ----------
 
@@ -284,7 +285,7 @@ function FolderRow({ f, pinned }: { f: Folder; pinned: boolean }) {
   )
 }
 
-function AllFoldersPanel({ onClose }: { onClose: () => void }) {
+export function AllFoldersPanel({ onClose }: { onClose: () => void }) {
   const { accounts, folders, smartFolders, settings, mailbox, toast } = useStore()
   const pins = settings?.ui?.pinnedFolders || []
   const byAccount = useMemo(() => {
@@ -425,9 +426,10 @@ export default function Sidebar() {
   const mode = useStore((s) => s.settings?.ui?.sidebar || 'rail')
   const [more, setMore] = useState(false)
   const toggle = () => setMore(!more)
+  if (narrow) return <PhoneDrawer />
   return (
     <div className="flex h-full shrink-0">
-      {narrow || mode === 'full' ? <FullSidebar onMore={toggle} moreOpen={more} /> : <Rail onMore={toggle} />}
+      {mode === 'full' ? <FullSidebar onMore={toggle} moreOpen={more} /> : <Rail onMore={toggle} />}
       {more && <AllFoldersPanel onClose={() => setMore(false)} />}
     </div>
   )

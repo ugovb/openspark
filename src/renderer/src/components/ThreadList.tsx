@@ -94,7 +94,7 @@ export function useMailboxTitle(): { title: string; subtitle: string } {
   }
 }
 
-type Variant = 'wide' | 'stack'
+type Variant = 'wide' | 'stack' | 'phone'
 
 /** Actions shown in place of the date when the pointer is over a row. */
 function HoverActions({ th, onMore }: { th: ThreadSummary; onMore: (e: React.MouseEvent) => void }) {
@@ -243,10 +243,37 @@ const ThreadRow = memo(function ThreadRow({
       className={cx(
         'group relative flex cursor-default gap-3 rounded-xl px-3',
         sw.dx ? '' : 'transition-[transform,background-color] duration-200',
-        compact ? 'py-2' : 'py-2.5',
+        variant === 'phone' ? 'py-3' : compact ? 'py-2' : 'py-2.5',
         highlighted ? 'bg-row-hover' : 'bg-surface hover:bg-row-hover',
       )}
     >
+      {variant === 'phone' ? (
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            {checked ? (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg"><Check size={13} /></span>
+            ) : (
+              <span className="h-[18px] w-[3px] shrink-0 rounded-full" style={{ background: th.account_color || 'var(--accent)' }} />
+            )}
+            <span className={cx('truncate text-[17px]', th.unread ? 'font-bold text-fg' : 'font-semibold text-fg/90')}>{names(th)}</span>
+            {th.has_draft && <span className="shrink-0 text-[13px] font-medium text-danger">{t('Draft')}</span>}
+            <span className="flex-1" />
+            {th.pinned && <Pin size={14} className="shrink-0 fill-current text-pin" />}
+            {th.unread && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />}
+          </div>
+          <div className="mt-0.5 flex items-center gap-2">
+            <span className={cx('min-w-0 truncate text-[16px]', th.unread ? 'font-medium text-fg' : 'text-fg/90')}>{th.subject || t('(no subject)')}</span>
+            {th.has_attachments && <Paperclip size={15} className="shrink-0 text-muted" />}
+            {th.message_count > 1 && <span className="tabular shrink-0 rounded-full border border-line px-2 text-[13px] leading-[20px] text-fg/80">{th.message_count}</span>}
+            {th.muted && <BellOff size={14} className="shrink-0 text-faint" />}
+          </div>
+          <div className="mt-0.5 flex items-baseline gap-3">
+            <span className="min-w-0 flex-1 truncate text-[15px] text-muted">{th.snippet || ' '}</span>
+            <span className={cx('tabular shrink-0 text-[14px] font-semibold', th.unread ? 'text-accent' : 'text-muted')}>{listDate(th.last_date)}</span>
+          </div>
+          <div className="mt-1 flex flex-wrap gap-1 empty:hidden"><Chips th={th} /></div>
+        </div>
+      ) : (<>
       {th.unread && <span className="absolute left-0.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-accent" />}
       <div className="mt-0.5" onClick={(e) => (e.stopPropagation(), onCheck(th, e))}>
         {checked ? (
@@ -271,6 +298,7 @@ const ThreadRow = memo(function ThreadRow({
         {!compact && <div className="line-clamp-1 text-[13px] text-muted">{th.snippet || ' '}</div>}
         <div className="mt-1 flex flex-wrap gap-1 empty:hidden"><Chips th={th} /></div>
       </div>
+      </>)}
     </div>
     </div>
   )
@@ -358,7 +386,17 @@ function GroupRow({ category, threads, expanded, variant, onToggle }: { category
 }
 
 /** Title row of the mail list: back, title and subtitle, search and compose. */
-function ListHeader({ loading, bulk, scrolled }: { loading: boolean; bulk: React.ReactNode; scrolled: boolean }) {
+/** Calendar icon showing today's day of the month. */
+function DayIcon() {
+  return (
+    <span className="relative flex h-[24px] w-[23px] flex-col overflow-hidden rounded-[6px] border-[1.75px] border-current">
+      <span className="h-[4px] shrink-0 border-b-[1.75px] border-current" />
+      <span className="tabular flex flex-1 items-center justify-center text-[11px] font-semibold leading-none">{new Date().getDate()}</span>
+    </span>
+  )
+}
+
+function ListHeader({ loading, bulk }: { loading: boolean; bulk: React.ReactNode }) {
   const { mailbox, accountFilter, accounts, setMailbox, setView, compose, refreshList } = useStore()
   const narrow = useNarrow()
   const { title, subtitle } = useMailboxTitle()
@@ -376,31 +414,27 @@ function ListHeader({ loading, bulk, scrolled }: { loading: boolean; bulk: React
     await useStore.getState().act('deleteForever', all.map((x) => x.thread_id))
   }
   if (narrow) {
-    // phone: compact bar, large title underneath that folds into the bar while scrolling
+    // phone: menu, title, then search and calendar on the right
     return (
-      <header className="shrink-0 bg-surface">
-        <div className="flex h-12 items-center gap-1 px-2">
-          <DrawerButton />
-          {!home && <IconButton aria-label={t('Back to Inbox')} onClick={() => setMailbox({ kind: 'smart' })}><ArrowLeft size={18} /></IconButton>}
-          <span className={cx('min-w-0 flex-1 truncate text-center text-[16px] font-semibold transition-opacity duration-200', scrolled || bulk ? 'opacity-100' : 'opacity-0')}>{bulk ? '' : title}</span>
-          {bulk || (
-            <>
-              {loading && <Spinner className="text-muted" />}
-              {trashLike && <button onClick={() => void empty()} className="rounded-full px-2 py-1 text-[13px] font-medium text-danger">{t('Empty')}</button>}
-              <span className="w-10" />
-            </>
-          )}
-        </div>
-        <div className={cx('overflow-hidden px-4 transition-[max-height,opacity] duration-200', scrolled ? 'max-h-0 opacity-0' : 'max-h-20 pb-2 opacity-100')}>
+      <header className="flex h-14 shrink-0 items-center gap-1 bg-surface px-2">
+        <DrawerButton />
+        {bulk ? <span className="flex-1" /> : (
           <button
             onClick={(e) => mailbox.kind === 'smart' && accounts.length > 1 && setMenu({ x: e.clientX, y: e.clientY + 14 })}
-            className="flex max-w-full items-center gap-1 text-left text-[30px] font-bold leading-tight tracking-tight"
+            className="flex min-w-0 flex-1 items-center gap-1 pl-2 text-left text-[20px] font-semibold tracking-tight"
           >
             <span className="truncate">{title}</span>
-            {mailbox.kind === 'smart' && accounts.length > 1 && <ChevronDown size={20} className="shrink-0 text-muted" />}
+            {mailbox.kind === 'smart' && accounts.length > 1 && <ChevronDown size={16} className="shrink-0 text-muted" />}
           </button>
-          {subtitle && <div className="truncate text-[13px] text-muted">{subtitle}</div>}
-        </div>
+        )}
+        {bulk || (
+          <>
+            {loading && <Spinner className="text-muted" />}
+            {trashLike && <button onClick={() => void empty()} className="rounded-full px-2 py-1 text-[14px] font-medium text-danger">{t('Empty')}</button>}
+            <button aria-label={t('Search')} onClick={() => setView('search')} className="flex h-11 w-11 items-center justify-center text-fg active:scale-95"><Search size={23} /></button>
+            <button aria-label={t('Calendar')} onClick={() => setView('calendar')} className="flex h-11 w-11 items-center justify-center text-fg active:scale-95"><DayIcon /></button>
+          </>
+        )}
         <Menu items={inboxItems} anchor={menu} onClose={() => setMenu(null)} />
       </header>
     )
@@ -447,12 +481,10 @@ export default function ThreadList() {
   const { threads, loading, hasMore, selected, checked, mailbox, settings, counts, loadMore, select, toggleCheck, act, clearChecks } = s
   const one = useOnePane()
   const narrow = useNarrow()
-  const variant: Variant = one && !narrow ? 'wide' : 'stack'
+  const variant: Variant = narrow ? 'phone' : one ? 'wide' : 'stack'
   const parentRef = useRef<HTMLDivElement>(null)
   const [expanded, setExpanded] = useState<Set<Category>>(new Set())
   const [menu, setMenu] = useState<{ x: number; y: number; t: ThreadSummary } | null>(null)
-  const [scrolled, setScrolled] = useState(false)
-  useEffect(() => setScrolled(false), [mailbox])
   const smart = mailbox.kind === 'smart' && settings?.smartInbox !== false
   const doneIsUndo = mailbox.kind === 'unified' && (mailbox.role === 'archive' || mailbox.role === 'trash')
   const groupCats = useMemo(() => {
@@ -470,7 +502,7 @@ export default function ThreadList() {
   const virt = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => (rows[i].kind === 'header' ? 34 : rows[i].kind === 'banner' ? 52 : variant === 'wide' ? 36 : compact ? 58 : 80),
+    estimateSize: (i) => (rows[i].kind === 'header' ? 34 : rows[i].kind === 'banner' ? 52 : variant === 'wide' ? 36 : variant === 'phone' ? 92 : compact ? 58 : 80),
     overscan: 12,
     getItemKey: (i) => rows[i].key,
   })
@@ -546,8 +578,8 @@ export default function ThreadList() {
 
   return (
     <section className={cx('flex h-full shrink-0 flex-col bg-surface', one ? 'min-w-0 flex-1' : 'w-[420px] border-r border-line')}>
-      <ListHeader loading={loading} bulk={bulk} scrolled={scrolled} />
-      <div ref={parentRef} onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 24)} className={cx('min-h-0 flex-1 overflow-y-auto', rows.length > 0 && 'pb-24')}>
+      <ListHeader loading={loading} bulk={bulk} />
+      <div ref={parentRef} className={cx('min-h-0 flex-1 overflow-y-auto', rows.length > 0 && 'pb-24')}>
         {!loading && rows.length === 0 ? (
           <MailboxEmpty />
         ) : (
@@ -557,7 +589,7 @@ export default function ThreadList() {
               return (
                 <div key={vi.key} data-index={vi.index} ref={virt.measureElement} style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${vi.start}px)` }}>
                   {r.kind === 'header' && (
-                    <div className={cx('flex h-[34px] items-end pb-1.5 text-[12.5px] text-muted', variant === 'wide' ? 'pl-[54px]' : 'pl-5')}>
+                    <div className={cx('flex items-end text-muted', variant === 'phone' ? 'h-[50px] pb-1 pl-5 text-[16px] font-semibold' : 'h-[34px] pb-1.5 text-[12.5px]', variant === 'wide' ? 'pl-[54px]' : 'pl-5')}>
                       {r.label}
                       {r.count ? <span className="tabular ml-1.5 text-faint">{r.count}</span> : null}
                     </div>

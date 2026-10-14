@@ -2,6 +2,7 @@ import {
   ArrowLeftRight, AtSign, Bell, BellRing, Bot, CalendarDays, ChevronLeft, ChevronRight, Columns2, Copy, Download, FileText, Image, Inbox, Info, Keyboard, Languages,
   MoveLeft, MoveRight, Newspaper, Palette, PanelLeft, PenLine, Plus, Power, RefreshCw, Rows3, Send, Server, ShieldCheck, ShieldOff, Smartphone, Sparkles, SunMoon,
   Trash2, Undo2, Unplug, Volume2, Wand2, Workflow, X, Eye, Sunrise, Sunset, MonitorDown,
+  type LucideIcon,
 } from 'lucide-react'
 import { Fragment, type ReactNode, useEffect, useState } from 'react'
 import type { Account, AgentAccess, AppSettings, Rule, RuleAction, RuleCondition, Signature, Template } from '../../../shared/types'
@@ -18,22 +19,36 @@ import { APP_VERSION } from '../../../shared/version'
 type Tab =
   | 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'swipes' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
 
-const TAB_INFO: Record<Tab, { label: string; icon: ReactNode }> = {
-  accounts: { label: t('Accounts'), icon: <AtSign size={15} className="text-people" /> },
-  ai: { label: t('AI'), icon: <Sparkles size={15} className="text-newsletter" /> },
-  agents: { label: t('AI agents & CLI'), icon: <Bot size={15} className="text-notification" /> },
-  general: { label: t('Appearance & general'), icon: <Palette size={15} className="text-accent" /> },
-  notifications: { label: t('Notifications'), icon: <Bell size={15} className="text-danger" /> },
-  inbox: { label: t('Inbox & Gatekeeper'), icon: <Inbox size={15} className="text-people" /> },
-  rules: { label: t('Rules'), icon: <Workflow size={15} className="text-warning" /> },
-  swipes: { label: t('Swipes'), icon: <ArrowLeftRight size={15} className="text-success" /> },
-  signatures: { label: t('Signatures'), icon: <PenLine size={15} className="text-notification" /> },
-  templates: { label: t('Templates'), icon: <FileText size={15} className="text-newsletter" /> },
-  calendars: { label: t('Calendars'), icon: <CalendarDays size={15} className="text-danger" /> },
-  server: { label: t('Home server'), icon: <Server size={15} className="text-success" /> },
-  shortcuts: { label: t('Keyboard shortcuts'), icon: <Keyboard size={15} className="text-muted" /> },
-  about: { label: t('About'), icon: <Info size={15} className="text-accent" /> },
+const TAB_INFO: Record<Tab, { label: string; Icon: LucideIcon; color: string }> = {
+  accounts: { label: t('Accounts'), Icon: AtSign, color: 'text-people' },
+  ai: { label: t('AI'), Icon: Sparkles, color: 'text-newsletter' },
+  agents: { label: t('AI agents & CLI'), Icon: Bot, color: 'text-notification' },
+  general: { label: t('Appearance & general'), Icon: Palette, color: 'text-accent' },
+  notifications: { label: t('Notifications'), Icon: Bell, color: 'text-danger' },
+  inbox: { label: t('Inbox & Gatekeeper'), Icon: Inbox, color: 'text-people' },
+  rules: { label: t('Rules'), Icon: Workflow, color: 'text-warning' },
+  swipes: { label: t('Swipes'), Icon: ArrowLeftRight, color: 'text-success' },
+  signatures: { label: t('Signatures'), Icon: PenLine, color: 'text-notification' },
+  templates: { label: t('Templates'), Icon: FileText, color: 'text-newsletter' },
+  calendars: { label: t('Calendars'), Icon: CalendarDays, color: 'text-danger' },
+  server: { label: t('Home server'), Icon: Server, color: 'text-success' },
+  shortcuts: { label: t('Keyboard shortcuts'), Icon: Keyboard, color: 'text-muted' },
+  about: { label: t('About'), Icon: Info, color: 'text-accent' },
 }
+
+function TabIcon({ id, phone }: { id: Tab; phone?: boolean }) {
+  const { Icon, color } = TAB_INFO[id]
+  return phone ? <Icon size={24} strokeWidth={1.6} className="text-accent" /> : <Icon size={15} className={color} />
+}
+
+/** Phone: grouped lists with a heading, like the system settings. */
+const PHONE_GROUPS: { title: string; tabs: Tab[] }[] = [
+  { title: t('Accounts'), tabs: ['accounts', 'calendars', 'server'] },
+  { title: t('Personalization'), tabs: ['inbox', 'general', 'swipes', 'notifications'] },
+  { title: t('AI'), tabs: ['ai', 'agents'] },
+  { title: t('Writing'), tabs: ['signatures', 'templates', 'rules'] },
+  { title: t('Other'), tabs: ['shortcuts', 'about'] },
+]
 
 /** Tabs in the left column; a gap separates the groups. */
 const GROUPS: Tab[][] = [
@@ -1036,7 +1051,7 @@ export default function SettingsView() {
                 tab === id ? 'bg-accent-soft font-medium text-accent' : 'hover:bg-hover',
               )}
             >
-              {TAB_INFO[id].icon}
+              <TabIcon id={id} />
               <span className="min-w-0 flex-1 truncate">{TAB_INFO[id].label}</span>
               {narrow && <ChevronRight size={16} className="text-faint" />}
             </button>
@@ -1074,19 +1089,48 @@ export default function SettingsView() {
     </>
   )
 
-  // phone: a full-screen sheet, list of tabs → one tab
+  // phone: a full-screen sheet with grouped lists → one page
   if (narrow) {
+    const round = 'flex h-12 w-12 items-center justify-center rounded-full bg-surface text-fg active:scale-95'
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-surface max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]">
-        <div className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-1.5">
-          <IconButton aria-label={tab ? t('Settings') : t('Close')} onClick={() => (tab ? setTab(null) : close())}><ChevronLeft size={20} /></IconButton>
-          <div className="min-w-0 flex-1 truncate text-[16px] font-semibold">{tab ? TAB_INFO[tab].label : t('Settings')}</div>
+      <div className="fixed inset-0 z-50 flex flex-col bg-bg pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div className="relative flex h-16 shrink-0 items-center justify-center px-4">
+          <button aria-label={tab ? t('Back') : t('Close')} onClick={() => (tab ? setTab(null) : close())} className={cx(round, 'absolute left-4')} style={{ boxShadow: 'var(--shadow)' }}>
+            {tab ? <ChevronLeft size={24} /> : <X size={24} />}
+          </button>
+          <div className="max-w-[60%] truncate text-[18px] font-semibold">{tab ? TAB_INFO[tab].label : t('Settings')}</div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-          {tab ? page : (
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8 pt-2">
+          {tab ? (
+            <div className="rounded-[22px] bg-surface px-4 py-4">{page}</div>
+          ) : (
             <>
-              {profile}
-              {nav}
+              {me && (
+                <button onClick={() => setTab('accounts')} className="flex w-full items-center gap-4 rounded-[22px] bg-surface px-4 py-4 text-left active:bg-hover">
+                  <Avatar addr={{ email: me.email, name: me.name }} size={52} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[19px] font-semibold">{me.name || me.email}</span>
+                    <span className="block truncate text-[15px] text-muted">{me.email}</span>
+                  </span>
+                  <ChevronRight size={20} className="text-faint" />
+                </button>
+              )}
+              {PHONE_GROUPS.map((g) => (
+                <section key={g.title}>
+                  <h3 className="px-4 pb-2 pt-6 text-[15px] text-muted">{g.title}</h3>
+                  <div className="overflow-hidden rounded-[22px] bg-surface">
+                    {g.tabs.map((id) => (
+                      <button key={id} onClick={() => setTab(id)} className="group flex w-full items-center gap-4 pl-4 text-left active:bg-hover">
+                        <TabIcon id={id} phone />
+                        <span className="flex min-h-[58px] min-w-0 flex-1 items-center gap-2 border-b border-line pr-4 group-last:border-0">
+                          <span className="min-w-0 flex-1 truncate text-[17px]">{TAB_INFO[id].label}</span>
+                          <ChevronRight size={20} className="shrink-0 text-faint" />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))}
             </>
           )}
         </div>

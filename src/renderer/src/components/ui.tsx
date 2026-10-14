@@ -173,9 +173,9 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={cx('relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors', checked ? 'bg-accent' : 'bg-line')}
+        className={cx('relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors max-md:h-[31px] max-md:w-[51px]', checked ? 'bg-accent max-md:bg-success' : 'bg-line')}
       >
-        <span className={cx('absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all', checked ? 'left-[18px]' : 'left-0.5')} />
+        <span className={cx('absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all max-md:h-[27px] max-md:w-[27px]', checked ? 'left-[18px] max-md:left-[22px]' : 'left-0.5')} />
       </button>
       {(label || hint) && (
         <span className="flex flex-col">
