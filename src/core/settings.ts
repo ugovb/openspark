@@ -44,6 +44,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   swipeRight: 'pin',
   conversationOrder: 'newest-bottom',
   bodyPrefetchDays: 30,
+  ui: {
+    sidebar: 'rail',
+    layout: 'full',
+    pinnedFolders: [],
+    recentSearches: [],
+  },
 }
 
 let cache: AppSettings | null = null

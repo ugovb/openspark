@@ -1,18 +1,16 @@
-import { Command, PenSquare, Sparkles } from 'lucide-react'
+import { PenSquare } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import CommandPalette from './components/CommandPalette'
 import Composer from './components/Composer'
-import DrawerButton from './components/DrawerButton'
 import { MovePicker, SnoozePicker } from './components/Pickers'
-import SearchBar from './components/SearchBar'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
 import ThreadView from './components/ThreadView'
 import Toasts from './components/Toasts'
-import { IconButton, PromptHost, Spinner } from './components/ui'
+import { PromptHost, Spinner } from './components/ui'
 import { api } from './lib/api'
 import { useNarrow } from './lib/narrow'
-import { useStore } from './lib/store'
+import { useOnePane, useStore } from './lib/store'
 import { t } from '../../shared/i18n'
 import AccountWizard from './views/AccountWizard'
 import AskView from './views/AskView'
@@ -20,6 +18,13 @@ import AskView from './views/AskView'
 const SettingsView = lazy(() => import('./views/SettingsView'))
 const CalendarView = lazy(() => import('./views/CalendarView'))
 const ContactsView = lazy(() => import('./views/ContactsView'))
+const SearchView = lazy(() => import('./views/SearchView'))
+
+function openSearch() {
+  const st = useStore.getState()
+  if (st.view === 'search') document.getElementById('octo-search')?.focus()
+  else st.setView('search')
+}
 
 function isTyping(e: KeyboardEvent): boolean {
   const el = e.target as HTMLElement | null
@@ -44,7 +49,7 @@ function useShortcuts() {
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && !isTyping(e)) {
         e.preventDefault()
-        document.getElementById('octo-search')?.focus()
+        openSearch()
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !isTyping(e)) {
@@ -57,7 +62,7 @@ function useShortcuts() {
         return
       }
       if (isTyping(e) || e.ctrlKey || e.metaKey || e.altKey) return
-      if (st.palette || st.snoozeFor || st.moveFor || (st.composer && !st.composer.inline)) return
+      if (st.palette || st.snoozeFor || st.moveFor || st.labelFor || (st.composer && !st.composer.inline)) return
       if (st.view !== 'mail' && !['c', '/', 'g'].includes(e.key) && gPressed.current === 0) return
 
       const key = e.key
@@ -83,7 +88,7 @@ function useShortcuts() {
       switch (key) {
         case 'g': gPressed.current = Date.now(); return
         case 'c': e.preventDefault(); st.compose({ mode: 'new' }); return
-        case '/': e.preventDefault(); document.getElementById('octo-search')?.focus(); return
+        case '/': e.preventDefault(); openSearch(); return
         case 'j': case 'ArrowDown': e.preventDefault(); go(1); return
         case 'k': case 'ArrowUp': e.preventDefault(); go(-1); return
         case 'e': case 'd': if (st.targets().length) void st.act('archive'); return
@@ -94,6 +99,9 @@ function useShortcuts() {
         case 'u': if (sel) void st.act(sel.unread ? 'read' : 'unread'); return
         case 'I': if (st.targets().length) void st.act('read'); return
         case 'm': if (sel) void st.act(sel.muted ? 'unmute' : 'mute'); return
+        case 'p': if (sel) void st.act(sel.priority ? 'unpriority' : 'priority'); return
+        case 'y': if (sel) void st.act(sel.set_aside ? 'unaside' : 'aside'); return
+        case 'l': if (st.targets().length && st.accounts.find((a) => a.id === sel?.account_id)?.is_gmail) useStore.setState({ labelFor: st.targets() }); return
         case 'x': if (sel) st.toggleCheck(sel.thread_id); return
         case '!': if (st.targets().length) void st.act('spam'); return
         case 'r': if (sel) st.compose({ mode: 'reply', messageId: sel.latest_message_id, threadId: sel.thread_id }); return
@@ -107,7 +115,7 @@ function useShortcuts() {
   }, [])
 }
 
-/** Phone layout: the system back button closes the drawer / goes from a conversation back to the list. */
+/** One-pane layout: the system/browser back button closes the drawer / goes from a conversation back to the list. */
 function usePhoneHistory(narrow: boolean) {
   const selected = useStore((s) => s.selected)
   const drawer = useStore((s) => s.drawer)
@@ -128,10 +136,11 @@ function usePhoneHistory(narrow: boolean) {
 }
 
 export default function App() {
-  const { ready, view, accounts, composer, selected, boot, setView, mailbox, drawer } = useStore()
+  const { ready, view, accounts, composer, selected, boot, mailbox, drawer } = useStore()
   const narrow = useNarrow()
+  const one = useOnePane()
   useShortcuts()
-  usePhoneHistory(narrow)
+  usePhoneHistory(one)
   // picking a place in the drawer closes it
   useEffect(() => useStore.setState({ drawer: false }), [mailbox, view, composer?.key])
 
@@ -165,7 +174,7 @@ export default function App() {
   // a reply composer for a conversation that is not on screen shows as a window instead
   const floatingComposer = composer && (!composer.inline || composer.threadId !== selected || view !== 'mail')
 
-  const phoneThread = narrow && selected !== null
+  const phoneThread = one && selected !== null
 
   return (
     <div className="flex h-full">
@@ -180,18 +189,9 @@ export default function App() {
       <main className="flex min-w-0 flex-1 flex-col">
         {view === 'mail' && (
           <>
-            {!phoneThread && (
-              <div className="flex h-[52px] shrink-0 items-center gap-3 border-b border-line bg-surface px-4 max-md:gap-1.5 max-md:px-2">
-                <DrawerButton />
-                <SearchBar />
-                <span className="flex-1 max-md:hidden" />
-                <IconButton title={t('Ask AI about your mail')} onClick={() => setView('ask')}><Sparkles size={16} className="text-accent" /></IconButton>
-                {!narrow && <IconButton title={t('Commands (Ctrl+K)')} onClick={() => useStore.setState({ palette: true })}><Command size={16} /></IconButton>}
-              </div>
-            )}
-            <div className="relative flex min-h-0 flex-1">
+            <div className="relative flex min-h-0 flex-1 bg-surface">
               {!phoneThread && <ThreadList />}
-              {(!narrow || phoneThread) && <ThreadView />}
+              {(!one || phoneThread) && <ThreadView />}
               {narrow && !phoneThread && (
                 <button
                   title={t('New message')}
@@ -209,6 +209,7 @@ export default function App() {
           {view === 'settings' && <SettingsView />}
           {view === 'calendar' && <CalendarView />}
           {view === 'contacts' && <ContactsView />}
+          {view === 'search' && <SearchView />}
         </Suspense>
         {view === 'ask' && <AskView />}
       </main>

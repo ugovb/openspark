@@ -9,7 +9,7 @@ import { formatWhen } from '../../../shared/when'
 import { api, errorText, stream } from '../lib/api'
 import { displayName, fileSize, fullDate, listDate, mdToHtml } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
-import { goBack, useStore } from '../lib/store'
+import { goBack, useOnePane, useStore } from '../lib/store'
 import Composer from './Composer'
 import MessageFrame from './MessageFrame'
 import { NoSelection } from './illustrations'
@@ -255,7 +255,7 @@ function QuickReplies({ threadId, messageId }: { threadId: number; messageId: nu
 
 export default function ThreadView() {
   const s = useStore()
-  const narrow = useNarrow()
+  const one = useOnePane()
   const { selected, act, composer, settings, toast } = s
   const [data, setData] = useState<TV | null>(null)
   const [openIds, setOpenIds] = useState<Set<number>>(new Set())
@@ -340,7 +340,7 @@ export default function ThreadView() {
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col bg-bg">
       <div className="flex h-12 shrink-0 items-center gap-0.5 border-b border-line bg-surface px-3 max-md:px-1">
-        {narrow && <IconButton title={t('Back to list')} onClick={goBack}><ArrowLeft size={18} /></IconButton>}
+        {one && <IconButton title={t('Back to list')} onClick={goBack}><ArrowLeft size={18} /></IconButton>}
         <IconButton title={t('Done (E)')} onClick={() => void act('archive', ids)}><Check size={17} /></IconButton>
         <IconButton title={thread.pinned ? t('Unpin (S)') : t('Pin (S)')} active={thread.pinned} onClick={() => void act(thread.pinned ? 'unpin' : 'pin', ids)}>{thread.pinned ? <PinOff size={16} /> : <Pin size={16} />}</IconButton>
         <IconButton title={t('Snooze (H)')} active={!!thread.snoozed_until} onClick={() => useStore.setState({ snoozeFor: ids, pickerMode: 'snooze' })}><Clock size={16} /></IconButton>

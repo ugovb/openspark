@@ -402,6 +402,17 @@ export interface AppSettings {
   swipeRight: string
   conversationOrder: 'newest-bottom' | 'newest-top'
   bodyPrefetchDays: number
+  /** layout preferences of the interface */
+  ui: {
+    /** desktop: icon rail only, or the full sidebar */
+    sidebar: 'rail' | 'full'
+    /** desktop: one pane (list, then the conversation in its place) or list and conversation side by side */
+    layout: 'full' | 'split'
+    /** folder ids shown in the sidebar under "Folders" */
+    pinnedFolders: number[]
+    /** newest first, at most 12 */
+    recentSearches: string[]
+  }
 }
 
 export interface SearchResult {

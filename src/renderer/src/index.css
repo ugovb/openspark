@@ -23,6 +23,21 @@
   --notification: #30b0a0;
   --newsletter: #ff7a1a;
   --shadow: 0 12px 32px rgba(20, 30, 50, 0.12), 0 2px 6px rgba(20, 30, 50, 0.06);
+  /* dark navigation column (rail and expanded sidebar) in both themes */
+  --rail: #202227;
+  --rail-2: #2a2d33;
+  --rail-fg: #c5c8cf;
+  --rail-faint: #7d828c;
+  --rail-hover: #33363d;
+  /* list rows: hover / open row */
+  --row-hover: #eef5ff;
+  /* command palette */
+  --palette: #164a87;
+  --palette-fg: #ffffff;
+  --palette-active: #2a63a8;
+  /* tooltips */
+  --tip: #2b2d32;
+  --scrim: rgba(17, 20, 26, 0.32);
   color-scheme: light;
 }
 
@@ -47,6 +62,17 @@
   --notification: #4fd1c0;
   --newsletter: #ff9a4d;
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --rail: #141518;
+  --rail-2: #1b1d21;
+  --rail-fg: #c5c8cf;
+  --rail-faint: #6f747e;
+  --rail-hover: #26292f;
+  --row-hover: #1a2636;
+  --palette: #14365f;
+  --palette-fg: #ffffff;
+  --palette-active: #22528d;
+  --tip: #3a3c42;
+  --scrim: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
@@ -70,6 +96,17 @@
   --color-people: var(--people);
   --color-notification: var(--notification);
   --color-newsletter: var(--newsletter);
+  --color-rail: var(--rail);
+  --color-rail-2: var(--rail-2);
+  --color-rail-fg: var(--rail-fg);
+  --color-rail-faint: var(--rail-faint);
+  --color-rail-hover: var(--rail-hover);
+  --color-row-hover: var(--row-hover);
+  --color-palette: var(--palette);
+  --color-palette-fg: var(--palette-fg);
+  --color-palette-active: var(--palette-active);
+  --color-tip: var(--tip);
+  --color-scrim: var(--scrim);
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   --radius-card: 14px;
 }
@@ -221,6 +258,36 @@ button {
 }
 .anim-drawer {
   animation: octo-drawer 0.18s ease-out;
+}
+
+/* panels sliding in from the right (Ask) */
+@keyframes octo-slide-right {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.anim-right {
+  animation: octo-slide-right 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-in,
+  .anim-drawer,
+  .anim-right {
+    animation: none;
+  }
+  * {
+    transition-duration: 0s !important;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 /* macOS: the window has no title bar (traffic lights float over the app): reserve a draggable strip */

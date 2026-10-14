@@ -5,9 +5,9 @@ import type {
 import { t } from '../../../shared/i18n'
 import { api, errorText } from './api'
 import { syncLanguage } from './lang'
-import { isNarrow } from './narrow'
+import { isNarrow, useNarrow } from './narrow'
 
-export type View = 'mail' | 'calendar' | 'contacts' | 'settings' | 'ask'
+export type View = 'mail' | 'calendar' | 'contacts' | 'settings' | 'ask' | 'search'
 
 export interface Toast {
   id: number
@@ -57,6 +57,8 @@ interface State {
   snoozeFor: number[] | null
   pickerMode: 'snooze' | 'remind'
   moveFor: number[] | null
+  /** threads waiting for the label picker */
+  labelFor: number[] | null
   aiPanel: boolean
   /** phone layout: the sidebar is open as a drawer */
   drawer: boolean
@@ -118,6 +120,7 @@ export const useStore = create<State>((set, get) => ({
   snoozeFor: null,
   pickerMode: 'snooze',
   moveFor: null,
+  labelFor: null,
   aiPanel: false,
   drawer: false,
   secretStore: t('in the system password store'),
@@ -395,6 +398,25 @@ export const useStore = create<State>((set, get) => ({
   },
 }))
 
+/** One pane: the list, and an open conversation takes its place (phones, and the desktop "full" layout). */
+export function onePane(): boolean {
+  return isNarrow() || useStore.getState().settings?.ui?.layout !== 'split'
+}
+
+export function useOnePane(): boolean {
+  const narrow = useNarrow()
+  const split = useStore((s) => s.settings?.ui?.layout === 'split')
+  return narrow || !split
+}
+
+/** Save a UI preference (sidebar, layout, pinned folders, recent searches). */
+export function setUi(p: Partial<AppSettings['ui']>): void {
+  const st = useStore.getState()
+  const cur = st.settings?.ui
+  if (!cur) return
+  void st.updateSettings({ ui: { ...cur, ...p } })
+}
+
 /** Phone layout "back": pops the history entry pushed when a conversation was opened. */
 export function goBack(): void {
   if (history.state?.octo === 'pane') history.back()
@@ -408,7 +430,7 @@ function removeFromList(ids: number[]) {
     let selected = s.selected
     if (selected && ids.includes(selected)) {
       // Spark-style: after Done/delete open the next conversation (on a phone: back to the list)
-      selected = isNarrow() ? null : (remaining[Math.min(idx, remaining.length - 1)]?.thread_id ?? null)
+      selected = onePane() ? null : (remaining[Math.min(idx, remaining.length - 1)]?.thread_id ?? null)
     }
     return { threads: remaining, checked: s.checked.filter((c) => !ids.includes(c)), selected }
   })

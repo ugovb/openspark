@@ -1,4 +1,4 @@
-import { Loader2, X } from 'lucide-react'
+import { Check, Loader2, Undo2, X } from 'lucide-react'
 import { type ButtonHTMLAttributes, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { create } from 'zustand'
@@ -251,5 +251,76 @@ export function PromptHost() {
         <input autoFocus className={inputCls} value={v} placeholder={req?.placeholder} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && close(v.trim() || null)} />
       </div>
     </Modal>
+  )
+}
+
+// ---------- tooltip with an optional shortcut key ----------
+
+type TipSide = 'top' | 'bottom' | 'right' | 'left'
+
+/** Hover/focus tooltip: dark label plus the keyboard shortcut. Children should be one focusable control. */
+export function Tip({ label, kbd, side = 'bottom', children, className }: { label: string; kbd?: string; side?: TipSide; children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [rect, setRect] = useState<DOMRect | null>(null)
+  const show = () => {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(() => ref.current && setRect(ref.current.getBoundingClientRect()), 350)
+  }
+  const hide = () => {
+    if (timer.current) clearTimeout(timer.current)
+    setRect(null)
+  }
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current)
+  }, [])
+  let style: React.CSSProperties = {}
+  if (rect) {
+    const cx_ = Math.max(60, Math.min(window.innerWidth - 60, rect.left + rect.width / 2))
+    const cy = rect.top + rect.height / 2
+    style =
+      side === 'bottom' ? { left: cx_, top: rect.bottom + 6, transform: 'translateX(-50%)' }
+        : side === 'top' ? { left: cx_, top: rect.top - 6, transform: 'translate(-50%, -100%)' }
+          : side === 'right' ? { left: rect.right + 8, top: cy, transform: 'translateY(-50%)' }
+            : { left: rect.left - 8, top: cy, transform: 'translate(-100%, -50%)' }
+  }
+  return (
+    <span ref={ref} className={cx('inline-flex', className)} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} onMouseDown={hide}>
+      {children}
+      {rect &&
+        createPortal(
+          <div role="tooltip" className="anim-in pointer-events-none fixed z-[70] flex items-center gap-2 whitespace-nowrap rounded-lg bg-tip px-2 py-1 text-[12px] text-white" style={{ ...style, boxShadow: 'var(--shadow)' }}>
+            {label}
+            {kbd && <span className="rounded bg-white/15 px-1.5 text-[10.5px] text-white/80">{kbd}</span>}
+          </div>,
+          document.body,
+        )}
+    </span>
+  )
+}
+
+/** Icon button with a tooltip instead of a native title. */
+export function TipButton({ label, kbd, side, children, className, active, size, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; kbd?: string; side?: TipSide; active?: boolean; size?: 'sm' | 'md' }) {
+  return (
+    <Tip label={label} kbd={kbd} side={side}>
+      <IconButton aria-label={label} active={active} size={size} className={className} {...p}>
+        {children}
+      </IconButton>
+    </Tip>
+  )
+}
+
+/** Round "Done" check shown at the start of a list row. */
+export function RoundCheck({ done, onClick, label, kbd }: { done?: boolean; onClick: () => void; label: string; kbd?: string }) {
+  return (
+    <Tip label={label} kbd={kbd}>
+      <button
+        aria-label={label}
+        onClick={(e) => (e.stopPropagation(), onClick())}
+        className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-accent/15 text-accent transition-[background-color,color,transform] hover:bg-accent hover:text-accent-fg active:scale-90"
+      >
+        {done ? <Undo2 size={12} strokeWidth={2.5} /> : <Check size={12} strokeWidth={3} />}
+      </button>
+    </Tip>
   )
 }
