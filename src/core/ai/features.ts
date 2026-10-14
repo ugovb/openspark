@@ -1,7 +1,7 @@
 // AI features: thread summaries, reply drafting, rewriting, translation, quick replies,
 // smart categorisation and "ask my inbox". Works with Ollama or Claude (see provider.ts).
 import crypto from 'node:crypto'
-import { dateLocale, getLang, t } from '../../shared/i18n'
+import { dateLocale, getLang, t, type Lang } from '../../shared/i18n'
 import { DEFAULT_DRAFT_PROMPT, MAX_DRAFT_PROMPT } from '../../shared/draft-prompt'
 import type { AiResult, Category } from '../../shared/types'
 import { all, get, now, parseJson, run, type Row } from '../db'
@@ -27,12 +27,16 @@ function languageRule(): string {
   const l = getSettings().ai.replyLanguage
   if (l === 'pl') return 'Write in Polish.'
   if (l === 'en') return 'Write in English.'
-  return 'Write in the language the conversation is in (usually Polish or English).'
+  if (l === 'fr') return 'Write in French.'
+  if (l === 'es') return 'Write in Spanish.'
+  return 'Write in the language the conversation is in (usually Polish, English, French or Spanish).'
 }
+
+const UI_LANGUAGE_NAMES: Record<Lang, string> = { en: 'English', pl: 'Polish', fr: 'French', es: 'Spanish' }
 
 /** Language of text only the user reads (summaries, answers): the UI language. */
 function uiLanguageRule(): string {
-  return getLang() === 'pl' ? 'Write in Polish.' : 'Write in English.'
+  return `Write in ${UI_LANGUAGE_NAMES[getLang()]}.`
 }
 
 /** "polski" / "pl" / "Polish" → "Polish" (the renderer and the CLI may pass any of these). */
@@ -40,6 +44,8 @@ function languageName(target: string): string {
   const k = target.trim().toLowerCase()
   if (['polski', 'pl', 'polish'].includes(k)) return 'Polish'
   if (['angielski', 'en', 'english'].includes(k)) return 'English'
+  if (['francuski', 'fr', 'french', 'français', 'francais'].includes(k)) return 'French'
+  if (['hiszpański', 'hiszpanski', 'es', 'spanish', 'español', 'espanol'].includes(k)) return 'Spanish'
   return target.trim()
 }
 
@@ -176,7 +182,7 @@ export async function rewrite(text: string, mode: RewriteMode, custom?: string, 
 }
 
 export async function translateMessage(messageId: number, targetLanguage?: string, onDelta?: (t: string) => void): Promise<AiResult> {
-  const target = languageName(targetLanguage || (getLang() === 'pl' ? 'Polish' : 'English'))
+  const target = languageName(targetLanguage || UI_LANGUAGE_NAMES[getLang()])
   await ensureBodies([messageId])
   const m = get('SELECT * FROM messages WHERE id = ?', messageId)
   if (!m) throw new Error(t('Message does not exist'))

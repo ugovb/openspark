@@ -361,7 +361,7 @@ export interface AppSettings {
   theme: 'system' | 'light' | 'dark'
   density: 'comfortable' | 'compact'
   /** UI language; 'auto' follows the system (Polish systems → Polish, others → English) */
-  language: 'auto' | 'pl' | 'en'
+  language: 'auto' | 'pl' | 'en' | 'fr' | 'es'
   smartInbox: boolean
   groupNewsletters: boolean
   groupNotifications: boolean
@@ -388,7 +388,7 @@ export interface AppSettings {
     anthropicCompatModel: string
     smartCategorize: boolean
     autoSummaries: boolean
-    replyLanguage: 'auto' | 'pl' | 'en'
+    replyLanguage: 'auto' | 'pl' | 'en' | 'fr' | 'es'
     persona: string
     /** custom reply-drafting instructions (max 4000 chars); empty = built-in default */
     draftPrompt: string

@@ -236,6 +236,8 @@ const dict: Dictionary = {
     'Show default': 'Pokaż domyślną',
     'Hide default': 'Ukryj domyślną',
     'Restore default': 'Przywróć domyślną',
+    'Always in French': 'Zawsze po francusku',
+    'Always in Spanish': 'Zawsze po hiszpańsku',
     'About me (persona)': 'O mnie (persona)',
     'Who you are and how you write — the AI uses this when drafting replies.':
       'Kim jesteś i jak piszesz — AI użyje tego przy redagowaniu odpowiedzi.',
