@@ -53,3 +53,27 @@ Fourth AI provider next to Ollama / Claude / off: any endpoint with `POST {base}
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
+
+---
+
+# Second batch
+
+Open the first batch first. Branches below are on `ugovb/octopus-mail`. Order: `draft-prompt`, `pairing-code-ui`, `lang-fr-es`, then `anthropic-compat` (needs `openai-compatible-ai` merged; or the PR shows both commits), then `default-provider-badge` (needs `anthropic-compat`).
+
+## `draft-prompt` — Custom writing instructions for AI replies
+Adds Settings → AI → "Writing instructions". Empty = short built-in default prompt. The text replaces only the role/style part of the reply-draft prompt. The rule that email content is data, the language and tone rules and the "return only the body" line are always added. 4000 character cap, "Show default" and "Restore default". Summaries, categorisation, rewrite and Ask keep their fixed prompts. Test: `node scripts/run-tests.mjs draft-prompt` (fake Ollama server, no mail server).
+
+## `pairing-code-ui` — Pairing code with countdown, copy button, optional device name
+"Add device" now asks for an optional device name, then shows the code with an mm:ss countdown and a Copy button, and an expired state with "New code". At most 5 live codes (oldest dropped). The sign-in page hints that a paired device can create a code. No new endpoint. Test: `node scripts/run-tests.mjs pairing` (redeem once, twice, expired, no token → 401, 6th code).
+
+## `lang-fr-es` — French and Spanish UI
+Language setting becomes auto / English / Polski / Français / Español. `i18n.ts` supports four languages with per-language plural rules (French treats 0 as singular). Full French and Spanish dictionaries mirroring the Polish keys; `i18n:check` verifies pl, fr and es. AI prompts, CLI and MCP messages stay English; the "reply language" setting gains French and Spanish. Translations were written by an AI and need a native read. Test: `node scripts/run-tests.mjs i18n`.
+
+## `anthropic-compat` — Anthropic-compatible AI provider
+New provider with base URL, model and its own stored key, for services that expose the Anthropic Messages API under their own address. It sends no Anthropic-only options (betas, effort, fallbacks), which third-party servers reject. Based on `openai-compatible-ai`. Test: `node scripts/run-tests.mjs anthropic-compat`.
+
+## `default-provider-badge` — Show which AI provider is used by default
+Each provider section in Settings → AI shows a "Used by default" pill when active, or a "Use by default" button. Based on `anthropic-compat`.
+
+## Fork only (not for upstream)
+`iPhone web app: keep content out of the status bar...` fixes the translucent status bar overlap introduced by this fork's home-screen meta tags.
