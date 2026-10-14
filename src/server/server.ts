@@ -12,8 +12,15 @@ import { get } from '../core/db'
 import { bus, log } from '../core/events'
 import { createService } from '../core/service'
 import { t } from '../shared/i18n'
-import { authenticate, createPairingCode, listDevices, noteFailure, redeemPairingCode, revokeDevice, tooManyFailures } from './auth'
-import { browserDeviceName, langFromAcceptLanguage, loginPage, withLang } from './login'
+import {
+  authenticate, closeTicket, createPairingCode, createTicket, issueDevice, linkLegacyDevices, listDevices, noteFailure, pairingAllowed, redeemPairingCode,
+  revokeAllDevices, revokeDevice, setPairingAllowed, tooManyFailures, useTicket,
+} from './auth'
+import { type AuthView, authMessage, authPage, browserDeviceName, langFromAcceptLanguage, loginPage, withLang } from './login'
+import {
+  AuthError, beginTotp, changePassword, checkCredentials, checkSecondFactor, clearFailures, confirmTotp, createOwner, disableTotp, emailProblem, getUser,
+  hasOwner, isLocked, passwordProblem, regenerateRecoveryCodes, type User,
+} from './users'
 import { APP_VERSION } from '../shared/version'
 
 export const SERVER_VERSION = APP_VERSION
@@ -54,6 +61,26 @@ function cookie(req: http.IncomingMessage, name: string): string | null {
   const m = (req.headers.cookie || '').match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`))
   return m ? decodeURIComponent(m[1]) : null
 }
+
+/** 303 back to the app with the device token in an HttpOnly cookie. */
+function signedIn(req: http.IncomingMessage, res: http.ServerResponse, token: string): void {
+  res.writeHead(303, {
+    Location: '/',
+    'Set-Cookie': `octo_token=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secureFlag(req)}`,
+  })
+  res.end()
+}
+
+/** Form posts (the sign-in pages) and JSON bodies (the desktop app) both end up as a plain object. */
+function parseFields(raw: string): { fields: Record<string, string>; json: boolean } {
+  if (raw.trimStart().startsWith('{')) {
+    const o = decodeWire<Record<string, unknown>>(raw)
+    return { fields: Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v === undefined || v === null ? '' : String(v)])), json: true }
+  }
+  return { fields: Object.fromEntries(new URLSearchParams(raw)), json: false }
+}
+
+const HTML = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
 
 function send(res: http.ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
   const text = typeof body === 'string' ? body : encodeWire(body)
@@ -112,11 +139,14 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
     try {
       // ---------- public endpoints ----------
       if (url.pathname === '/api/info') {
-        const info: Omit<ServerInfo, 'accounts' | 'engine'> & { pairing: true } = { name: 'octopus-mail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: true }
+        const info: Omit<ServerInfo, 'accounts' | 'engine'> & { pairing: boolean; account: boolean } = {
+          name: 'octopus-mail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: pairingAllowed(), account: hasOwner(),
+        }
         return send(res, 200, info)
       }
       if (url.pathname === '/api/pair' && req.method === 'POST') {
         if (tooManyFailures(ip)) return send(res, 429, { error: t('Too many failed attempts — wait 10 minutes') })
+        if (!pairingAllowed()) return send(res, 403, { error: t('Pairing codes are switched off. Sign in with your email and password.') })
         const body = decodeWire<{ code?: string; name?: string }>((await readBody(req, 4096)).toString('utf8'))
         const r = redeemPairingCode(String(body.code || ''), String(body.name || t('Computer')), ip)
         if (!r) {
@@ -130,17 +160,89 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         if (tooManyFailures(ip)) return send(res, 429, loginPage(lang, 'too-many'), { 'Content-Type': 'text/html; charset=utf-8' })
         const form = new URLSearchParams((await readBody(req, 4096)).toString('utf8'))
         const ua = String(req.headers['user-agent'] || '')
+        if (!pairingAllowed()) {
+          res.writeHead(403, HTML)
+          return res.end(authPage(lang, { view: 'login', allowPairing: false, error: { text: withLang(lang, () => t('Pairing codes are switched off. Sign in with your email and password.')) } }))
+        }
         const r = redeemPairingCode(form.get('code') || '', browserDeviceName(lang, ua, ip), ip)
         if (!r) {
           noteFailure(ip)
-          res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' })
+          res.writeHead(403, HTML)
           return res.end(loginPage(lang, 'bad-code'))
         }
-        res.writeHead(303, {
-          Location: '/',
-          'Set-Cookie': `octo_token=${encodeURIComponent(r.token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secureFlag(req)}`,
-        })
-        return res.end()
+        return signedIn(req, res, r.token)
+      }
+
+      // ---------- email + password (+ second factor) ----------
+      const page = (status: number, v: AuthView) => {
+        res.writeHead(status, HTML)
+        return res.end(authPage(lang, v))
+      }
+      if (url.pathname === '/api/auth/login' && req.method === 'POST') {
+        const { fields, json } = parseFields((await readBody(req, 8192)).toString('utf8'))
+        const fail = (status: number, key: 'invalid' | 'locked' | 'too-many') =>
+          json ? send(res, status, { error: authMessage(key) }) : page(status, { view: 'login', error: key, email: fields.email, allowPairing: pairingAllowed() })
+        if (tooManyFailures(ip)) return fail(429, 'too-many')
+        const r = await checkCredentials(fields.email || '', fields.password || '')
+        if (!r.ok) {
+          noteFailure(ip)
+          return fail(r.reason === 'locked' ? 429 : 401, r.reason)
+        }
+        const name = json && fields.name ? fields.name : browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip)
+        if (r.needsSecondFactor) {
+          const ticket = createTicket(r.user.id, name)
+          return json ? send(res, 200, { needs2fa: true, ticket }) : page(200, { view: 'totp', ticket })
+        }
+        clearFailures(r.user.id)
+        const d = issueDevice(name, ip, r.user.id, 'password')
+        log('server', `signed in "${d.device.name}" from ${ip}`)
+        return json ? send(res, 200, d) : signedIn(req, res, d.token)
+      }
+      if (url.pathname === '/api/auth/totp' && req.method === 'POST') {
+        const { fields, json } = parseFields((await readBody(req, 8192)).toString('utf8'))
+        const fail = (status: number, key: 'expired' | 'bad-totp' | 'locked' | 'too-many') =>
+          json ? send(res, status, { error: authMessage(key) })
+            : key === 'bad-totp' ? page(status, { view: 'totp', ticket: fields.ticket || '', error: key })
+              : page(status, { view: 'login', error: key, allowPairing: pairingAllowed() })
+        if (tooManyFailures(ip)) return fail(429, 'too-many')
+        const k = useTicket(fields.ticket || '')
+        if (!k) return fail(401, 'expired')
+        if (isLocked(k.userId)) return fail(429, 'locked')
+        if (!checkSecondFactor(k.userId, fields.code || '')) {
+          noteFailure(ip)
+          return fail(401, isLocked(k.userId) ? 'locked' : 'bad-totp')
+        }
+        closeTicket(fields.ticket)
+        clearFailures(k.userId)
+        const d = issueDevice(k.name, ip, k.userId, 'password')
+        log('server', `signed in (2FA) "${d.device.name}" from ${ip}`)
+        return json ? send(res, 200, d) : signedIn(req, res, d.token)
+      }
+      if (url.pathname === '/api/auth/setup' && req.method === 'POST') {
+        // first account of the server: needs a pairing code (proof of access to the NAS); afterwards sign-up is closed
+        const { fields, json } = parseFields((await readBody(req, 8192)).toString('utf8'))
+        const fail = (status: number, text: string) =>
+          json ? send(res, status, { error: text }) : page(status, { view: 'setup', error: { text }, email: fields.email })
+        if (hasOwner()) return fail(403, withLang(lang, () => t('An account already exists on this server.')))
+        if (tooManyFailures(ip)) return fail(429, authMessage('too-many'))
+        const problem = withLang(lang, () =>
+          emailProblem(fields.email || '') || (fields.password !== (fields.password2 ?? fields.password) ? t('The passwords do not match.') : passwordProblem(fields.password || '', fields.email)))
+        if (problem) return fail(400, problem)
+        const paired = redeemPairingCode(fields.code || '', browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip), ip)
+        if (!paired) {
+          noteFailure(ip)
+          return fail(403, authMessage('bad-code'))
+        }
+        let user: User
+        try {
+          user = await createOwner(fields.email, fields.password)
+        } catch (e) {
+          return fail(400, e instanceof AuthError ? e.message : String((e as Error).message))
+        }
+        linkLegacyDevices(user.id)
+        setPairingAllowed(false)
+        log('server', `owner account created (${user.email}) from ${ip}`)
+        return json ? send(res, 200, { ...paired, user }) : signedIn(req, res, paired.token)
       }
 
       // ---------- authentication ----------
@@ -152,8 +254,10 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         // web UI (desktop browsers and phones)
         if (!webRoot) return send(res, 404, withLang(lang, () => t('The web interface is not available in this installation.')))
         if (!device && !PUBLIC_FILES.has(url.pathname) && !url.pathname.startsWith('/assets/')) {
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' })
-          return res.end(loginPage(lang))
+          res.writeHead(200, HTML)
+          if (!hasOwner()) return res.end(authPage(lang, url.searchParams.get('pair') ? { view: 'pair' } : { view: 'setup' }))
+          if (url.searchParams.get('pair') && pairingAllowed()) return res.end(authPage(lang, { view: 'pair', hasOwner: true }))
+          return res.end(authPage(lang, { view: 'login', allowPairing: pairingAllowed() }))
         }
         const rel = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname.slice(1))
         let file = path.resolve(webRoot, rel)
@@ -177,11 +281,101 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
       }
       if (url.pathname === '/api/devices' && req.method === 'GET') return send(res, 200, { devices: listDevices() })
       if (url.pathname === '/api/devices/pair' && req.method === 'POST') {
+        if (!pairingAllowed()) return send(res, 403, { error: t('Pairing codes are switched off. Sign in with your email and password.') })
         const body = decodeWire<{ name?: string }>((await readBody(req, 4096)).toString('utf8') || '{}')
         return send(res, 200, createPairingCode(body.name))
       }
       const del = url.pathname.match(/^\/api\/devices\/([a-f0-9]+)$/)
       if (del && req.method === 'DELETE') return send(res, 200, { ok: revokeDevice(del[1]) })
+
+      // ---------- the owner account (managed from a device that is signed in) ----------
+      if (url.pathname.startsWith('/api/account')) {
+        const owner = hasOwner() ? getUser(device.userId ?? -1) : null
+        const body = req.method === 'POST' ? parseFields((await readBody(req, 8192)).toString('utf8') || '{}').fields : {}
+        const info = () => ({ account: hasOwner(), user: owner, allowPairing: pairingAllowed() })
+        if (url.pathname === '/api/account' && req.method === 'GET') return send(res, 200, info())
+        if (req.method !== 'POST') return send(res, 404, { error: t('Not found') })
+
+        if (url.pathname === '/api/account/create') {
+          if (hasOwner()) return send(res, 409, { error: t('An account already exists on this server.') })
+          const problem = emailProblem(body.email || '') || passwordProblem(body.password || '', body.email)
+          if (problem) return send(res, 400, { error: problem })
+          try {
+            const u = await createOwner(body.email, body.password)
+            linkLegacyDevices(u.id)
+            setPairingAllowed(false)
+            log('server', `owner account created (${u.email}) from ${ip}`)
+            return send(res, 200, { ...info(), user: u })
+          } catch (e) {
+            return send(res, 400, { error: (e as Error).message })
+          }
+        }
+        if (!owner) return send(res, 403, { error: t('Sign in with your email and password to manage the account.') })
+
+        // changing security settings asks for the password again (and a 2FA code when it is on)
+        const confirm = async (needCode: boolean): Promise<string | null> => {
+          if (tooManyFailures(ip)) return t('Too many failed attempts — wait 10 minutes')
+          const r = await checkCredentials(owner.email, body.password || '')
+          if (!r.ok) {
+            noteFailure(ip)
+            return r.reason === 'locked' ? authMessage('locked') : t('Current password is incorrect.')
+          }
+          if (needCode && owner.totpEnabled && !checkSecondFactor(owner.id, body.code || '')) {
+            noteFailure(ip)
+            return authMessage('bad-totp')
+          }
+          return null
+        }
+        const refuse = (msg: string) => send(res, 403, { error: msg })
+
+        try {
+          switch (url.pathname) {
+            case '/api/account/password': {
+              if (tooManyFailures(ip)) return refuse(t('Too many failed attempts — wait 10 minutes'))
+              try {
+                await changePassword(owner.id, body.current || '', body.next || '')
+              } catch (e) {
+                noteFailure(ip)
+                throw e
+              }
+              return send(res, 200, { ok: true })
+            }
+            case '/api/account/totp/begin': {
+              const bad = await confirm(false)
+              return bad ? refuse(bad) : send(res, 200, beginTotp(owner.id))
+            }
+            case '/api/account/totp/confirm': {
+              const codes = confirmTotp(owner.id, body.code || '')
+              return codes ? send(res, 200, { recovery: codes, user: getUser(owner.id) }) : send(res, 400, { error: authMessage('bad-totp') })
+            }
+            case '/api/account/totp/disable': {
+              const bad = await confirm(true)
+              if (bad) return refuse(bad)
+              disableTotp(owner.id)
+              return send(res, 200, { user: getUser(owner.id) })
+            }
+            case '/api/account/recovery': {
+              const bad = await confirm(true)
+              return bad ? refuse(bad) : send(res, 200, { recovery: regenerateRecoveryCodes(owner.id) })
+            }
+            case '/api/account/pairing': {
+              const bad = await confirm(true)
+              if (bad) return refuse(bad)
+              setPairingAllowed(body.allow === 'true')
+              return send(res, 200, info())
+            }
+            case '/api/account/revoke-all': {
+              const bad = await confirm(true)
+              if (bad) return refuse(bad)
+              revokeAllDevices()
+              return send(res, 200, { ok: true }, { 'Set-Cookie': `octo_token=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secureFlag(req)}` })
+            }
+          }
+        } catch (e) {
+          return send(res, e instanceof AuthError ? 400 : 500, { error: (e as Error).message })
+        }
+        return send(res, 404, { error: t('Not found') })
+      }
 
       if (url.pathname === '/api/call' && req.method === 'POST') {
         const { method, args } = decodeWire<{ method: string; args: unknown[] }>((await readBody(req)).toString('utf8'))

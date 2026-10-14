@@ -4,6 +4,7 @@ import crypto from 'node:crypto'
 import { now } from '../core/db'
 import { getKV, setKV } from '../core/settings'
 import { t } from '../shared/i18n'
+import { hasOwner } from './users'
 
 export interface Device {
   id: string
@@ -12,6 +13,9 @@ export interface Device {
   createdAt: number
   lastSeen: number | null
   lastIp: string | null
+  /** owner account the device signed in with (null = paired with a code before accounts existed) */
+  userId?: number | null
+  method?: 'pairing' | 'password'
 }
 
 interface Pairing {
@@ -22,6 +26,7 @@ interface Pairing {
 
 const DEVICES = 'server.devices'
 const PAIRINGS = 'server.pairings'
+const ALLOW_PAIRING = 'server.allowPairing'
 const PAIR_TTL = 15 * 60_000
 const MAX_LIVE_CODES = 5 // repeated clicks cannot grow the store: the oldest code is dropped
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no 0/O/1/I
@@ -54,18 +59,76 @@ export function redeemPairingCode(code: string, deviceName: string, ip: string |
     return null
   }
   setKV(PAIRINGS, list.filter((p) => p !== hit))
+  return issueDevice(hit.name || deviceName, ip, null, 'pairing')
+}
+
+/** Creates a device and its long-lived token (only the hash is stored). */
+export function issueDevice(name: string, ip: string | null, userId: number | null, method: 'pairing' | 'password'): { token: string; device: Omit<Device, 'tokenHash'> } {
   const token = `octo_${crypto.randomBytes(32).toString('base64url')}`
   const device: Device = {
     id: crypto.randomBytes(6).toString('hex'),
-    name: (hit.name || deviceName || t('Device')).slice(0, 80),
+    name: (name || t('Device')).slice(0, 80),
     tokenHash: sha(token),
     createdAt: now(),
     lastSeen: now(),
     lastIp: ip,
+    userId,
+    method,
   }
   setKV(DEVICES, [...getKV<Device[]>(DEVICES, []), device])
   const { tokenHash: _t, ...pub } = device
   return { token, device: pub }
+}
+
+/** Devices paired with a code before the account existed belong to the same single owner: attach them to it. */
+export function linkLegacyDevices(userId: number): void {
+  setKV(DEVICES, getKV<Device[]>(DEVICES, []).map((d) => (d.userId ? d : { ...d, userId, method: 'pairing' as const })))
+}
+
+export function revokeAllDevices(): number {
+  const n = getKV<Device[]>(DEVICES, []).length
+  setKV(DEVICES, [])
+  seenWrites = new Map()
+  return n
+}
+
+/** Pairing codes work until the owner account exists; after that only when switched on in "My account". */
+export function pairingAllowed(): boolean {
+  return !hasOwner() || getKV<boolean>(ALLOW_PAIRING, false)
+}
+
+export function setPairingAllowed(allow: boolean): void {
+  setKV(ALLOW_PAIRING, allow)
+}
+
+// --- short-lived tickets between the password step and the second-factor step ---
+const tickets = new Map<string, { userId: number; expires: number; tries: number; name: string }>()
+const TICKET_TTL = 5 * 60_000
+const TICKET_TRIES = 5
+
+export function createTicket(userId: number, deviceName: string): string {
+  for (const [k, v] of tickets) if (v.expires < now()) tickets.delete(k)
+  const id = crypto.randomBytes(24).toString('base64url')
+  tickets.set(id, { userId, expires: now() + TICKET_TTL, tries: 0, name: deviceName })
+  return id
+}
+
+/** Looks a ticket up and counts one try; after 5 wrong codes it is gone. */
+export function useTicket(id: string): { userId: number; name: string } | null {
+  const k = tickets.get(id)
+  if (!k || k.expires < now()) {
+    tickets.delete(id)
+    return null
+  }
+  if (++k.tries > TICKET_TRIES) {
+    tickets.delete(id)
+    return null
+  }
+  return { userId: k.userId, name: k.name }
+}
+
+export function closeTicket(id: string): void {
+  tickets.delete(id)
 }
 
 let seenWrites = new Map<string, number>()

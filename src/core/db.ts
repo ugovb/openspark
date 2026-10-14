@@ -223,6 +223,21 @@ const MIGRATIONS: string[] = [
   CREATE INDEX IF NOT EXISTS threads_aside ON threads(set_aside) WHERE set_aside = 1;
   CREATE INDEX IF NOT EXISTS messages_unread ON messages(folder_id, thread_id) WHERE seen = 0 AND hidden = 0;
   `,
+  /* 3 — home-server owner account: email + password (scrypt) + optional TOTP second factor */ `
+  CREATE TABLE users(
+    id INTEGER PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_hash TEXT NOT NULL,
+    totp_secret TEXT,
+    totp_enabled INTEGER NOT NULL DEFAULT 0,
+    totp_last_step INTEGER NOT NULL DEFAULT 0,
+    recovery_hashes TEXT NOT NULL DEFAULT '[]',
+    failed_count INTEGER NOT NULL DEFAULT 0,
+    locked_until INTEGER,
+    created_at INTEGER NOT NULL,
+    password_changed_at INTEGER NOT NULL
+  );
+  `,
 ]
 
 let _db: DatabaseSync | null = null

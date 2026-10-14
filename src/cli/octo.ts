@@ -205,6 +205,8 @@ function help(): string {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
+  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+                                              the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`),
   ].join('\n\n')
@@ -225,6 +227,36 @@ async function main(): Promise<void> {
   }
   initCore()
 
+  /** Reads a password without echoing it (TTY), or one line from a pipe (`echo … | docker exec -i`). */
+  async function readSecret(prompt: string): Promise<string> {
+    if (!process.stdin.isTTY) {
+      const chunks: Buffer[] = []
+      for await (const c of process.stdin) chunks.push(c as Buffer)
+      return Buffer.concat(chunks).toString('utf8').split(/\r?\n/)[0]
+    }
+    process.stdout.write(prompt)
+    return new Promise((resolve) => {
+      let buf = ''
+      process.stdin.setRawMode(true)
+      process.stdin.resume()
+      const onData = (d: Buffer) => {
+        for (const ch of d.toString('utf8')) {
+          if (ch === '\r' || ch === '\n') {
+            process.stdin.setRawMode(false)
+            process.stdin.pause()
+            process.stdin.off('data', onData)
+            process.stdout.write('\n')
+            return resolve(buf)
+          }
+          if (ch === '\u0003') process.exit(130)
+          if (ch === '\u007f' || ch === '\b') buf = buf.slice(0, -1)
+          else buf += ch
+        }
+      }
+      process.stdin.on('data', onData)
+    })
+  }
+
   switch (cmd) {
     case 'mcp': {
       const { runMcp } = await import('./mcp')
@@ -242,14 +274,24 @@ async function main(): Promise<void> {
       process.env.OCTO_QUIET = a.b.has('quiet') ? '1' : ''
       await runServer({ port, host, webRoot })
       const urls = host === '0.0.0.0' ? lanAddresses(port) : [`http://${host}:${port}`]
-      const { code } = createPairingCode()
-      console.log(t(`Octopus Mail — home server is running.
+      const users = await import('../server/users')
+      if (users.hasOwner()) {
+        console.log(t(`Octopus Mail — home server is running.
+
+Address:  {addresses}
+
+Sign in with your email and password (and your authenticator code).
+Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`, { addresses: urls.join('  ') }))
+      } else {
+        const { code } = createPairingCode()
+        console.log(t(`Octopus Mail — home server is running.
 
 Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
-In the app: Settings → Home server → enter the address and code. In a browser or on a phone, open the address.
-New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
+Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
+The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
+      }
       await new Promise(() => undefined)
       return
     }
@@ -267,7 +309,44 @@ New code: octo server pair · Device list: octo server devices · Ctrl+C to stop
       } else if (sub === 'revoke') {
         if (!a._[0]) throw new CliError(t('Give a device ID (octo server devices)'))
         console.log(auth.revokeDevice(a._[0]) ? t('Access revoked.') : t('No such device.'))
-      } else throw new CliError('octo server pair [--name …] | devices | revoke <ID>')
+      } else if (sub === 'account' || sub === 'reset-password' || sub === '2fa-off' || sub === 'sign-out-all' || sub === 'pairing') {
+        // recovery commands: being able to run them on the NAS (docker exec) is the proof of ownership
+        const users = await import('../server/users')
+        const owner = users.getOwner()
+        if (sub === 'account') {
+          print(a, { owner }, () => (owner
+            ? t('Account: {email}\nTwo-step verification: {state}\nRecovery codes left: {n}\nPairing codes: {pairing}', {
+              email: owner.email, state: owner.totpEnabled ? t('on') : t('off'), n: owner.recoveryLeft, pairing: auth.pairingAllowed() ? t('allowed') : t('switched off'),
+            })
+            : t('No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).')))
+          return
+        }
+        if (sub === 'pairing') {
+          const v = a._[0]
+          if (v !== 'on' && v !== 'off') throw new CliError('octo server pairing on|off')
+          auth.setPairingAllowed(v === 'on')
+          console.log(v === 'on' ? t('Pairing codes are allowed.') : t('Pairing codes are switched off.'))
+          return
+        }
+        if (!owner) throw new CliError(t('No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).'))
+        if (sub === '2fa-off') {
+          users.disableTotp(owner.id)
+          console.log(t('Two-step verification is off. Turn it on again in Settings → Home server.'))
+        } else if (sub === 'sign-out-all') {
+          console.log(t('{n} devices signed out.', { n: auth.revokeAllDevices() }))
+        } else {
+          const pw = await readSecret(t('New password: '))
+          if (!process.stdin.isTTY) {
+            /* piped: one line is enough */
+          } else if (pw !== (await readSecret(t('Repeat the password: ')))) throw new CliError(t('The passwords do not match.'))
+          try {
+            await users.setPassword(owner.id, pw)
+          } catch (e) {
+            throw new CliError((e as Error).message)
+          }
+          console.log(t('Password changed for {email}. The account is unlocked.', { email: owner.email }))
+        }
+      } else throw new CliError('octo server pair [--name …] | devices | revoke <ID> | account | reset-password | 2fa-off | sign-out-all | pairing on|off')
       return
     }
     case 'daemon': {

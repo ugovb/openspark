@@ -71,11 +71,15 @@ const dict: Dictionary = {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
+  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+                                              the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`]: `Inne:
   octo status · octo sync [konto] · octo history [--limit N] · octo daemon (synchronizacja bez okna)
   octo serve [--port 8787]   serwer domowy (np. Raspberry Pi): silnik 24/7 + API + interfejs WWW
   octo server pair | devices | revoke <ID>    kody parowania i sparowane urządzenia
+  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+                                              konto serwera domowego (odzyskiwanie na NAS)
   octo mcp   (serwer MCP na stdio dla Claude Code / Claude Desktop)
 Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
 
@@ -239,16 +243,27 @@ Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
     [`Octopus Mail — home server is running.
 
 Address:  {addresses}
+
+Sign in with your email and password (and your authenticator code).
+Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `Octopus Mail — serwer domowy działa.
+
+Adres:  {addresses}
+
+Zaloguj się e-mailem i hasłem (oraz kodem z aplikacji uwierzytelniającej).
+Zapomniane hasło? octo server reset-password · Konto: octo server account · Ctrl+C, aby zatrzymać.`,
+    [`Octopus Mail — home server is running.
+
+Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
-In the app: Settings → Home server → enter the address and code. In a browser or on a phone, open the address.
-New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — serwer domowy działa.
+Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
+The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — serwer domowy działa.
 
 Adres:  {addresses}
 Kod parowania (ważny 15 min): {code}
 
-W aplikacji: Ustawienia → Serwer domowy → wpisz adres i kod. W przeglądarce/telefonie otwórz adres.
-Nowy kod: octo server pair · Lista urządzeń: octo server devices · Ctrl+C kończy.`,
+Otwórz adres w przeglądarce i utwórz konto za pomocą tego kodu (e-mail + hasło, potem włącz weryfikację dwuetapową w Ustawienia → Serwer domowy).
+Aplikacja na komputer również może się sparować. Nowy kod: octo server pair · Lista urządzeń: octo server devices · Ctrl+C, aby zatrzymać.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Kod parowania: {code}\nWażny do: {time} (jednorazowy)',
     DEVICE: 'URZĄDZENIE',
     PAIRED: 'SPAROWANE',
@@ -256,6 +271,19 @@ Nowy kod: octo server pair · Lista urządzeń: octo server devices · Ctrl+C ko
     'Give a device ID (octo server devices)': 'Podaj ID urządzenia (octo server devices)',
     'Access revoked.': 'Odebrano dostęp.',
     'No such device.': 'Nie ma takiego urządzenia.',
+    'Account: {email}\nTwo-step verification: {state}\nRecovery codes left: {n}\nPairing codes: {pairing}': 'Konto: {email}\nWeryfikacja dwuetapowa: {state}\nPozostałe kody zapasowe: {n}\nKody parowania: {pairing}',
+    'allowed': 'dozwolone',
+    'off': 'wyłączona',
+    'on': 'włączona',
+    'switched off': 'wyłączone',
+    'No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).': 'Brak konta. Otwórz adres serwera w przeglądarce i utwórz je za pomocą kodu parowania (octo server pair).',
+    'Pairing codes are allowed.': 'Kody parowania są dozwolone.',
+    'Pairing codes are switched off.': 'Kody parowania są wyłączone.',
+    'Two-step verification is off. Turn it on again in Settings → Home server.': 'Weryfikacja dwuetapowa jest wyłączona. Włącz ją ponownie w Ustawieniach → Serwer domowy.',
+    '{n} devices signed out.': 'Wylogowano urządzenia: {n}.',
+    'New password: ': 'Nowe hasło: ',
+    'Repeat the password: ': 'Powtórz hasło: ',
+    'Password changed for {email}. The account is unlocked.': 'Zmieniono hasło dla {email}. Konto jest odblokowane.',
   },
   plurals: {},
 }

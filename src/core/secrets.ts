@@ -125,3 +125,4 @@ export const calSourceSecretKey = (sourceId: number): string => `calsource:${sou
 export const claudeKeyName = 'anthropic-api-key'
 export const openaiKeyName = 'openai-compatible-api-key'
 export const anthropicCompatKeyName = 'anthropic-compatible-api-key'
+export const totpKeyName = 'server-totp-key'

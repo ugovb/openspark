@@ -72,11 +72,15 @@ const dict: Dictionary = {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
+  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+                                              the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`]: `Autres :
   octo status · octo sync [compte] · octo history [--limit N] · octo daemon (synchronisation sans fenêtre)
   octo serve [--port 8787]   serveur domestique (par ex. Raspberry Pi) : moteur 24h/24 + API + interface web
   octo server pair | devices | revoke <ID>    codes de jumelage et appareils jumelés
+  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+                                              le compte du serveur domestique (dépannage sur le NAS)
   octo mcp   (serveur MCP sur stdio pour Claude Code / Claude Desktop)
 Global : --json (données lisibles par machine), --no-sync (ne pas récupérer d’abord le nouveau courrier)`,
 
@@ -240,16 +244,27 @@ Global : --json (données lisibles par machine), --no-sync (ne pas récupérer d
     [`Octopus Mail — home server is running.
 
 Address:  {addresses}
+
+Sign in with your email and password (and your authenticator code).
+Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `Octopus Mail — le serveur domestique est actif.
+
+Adresse :  {addresses}
+
+Connectez-vous avec votre e-mail et votre mot de passe (et le code de votre application d’authentification).
+Mot de passe oublié ? octo server reset-password · Compte : octo server account · Ctrl+C pour arrêter.`,
+    [`Octopus Mail — home server is running.
+
+Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
-In the app: Settings → Home server → enter the address and code. In a browser or on a phone, open the address.
-New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — le serveur domestique est actif.
+Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
+The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — le serveur domestique est actif.
 
 Adresse :  {addresses}
 Code de jumelage (valable 15 min) : {code}
 
-Dans l’application : Paramètres → Serveur domestique → saisissez l’adresse et le code. Dans un navigateur ou sur un téléphone, ouvrez l’adresse.
-Nouveau code : octo server pair · Liste des appareils : octo server devices · Ctrl+C pour arrêter.`,
+Ouvrez l’adresse dans un navigateur et créez votre compte avec ce code (e-mail + mot de passe, puis activez la vérification en deux étapes dans Paramètres → Serveur domestique).
+L’application de bureau peut aussi s’y jumeler. Nouveau code : octo server pair · Liste des appareils : octo server devices · Ctrl+C pour arrêter.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Code de jumelage : {code}\nValable jusqu’à : {time} (usage unique)',
     DEVICE: 'APPAREIL',
     PAIRED: 'JUMELÉ',
@@ -257,6 +272,19 @@ Nouveau code : octo server pair · Liste des appareils : octo server devices · 
     'Give a device ID (octo server devices)': 'Indiquez un ID d’appareil (octo server devices)',
     'Access revoked.': 'Accès révoqué.',
     'No such device.': 'Aucun appareil de ce type.',
+    'Account: {email}\nTwo-step verification: {state}\nRecovery codes left: {n}\nPairing codes: {pairing}': 'Compte : {email}\nVérification en deux étapes : {state}\nCodes de secours restants : {n}\nCodes de jumelage : {pairing}',
+    'allowed': 'autorisés',
+    'off': 'désactivée',
+    'on': 'activée',
+    'switched off': 'désactivés',
+    'No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).': 'Aucun compte pour l’instant. Ouvrez l’adresse du serveur dans un navigateur et créez-le avec un code de jumelage (octo server pair).',
+    'Pairing codes are allowed.': 'Les codes de jumelage sont autorisés.',
+    'Pairing codes are switched off.': 'Les codes de jumelage sont désactivés.',
+    'Two-step verification is off. Turn it on again in Settings → Home server.': 'La vérification en deux étapes est désactivée. Réactivez-la dans Paramètres → Serveur domestique.',
+    '{n} devices signed out.': '{n} appareils déconnectés.',
+    'New password: ': 'Nouveau mot de passe : ',
+    'Repeat the password: ': 'Répétez le mot de passe : ',
+    'Password changed for {email}. The account is unlocked.': 'Mot de passe modifié pour {email}. Le compte est déverrouillé.',
   },
   plurals: {},
 }
