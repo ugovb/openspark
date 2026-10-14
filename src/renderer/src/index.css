@@ -3,50 +3,50 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --bg: #f4f4f7;
-  --panel: #ececf1;
+  --bg: #f2f3f5;
+  --panel: #f7f8fa;
   --surface: #ffffff;
-  --surface-2: #f8f8fb;
-  --hover: #f1f1f6;
-  --border: #e3e3ea;
-  --text: #1c1c22;
-  --muted: #6b6b78;
-  --faint: #9d9daa;
-  --accent: #5b4cf0;
+  --surface-2: #f6f7f9;
+  --hover: #eef0f3;
+  --border: #e6e8ec;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #a1a1a8;
+  --accent: #1a8cff;
   --accent-fg: #ffffff;
-  --accent-soft: #ecebff;
-  --danger: #d93a3a;
-  --success: #1f9d61;
-  --warning: #c98a0b;
-  --pin: #e8a10c;
-  --people: #5b4cf0;
-  --notification: #0e8fb4;
-  --newsletter: #c2410c;
-  --shadow: 0 10px 30px rgba(20, 20, 40, 0.14), 0 2px 6px rgba(20, 20, 40, 0.08);
+  --accent-soft: #e5f2ff;
+  --danger: #ff3b30;
+  --success: #28b463;
+  --warning: #ff9f0a;
+  --pin: #ffb020;
+  --people: #1a8cff;
+  --notification: #30b0a0;
+  --newsletter: #ff7a1a;
+  --shadow: 0 12px 32px rgba(20, 30, 50, 0.12), 0 2px 6px rgba(20, 30, 50, 0.06);
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --bg: #141418;
-  --panel: #18181d;
-  --surface: #1e1e24;
-  --surface-2: #23232a;
-  --hover: #27272f;
-  --border: #2e2e37;
-  --text: #ececf2;
-  --muted: #a0a0ad;
-  --faint: #6e6e7a;
-  --accent: #8d80ff;
-  --accent-fg: #0f0f14;
-  --accent-soft: #2a2650;
-  --danger: #f06262;
-  --success: #3ccf8a;
-  --warning: #f0b43c;
-  --pin: #f5b82e;
-  --people: #9d92ff;
-  --notification: #4cc3e6;
-  --newsletter: #fb8a4c;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --bg: #111113;
+  --panel: #1a1a1c;
+  --surface: #1c1c1e;
+  --surface-2: #232326;
+  --hover: #2a2a2e;
+  --border: #2c2c30;
+  --text: #f2f2f7;
+  --muted: #9a9aa2;
+  --faint: #6a6a72;
+  --accent: #3d9bff;
+  --accent-fg: #ffffff;
+  --accent-soft: #14304f;
+  --danger: #ff5a52;
+  --success: #3ccf7a;
+  --warning: #ffb340;
+  --pin: #ffc24a;
+  --people: #3d9bff;
+  --notification: #4fd1c0;
+  --newsletter: #ff9a4d;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 }
 
@@ -70,7 +70,8 @@
   --color-people: var(--people);
   --color-notification: var(--notification);
   --color-newsletter: var(--newsletter);
-  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --radius-card: 14px;
 }
 
 html,
@@ -206,4 +207,30 @@ button {
 }
 .anim-drawer {
   animation: octo-drawer 0.18s ease-out;
+}
+
+/* macOS: the window has no title bar (traffic lights float over the app): reserve a draggable strip */
+[data-platform="darwin"] #root {
+  padding-top: 28px;
+  box-sizing: border-box;
+}
+[data-platform="darwin"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 28px;
+  -webkit-app-region: drag;
+  z-index: 60;
+  pointer-events: auto;
+}
+
+/* Spark-like softness: rounder cards and menus, hairline separators, inbox rows with room to breathe */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+[role="menu"] {
+  border-radius: var(--radius-card);
 }

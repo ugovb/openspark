@@ -46,11 +46,11 @@ export function loginPage(lang: Lang, error?: LoginError): string {
     const err = error === 'too-many' ? t('Too many attempts — wait 10 minutes.') : error === 'bad-code' ? t('Invalid or expired code.') : ''
     return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${t('Octopus Mail — sign in')}</title>
-<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="theme-color" content="#15151b">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="theme-color" content="#1c1c1e">
 <style>
-:root{color-scheme:light dark;--a:#5b4cf0}
-body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:"Segoe UI",system-ui,sans-serif;background:#f4f4f7;color:#1c1c22}
-@media (prefers-color-scheme:dark){body{background:#141418;color:#ececf2}.card{background:#1e1e24!important;border-color:#2e2e37!important}input{background:#141418;color:#ececf2;border-color:#2e2e37!important}}
+:root{color-scheme:light dark;--a:#1a8cff}
+body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;background:#f2f3f5;color:#1d1d1f}
+@media (prefers-color-scheme:dark){body{background:#111113;color:#ececf2}.card{background:#1c1c1e!important;border-color:#2c2c30!important}input{background:#111113;color:#ececf2;border-color:#2c2c30!important}}
 .card{width:min(380px,calc(100vw - 32px));background:#fff;border:1px solid #e3e3ea;border-radius:18px;padding:28px;box-sizing:border-box;text-align:center}
 img{width:64px;height:64px}h1{font-size:20px;margin:12px 0 4px}p{color:#6b6b78;font-size:13.5px;margin:0 0 18px}
 input{width:100%;box-sizing:border-box;height:44px;border:1px solid #e3e3ea;border-radius:10px;font-size:20px;letter-spacing:3px;text-align:center;text-transform:uppercase}
