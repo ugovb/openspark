@@ -34,6 +34,10 @@ const api = {
   setBadge: (dataUrl: string | null, count: number) => ipcRenderer.invoke('set-badge', dataUrl, count),
   setLoginItem: (on: boolean) => ipcRenderer.invoke('set-login-item', on),
   windowCmd: (cmd: 'minimize' | 'close' | 'reload') => ipcRenderer.invoke('window', cmd),
+  /** print a self-contained HTML document (already sanitized) */
+  printHtml: (html: string): Promise<void> => ipcRenderer.invoke('print-html', html),
+  /** show one conversation in its own window */
+  openThreadWindow: (threadId: number): Promise<void> => ipcRenderer.invoke('open-thread-window', threadId),
   // home server
   serverStatus: () => ipcRenderer.invoke('server-status'),
   serverProbe: (url: string) => ipcRenderer.invoke('server-probe', url),

@@ -10,6 +10,7 @@ import { api } from '../lib/api'
 import { dayHeader, displayName, listDate } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
 import { useOnePane, useStore } from '../lib/store'
+import { extraThreadItems } from '../lib/thread-actions'
 import DraftList from './DraftList'
 import DrawerButton from './DrawerButton'
 import { InboxZero, NoResults } from './illustrations'
@@ -430,6 +431,8 @@ export default function ThreadList() {
       { label: t('Move to folder…'), icon: <FolderInput size={14} />, hint: 'V', onClick: () => useStore.setState({ moveFor: ids }) },
       ...(s.accounts.find((a) => a.id === th.account_id)?.is_gmail ? [{ label: t('Add a label'), icon: <Tag size={14} />, hint: 'L', onClick: () => useStore.setState({ labelFor: ids }) }] : []),
       { label: t('Move to Inbox'), icon: <Inbox size={14} />, onClick: () => void act('moveToInbox', ids) },
+      { separator: true, label: '' },
+      ...extraThreadItems(th),
       { separator: true, label: '' },
       { label: t('Sender → People'), icon: <Users size={14} />, onClick: () => void s.categorize(emails, 'people') },
       { label: t('Sender → Notifications'), icon: <Bell size={14} />, onClick: () => void s.categorize(emails, 'notification') },

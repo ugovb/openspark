@@ -20,7 +20,8 @@ export interface Toast {
 
 export interface ComposerRequest {
   key: number
-  mode: 'new' | 'reply' | 'replyall' | 'forward' | 'edit'
+  /** again = a new message copying one already sent ("Send again") */
+  mode: 'new' | 'reply' | 'replyall' | 'forward' | 'edit' | 'again'
   messageId?: number
   draftId?: number
   threadId?: number
@@ -66,6 +67,8 @@ interface State {
   secretStore: string
   /** null = this computer runs the engine; otherwise the home-server connection state */
   server: { url: string; online: boolean } | null
+  /** this window shows one conversation only ("Open in a new window", ?thread=<id>) */
+  standalone: boolean
 
   boot(): Promise<void>
   setView(v: View): void
@@ -94,6 +97,9 @@ interface State {
 }
 
 let toastSeq = 0
+/** ?thread=<id>: this window was opened for one conversation */
+const threadParam = new URLSearchParams(location.search).get('thread') || ''
+const windowThread = /^\d+$/.test(threadParam) ? Number(threadParam) : null
 let refreshTimer: ReturnType<typeof setTimeout> | null = null
 const PAGE = 120
 
@@ -111,7 +117,7 @@ export const useStore = create<State>((set, get) => ({
   threads: [],
   loading: false,
   hasMore: false,
-  selected: null,
+  selected: windowThread,
   checked: [],
   searchQuery: '',
   toasts: [],
@@ -125,6 +131,7 @@ export const useStore = create<State>((set, get) => ({
   drawer: false,
   secretStore: t('in the system password store'),
   server: null,
+  standalone: windowThread !== null,
 
   async boot() {
     const [settings, accounts, platform] = await Promise.all([api.getSettings(), api.listAccounts(), api.platform()])
@@ -400,12 +407,13 @@ export const useStore = create<State>((set, get) => ({
 
 /** One pane: the list, and an open conversation takes its place (phones, and the desktop "full" layout). */
 export function onePane(): boolean {
-  return isNarrow() || useStore.getState().settings?.ui?.layout !== 'split'
+  const st = useStore.getState()
+  return isNarrow() || st.standalone || st.settings?.ui?.layout !== 'split'
 }
 
 export function useOnePane(): boolean {
   const narrow = useNarrow()
-  const split = useStore((s) => s.settings?.ui?.layout === 'split')
+  const split = useStore((s) => s.settings?.ui?.layout === 'split' && !s.standalone)
   return narrow || !split
 }
 

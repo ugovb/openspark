@@ -440,6 +440,38 @@ export function scheduledDrafts(): DraftView[] {
   return all("SELECT * FROM drafts WHERE status IN ('scheduled','sending','failed') ORDER BY send_at").map(rowToDraft)
 }
 
+/**
+ * "Send again": a fresh draft (not a reply) with the recipients, subject, body and attachments of a
+ * message that was already sent. The body must already be downloaded; attachments are referenced
+ * (octo-att:) and fetched from the server only when the new draft is sent.
+ */
+export function sendAgainDraft(messageId: number): DraftView {
+  const m = get('SELECT * FROM messages WHERE id = ?', messageId)
+  if (!m) throw new Error(t('Message {id} does not exist', { id: messageId }))
+  const body = get<{ html: string | null; text: string | null }>('SELECT html, text FROM bodies WHERE message_id = ?', messageId)
+  let html = body?.html || (body?.text ? textToHtml(body.text) : '')
+  // what buildMime wrapped around the draft when it was sent
+  const inBody = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)
+  if (inBody) html = inBody[1]
+  const wrapped = html.match(/^\s*<div dir="auto">([\s\S]*)<\/div>\s*$/i)
+  if (wrapped) html = wrapped[1]
+  // our own signature block is dropped and replaced with the current one
+  const hadSignature = html.includes('class="octo-signature"')
+  const atts = all('SELECT * FROM attachments WHERE message_id = ? AND inline = 0 ORDER BY id', messageId)
+  const fromEmail = m.from_email && myAddresses().has(String(m.from_email).toLowerCase()) ? m.from_email : undefined
+  return saveDraft({
+    account_id: m.account_id,
+    from_email: fromEmail,
+    to: parseJson<Address[]>(m.to_json, []),
+    cc: parseJson<Address[]>(m.cc_json, []),
+    bcc: parseJson<Address[]>(m.bcc_json, []),
+    subject: m.subject || '',
+    html,
+    attachments: atts.map((a) => ({ filename: a.filename || t('attachment'), path: `octo-att:${a.id}`, mime: a.mime || undefined, size: a.size || undefined })),
+    signature: hadSignature,
+  })
+}
+
 /** Convert a server-side draft (e.g. written in Gmail web) into a local editable draft. */
 export function adoptServerDraft(messageId: number): DraftView {
   const m = get('SELECT * FROM messages WHERE id = ?', messageId)

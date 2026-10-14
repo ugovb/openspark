@@ -2,7 +2,7 @@ import { PenSquare } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import CommandPalette from './components/CommandPalette'
 import Composer from './components/Composer'
-import { MovePicker, SnoozePicker } from './components/Pickers'
+import { LabelPicker, MovePicker, SnoozePicker } from './components/Pickers'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
 import ThreadView from './components/ThreadView'
@@ -26,6 +26,24 @@ function openSearch() {
   else st.setView('search')
 }
 
+/** Conversation named in the address: ?thread=<id> (conversation window) or #/thread/<id> (copied web link). */
+function threadFromUrl(): number | null {
+  const q = new URLSearchParams(location.search).get('thread')
+  if (q && /^\d+$/.test(q)) return Number(q)
+  const h = location.hash.match(/^#\/thread\/(\d+)/)
+  return h ? Number(h[1]) : null
+}
+
+function openThreadFromUrl(): void {
+  const id = threadFromUrl()
+  if (id === null) return
+  const st = useStore.getState()
+  st.setView('mail')
+  st.select(id)
+  // a used #/thread link is dropped so reloading or going back does not reopen it
+  if (location.hash) history.replaceState(history.state, '', location.pathname + location.search)
+}
+
 function isTyping(e: KeyboardEvent): boolean {
   const el = e.target as HTMLElement | null
   if (!el) return false
@@ -47,7 +65,7 @@ function useShortcuts() {
         st.compose({ mode: 'new' })
         return
       }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && !isTyping(e)) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && !isTyping(e) && !st.standalone) {
         e.preventDefault()
         openSearch()
         return
@@ -64,6 +82,8 @@ function useShortcuts() {
       if (isTyping(e) || e.ctrlKey || e.metaKey || e.altKey) return
       if (st.palette || st.snoozeFor || st.moveFor || st.labelFor || (st.composer && !st.composer.inline)) return
       if (st.view !== 'mail' && !['c', '/', 'g'].includes(e.key) && gPressed.current === 0) return
+      // a conversation window has no list or places to go to
+      if (st.standalone && ['g', '/', 'j', 'k', 'ArrowDown', 'ArrowUp'].includes(e.key)) return
 
       const key = e.key
       const list = st.threads
@@ -136,7 +156,7 @@ function usePhoneHistory(narrow: boolean) {
 }
 
 export default function App() {
-  const { ready, view, accounts, composer, selected, boot, mailbox, drawer } = useStore()
+  const { ready, view, accounts, composer, selected, boot, mailbox, drawer, standalone } = useStore()
   const narrow = useNarrow()
   const one = useOnePane()
   useShortcuts()
@@ -145,7 +165,8 @@ export default function App() {
   useEffect(() => useStore.setState({ drawer: false }), [mailbox, view, composer?.key])
 
   useEffect(() => {
-    void boot()
+    void boot().then(openThreadFromUrl)
+    window.addEventListener('hashchange', openThreadFromUrl)
     const offLink = window.octo.on('deep-link', async (p: { kind: string; id: number }) => {
       const st = useStore.getState()
       if (p.kind === 'draft') st.compose({ mode: 'edit', draftId: p.id, inline: false })
@@ -157,10 +178,16 @@ export default function App() {
     })
     const offCmd = window.octo.on('command', (c: string) => c === 'compose' && useStore.getState().compose({ mode: 'new' }))
     return () => {
+      window.removeEventListener('hashchange', openThreadFromUrl)
       offLink()
       offCmd()
     }
   }, [])
+
+  // a conversation window closes once its conversation is gone (Done, deleted, moved…)
+  useEffect(() => {
+    if (standalone && ready && selected === null) void window.octo.windowCmd('close')
+  }, [standalone, ready, selected])
 
   if (!ready) return <div className="flex h-full items-center justify-center text-muted"><Spinner /></div>
   if (!accounts.length) return (
@@ -175,6 +202,25 @@ export default function App() {
   const floatingComposer = composer && (!composer.inline || composer.threadId !== selected || view !== 'mail')
 
   const phoneThread = one && selected !== null
+
+  const overlays = (
+    <>
+      {floatingComposer && <Composer key={composer.key} request={{ ...composer, inline: false }} />}
+      <SnoozePicker />
+      <MovePicker />
+      <LabelPicker />
+      <CommandPalette />
+      <Toasts />
+      <PromptHost />
+    </>
+  )
+
+  if (standalone) return (
+    <div className="flex h-full">
+      <main className="flex min-w-0 flex-1 flex-col bg-surface">{view === 'mail' && <ThreadView />}</main>
+      {overlays}
+    </div>
+  )
 
   return (
     <div className="flex h-full">
@@ -213,12 +259,7 @@ export default function App() {
         </Suspense>
         {view === 'ask' && <AskView />}
       </main>
-      {floatingComposer && <Composer key={composer.key} request={{ ...composer, inline: false }} />}
-      <SnoozePicker />
-      <MovePicker />
-      <CommandPalette />
-      <Toasts />
-      <PromptHost />
+      {overlays}
     </div>
   )
 }

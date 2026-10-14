@@ -98,6 +98,34 @@ function download(url: string): void {
   a.remove()
 }
 
+/** Print through a hidden iframe; the document carries its own CSP and the frame may not run scripts. */
+function printInFrame(html: string): Promise<void> {
+  return new Promise((resolve) => {
+    const frame = document.createElement('iframe')
+    frame.setAttribute('sandbox', 'allow-same-origin allow-modals')
+    frame.setAttribute('aria-hidden', 'true')
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      setTimeout(() => frame.remove(), 1000)
+      resolve()
+    }
+    frame.onload = () => {
+      const w = frame.contentWindow
+      if (!w) return finish()
+      w.addEventListener('afterprint', finish)
+      w.focus()
+      w.print()
+      // browsers without afterprint (or with a non-blocking dialog)
+      setTimeout(finish, 60_000)
+    }
+    frame.srcdoc = html
+    document.body.appendChild(frame)
+  })
+}
+
 export function installWebBridge(): void {
   if (window.octo) return
   window.__OCTO_WEB__ = true
@@ -139,6 +167,11 @@ export function installWebBridge(): void {
     },
     setLoginItem: async () => undefined,
     windowCmd: async () => undefined,
+    printHtml: async (html: string) => printInFrame(html),
+    // the browser version opens the conversation in a new tab of the regular UI
+    openThreadWindow: async (threadId: number) => {
+      window.open(`/#/thread/${threadId}`, '_blank', 'noopener')
+    },
     // browsers never expose file paths: the composer falls back to uploading the bytes
     filePath: () => '',
     async serverStatus() {
