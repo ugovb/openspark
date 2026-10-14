@@ -9,7 +9,8 @@ import type { CoreEvent } from '../shared/types'
 import { log } from '../core/events'
 import { startOAuth, type OAuthClient, type OAuthProvider } from '../core/oauth'
 import { dataDir } from '../core/paths'
-import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, remoteConfigPath } from './backend'
+import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
+import { decodeWire, encodeWire } from '../shared/wire'
 
 const PROTOCOL = 'octopus-mail'
 let win: BrowserWindow | null = null
@@ -311,6 +312,39 @@ function registerIpc(): void {
     const cfg = await RemoteBackend.pair(url, code, deviceName || os.hostname())
     fs.writeFileSync(remoteConfigPath(), JSON.stringify(cfg, null, 2), { mode: 0o600 })
     relaunch()
+  })
+  const saveRemote = (cfg: RemoteConfig) => {
+    fs.writeFileSync(remoteConfigPath(), JSON.stringify(cfg, null, 2), { mode: 0o600 })
+    relaunch()
+  }
+  ipcMain.handle('server-login', async (_e, url: string, email: string, password: string, deviceName: string) => {
+    const r = await RemoteBackend.login(url, email, password, deviceName || os.hostname())
+    if ('needs2fa' in r) return r
+    saveRemote(r)
+    return { ok: true }
+  })
+  ipcMain.handle('server-login-2fa', async (_e, url: string, ticket: string, code: string) => {
+    saveRemote(await RemoteBackend.login2fa(url, ticket, code))
+    return { ok: true }
+  })
+  // the account of the home server: only /api/account* paths, with this device's token
+  ipcMain.handle('server-account', async (_e, apiPath: string, body?: Record<string, unknown>) => {
+    if (backend.kind !== 'remote') throw new Error(t('The app is not connected to a home server'))
+    if (!/^\/api\/account(\/[a-z/]+)?$/.test(apiPath)) throw new Error('bad path')
+    const r = backend as RemoteBackend
+    const res = await fetch(`${r.cfg.url}${apiPath}`, {
+      method: body === undefined ? 'GET' : 'POST',
+      headers: { Authorization: `Bearer ${r.cfg.token}` },
+      body: body === undefined ? undefined : encodeWire(body),
+    })
+    const j = decodeWire<Record<string, unknown> & { error?: string }>(await res.text())
+    if (!res.ok || j.error) throw new Error(j.error || `HTTP ${res.status}`)
+    if (apiPath === '/api/account/revoke-all') {
+      // this device was signed out too: back to local mode
+      fs.rmSync(remoteConfigPath(), { force: true })
+      relaunch()
+    }
+    return j
   })
   ipcMain.handle('server-disconnect', () => {
     fs.rmSync(remoteConfigPath(), { force: true })

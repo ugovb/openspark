@@ -101,6 +101,7 @@ const dict: Dictionary = {
     'The password must not contain your email address.': 'Hasło nie może zawierać Twojego adresu e-mail.',
     'Enter a valid email address.': 'Wpisz prawidłowy adres e-mail.',
     'The passwords do not match.': 'Hasła nie są takie same.',
+    'Forbidden': 'Brak dostępu',
   },
   plurals: {
     '{n} new message': ['{n} nowa wiadomość', '{n} nowe wiadomości', '{n} nowych wiadomości'],

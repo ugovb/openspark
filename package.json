@@ -1,7 +1,7 @@
 {
   "name": "octopus-mail",
   "productName": "Octopus Mail",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Free, local-first desktop mail client with Smart Inbox, AI, calendar and an agent CLI",
   "author": {
     "name": "Krabi",
@@ -71,6 +71,7 @@
     "electron-vite": "^5.0.0",
     "esbuild": "^0.28.2",
     "lucide-react": "^1.56.0",
+    "qrcode-generator": "2.0.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",

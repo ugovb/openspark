@@ -379,9 +379,30 @@ export class RemoteBackend implements Backend {
     } catch (e) {
       throw new Error(t("Can't connect to {url}: {error}", { url: u, error: (e as Error).message }))
     }
-    const j = (await r.json().catch(() => ({}))) as { name?: string; hostname: string; version: string }
+    const j = (await r.json().catch(() => ({}))) as { name?: string; hostname: string; version: string; account?: boolean; pairing?: boolean }
     if (j.name !== 'octopus-mail-server') throw new Error(t('{url} is not an Octopus Mail server', { url: u }))
     return j
+  }
+
+  /** Sign in with email + password. Resolves to the config, or to a ticket when a second-factor code is needed. */
+  static async login(url: string, email: string, password: string, deviceName: string): Promise<RemoteConfig | { needs2fa: true; ticket: string; url: string }> {
+    const u = normalizeServerUrl(url)
+    const info = await RemoteBackend.probe(u)
+    const r = await fetch(`${u}/api/auth/login`, { method: 'POST', body: encodeWire({ email, password, name: deviceName }) })
+    const j = decodeWire<{ token?: string; device?: { id: string; name: string }; needs2fa?: boolean; ticket?: string; error?: string }>(await r.text())
+    if (j.needs2fa && j.ticket) return { needs2fa: true, ticket: j.ticket, url: u }
+    if (!j.token || !j.device) throw new Error(j.error || t('Sign-in failed (HTTP {status})', { status: r.status }))
+    return { url: u, token: j.token, deviceId: j.device.id, deviceName: j.device.name, serverName: info.hostname }
+  }
+
+  /** Second step of the sign-in: the 6-digit code (or a recovery code) for the ticket returned by login(). */
+  static async login2fa(url: string, ticket: string, code: string): Promise<RemoteConfig> {
+    const u = normalizeServerUrl(url)
+    const info = await RemoteBackend.probe(u)
+    const r = await fetch(`${u}/api/auth/totp`, { method: 'POST', body: encodeWire({ ticket, code }) })
+    const j = decodeWire<{ token?: string; device?: { id: string; name: string }; error?: string }>(await r.text())
+    if (!j.token || !j.device) throw new Error(j.error || t('Sign-in failed (HTTP {status})', { status: r.status }))
+    return { url: u, token: j.token, deviceId: j.device.id, deviceName: j.device.name, serverName: info.hostname }
   }
 
   static async pair(url: string, code: string, deviceName: string): Promise<RemoteConfig> {

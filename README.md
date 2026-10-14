@@ -69,7 +69,7 @@ Spark's public feature set was only the to-do list.
   snoozed mail and reminders while your computers are off.
 - Every computer sees the same accounts, snoozes and drafts. Phones and browsers get a web UI with a
   phone layout that you can add to the home screen.
-- Devices pair with a one-time code; each gets its own revocable key.
+- One owner account on the server (email + password + optional TOTP two-step verification); each device gets its own revocable key. Pairing codes remain for first setup.
 
 **AI agents: CLI and MCP**
 - `octo`: a CLI and an **MCP server** for Claude Code / Claude Desktop with per-account access levels

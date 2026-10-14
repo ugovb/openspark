@@ -123,6 +123,14 @@ describe('home-server account', () => {
     assert.equal(again.status, 401)
   })
 
+  it('does not let a device flip the pairing switch through the generic settings call', async () => {
+    for (const method of ['setKV', 'getKV']) {
+      const r = await json('/api/call', { method, args: ['server.allowPairing', true] }, token)
+      assert.equal(r.status, 403)
+    }
+    assert.equal((await json('/api/call', { method: 'getKV', args: ['ui.something', null] }, token)).status, 200)
+  })
+
   it('turns pairing codes back on, then off, with password and code', async () => {
     const body = (allow: boolean, extra = {}) => ({ allow, password: PASSWORD, code: recovery[1], ...extra })
     assert.equal((await json('/api/account/pairing', body(true, { password: 'nope nope nope' }), token)).status, 403)

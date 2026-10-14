@@ -196,6 +196,19 @@ export function installWebBridge(): void {
     serverConnect: async () => {
       throw new Error(t('Not available in the browser'))
     },
+    serverLogin: async () => {
+      throw new Error(t('Not available in the browser'))
+    },
+    serverLogin2fa: async () => {
+      throw new Error(t('Not available in the browser'))
+    },
+    async serverAccount(apiPath: string, body?: Record<string, unknown>) {
+      const res = await fetch(apiPath, { method: body === undefined ? 'GET' : 'POST', headers: H, body: body === undefined ? undefined : encodeWire(body) })
+      const j = decodeWire<Record<string, unknown> & { error?: string }>(await res.text())
+      if (!res.ok || j.error) throw new Error(j.error || `HTTP ${res.status}`)
+      if (apiPath === '/api/account/revoke-all') location.reload()
+      return j
+    },
     // "Odłącz" in a browser = log out this browser
     async serverDisconnect() {
       await fetch('/api/logout', { method: 'POST', headers: H })

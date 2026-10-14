@@ -42,6 +42,10 @@ const api = {
   serverStatus: () => ipcRenderer.invoke('server-status'),
   serverProbe: (url: string) => ipcRenderer.invoke('server-probe', url),
   serverConnect: (url: string, code: string, deviceName: string) => ipcRenderer.invoke('server-connect', url, code, deviceName),
+  serverLogin: (url: string, email: string, password: string, deviceName: string) => ipcRenderer.invoke('server-login', url, email, password, deviceName),
+  serverLogin2fa: (url: string, ticket: string, code: string) => ipcRenderer.invoke('server-login-2fa', url, ticket, code),
+  /** the home server's owner account; apiPath is /api/account…, a body makes it a POST */
+  serverAccount: (apiPath: string, body?: Record<string, unknown>) => ipcRenderer.invoke('server-account', apiPath, body),
   serverDisconnect: () => ipcRenderer.invoke('server-disconnect'),
   serverNewCode: (name?: string) => ipcRenderer.invoke('server-new-code', name),
   serverRevoke: (id: string) => ipcRenderer.invoke('server-revoke', id),

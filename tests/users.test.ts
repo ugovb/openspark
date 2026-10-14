@@ -10,6 +10,7 @@ process.env.OCTO_SECRETS = 'memory'
 process.env.OCTO_QUIET = '1'
 
 import { initCore } from '../src/core/boot'
+import { setLang } from '../src/shared/i18n'
 import { run } from '../src/core/db'
 import {
   base32Decode, base32Encode, beginTotp, changePassword, checkCredentials, checkSecondFactor, confirmTotp, createOwner, disableTotp, hasOwner,
@@ -17,6 +18,7 @@ import {
 } from '../src/server/users'
 
 initCore()
+setLang('en') // the suite runs in Polish; these assertions check the English messages
 
 // RFC 6238 appendix B, SHA-1 secret "12345678901234567890" (6 digits = last six of the published 8-digit codes)
 const RFC_SECRET = base32Encode(Buffer.from('12345678901234567890'))

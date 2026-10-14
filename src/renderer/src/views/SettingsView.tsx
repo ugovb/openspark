@@ -15,6 +15,7 @@ import { setUi, useStore } from '../lib/store'
 import AccountWizard from './AccountWizard'
 import { Avatar, Button, cx, Field, IconButton, inputCls, Modal, Select, Spinner, Toggle } from '../components/ui'
 import { APP_VERSION } from '../../../shared/version'
+import AccountSection from './AccountSection'
 
 type Tab =
   | 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'swipes' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
@@ -855,6 +856,12 @@ function ServerTab() {
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [probe, setProbe] = useState('')
+  // how this app signs in: email + password (+ code), or a one-time pairing code
+  const [how, setHow] = useState<'account' | 'code'>('account')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [ticket, setTicket] = useState('')
+  const [totp, setTotp] = useState('')
   const load = async () => setSt((await window.octo.serverStatus()) as ServerStatus)
   useEffect(() => void load(), [])
   if (!st) return <Spinner />
@@ -865,20 +872,33 @@ function ServerTab() {
       try {
         const info = await window.octo.serverProbe(url)
         setProbe(`✓ ${t('Found the server “{host}” (version {version})', { host: info.hostname, version: info.version })}`)
+        setHow(info.account ? 'account' : 'code')
       } catch (e) {
         setProbe(`✗ ${errorText(e)}`)
       }
     }
     const connect = async () => {
-      if (!window.confirm(t('After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?'))) return
+      if (!ticket && !window.confirm(t('After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?'))) return
       setBusy(true)
       try {
-        await window.octo.serverConnect(url, code, name)
+        if (how === 'code') await window.octo.serverConnect(url, code, name)
+        else if (ticket) await window.octo.serverLogin2fa(url, ticket, totp)
+        else {
+          const r = (await window.octo.serverLogin(url, email, password, name)) as { needs2fa?: boolean; ticket?: string } | undefined
+          if (r?.needs2fa && r.ticket) {
+            setTicket(r.ticket)
+            setBusy(false)
+          }
+        }
       } catch (e) {
         toast({ level: 'error', message: errorText(e) })
         setBusy(false)
+        if (ticket) setTotp('')
       }
     }
+    const ready = how === 'code'
+      ? code.replace(/[^A-Za-z0-9]/g, '').length >= 8
+      : ticket ? totp.trim().length >= 6 : email.includes('@') && password.length > 0
     return (
       <>
         <Section title={t('Home server')} hint={t('An always-on computer (Raspberry Pi, NAS, old laptop) running Octopus Mail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.')}>
@@ -892,18 +912,38 @@ function ServerTab() {
           </div>
           <div className="grid grid-cols-2 max-md:grid-cols-1 gap-x-4">
             <Field label={t('Server address')}>
-              <input className={inputCls} placeholder={t('e.g. 192.168.1.50 or raspberrypi.local')} value={url} onChange={(e) => (setUrl(e.target.value), setProbe(''))} onBlur={() => void check()} />
-            </Field>
-            <Field label={t('Pairing code')}>
-              <input className={cx(inputCls, 'uppercase tracking-widest')} placeholder="XXXX-XXXX" maxLength={9} value={code} onChange={(e) => setCode(e.target.value)} />
+              <input className={inputCls} placeholder={t('e.g. 192.168.1.50 or raspberrypi.local')} value={url} onChange={(e) => (setUrl(e.target.value), setProbe(''), setTicket(''))} onBlur={() => void check()} />
             </Field>
             <Field label={t('Name of this device')}>
               <input className={inputCls} placeholder={t('e.g. Anna’s laptop')} value={name} onChange={(e) => setName(e.target.value)} />
             </Field>
-            <div className="flex items-end pb-1.5">
-              <Button variant="primary" disabled={busy || !url.trim() || code.replace(/[^A-Za-z0-9]/g, '').length < 8} onClick={() => void connect()}>
-                {busy && <Spinner />} {t('Connect to server')}
+            {how === 'code' ? (
+              <Field label={t('Pairing code')}>
+                <input className={cx(inputCls, 'uppercase tracking-widest')} placeholder="XXXX-XXXX" maxLength={9} value={code} onChange={(e) => setCode(e.target.value)} />
+              </Field>
+            ) : ticket ? (
+              <Field label={t('Code from your authenticator app (or a recovery code)')}>
+                <input className={cx(inputCls, 'tracking-widest')} inputMode="numeric" autoComplete="one-time-code" autoFocus value={totp} onChange={(e) => setTotp(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ready && void connect()} />
+              </Field>
+            ) : (
+              <>
+                <Field label={t('Email')}>
+                  <input className={inputCls} type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </Field>
+                <Field label={t('Password')}>
+                  <input className={inputCls} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ready && void connect()} />
+                </Field>
+              </>
+            )}
+            <div className="flex items-end gap-3 pb-1.5">
+              <Button variant="primary" disabled={busy || !url.trim() || !ready} onClick={() => void connect()}>
+                {busy && <Spinner />} {ticket ? t('Verify') : how === 'code' ? t('Connect to server') : t('Sign in')}
               </Button>
+              {!ticket && (
+                <button className="text-[12.5px] text-accent hover:underline" onClick={() => setHow(how === 'code' ? 'account' : 'code')}>
+                  {how === 'code' ? t('Sign in with email and password') : t('Use a pairing code instead')}
+                </button>
+              )}
             </div>
           </div>
           {probe && <div className={cx('pb-2 text-[12.5px]', probe.startsWith('✓') ? 'text-success' : 'text-danger')}>{probe}</div>}
@@ -948,6 +988,7 @@ function ServerTab() {
           </Button>
         </div>
       </Section>
+      <AccountSection />
       <Section title={t('Devices')} hint={t('Computers and browsers that have access to your mail on the server.')}>
         {st.devices.map((d) => (
           <div key={d.id} className="flex items-center gap-3 border-b border-line py-2 last:border-0">

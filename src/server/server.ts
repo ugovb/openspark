@@ -381,6 +381,8 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         const { method, args } = decodeWire<{ method: string; args: unknown[] }>((await readBody(req)).toString('utf8'))
         const fn = svc[method]
         if (typeof fn !== 'function' || LOCAL_ONLY_METHODS.has(method) || method === 'actor') return send(res, 400, { error: t('Unknown method {method}', { method }) })
+        // devices, pairing codes and the pairing switch live under server.* and are only changed through the account routes
+        if ((method === 'getKV' || method === 'setKV') && String(args?.[0] ?? '').startsWith('server.')) return send(res, 403, { error: t('Forbidden') })
         try {
           return send(res, 200, { result: await fn(...(args || [])) })
         } catch (e) {
