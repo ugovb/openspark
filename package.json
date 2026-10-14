@@ -1,7 +1,7 @@
 {
   "name": "octopus-mail",
   "productName": "Octopus Mail",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Free, local-first desktop mail client with Smart Inbox, AI, calendar and an agent CLI",
   "author": {
     "name": "Krabi",
