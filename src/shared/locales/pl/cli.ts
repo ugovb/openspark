@@ -71,14 +71,14 @@ const dict: Dictionary = {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
-  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`]: `Inne:
   octo status · octo sync [konto] · octo history [--limit N] · octo daemon (synchronizacja bez okna)
   octo serve [--port 8787]   serwer domowy (np. Raspberry Pi): silnik 24/7 + API + interfejs WWW
   octo server pair | devices | revoke <ID>    kody parowania i sparowane urządzenia
-  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               konto serwera domowego (odzyskiwanie na NAS)
   octo mcp   (serwer MCP na stdio dla Claude Code / Claude Desktop)
 Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
@@ -284,6 +284,8 @@ Aplikacja na komputer również może się sparować. Nowy kod: octo server pair
     'New password: ': 'Nowe hasło: ',
     'Repeat the password: ': 'Powtórz hasło: ',
     'Password changed for {email}. The account is unlocked.': 'Zmieniono hasło dla {email}. Konto jest odblokowane.',
+    'Account deleted. Open the server address in a browser and create a new one with this pairing code (valid 15 min): {code}': 'Konto usunięte. Otwórz adres serwera w przeglądarce i utwórz nowe za pomocą tego kodu parowania (ważny 15 min): {code}',
+    'This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.': 'To usuwa konto {email} i wylogowuje wszystkie urządzenia. Konta pocztowe i wiadomości zostają. Uruchom ponownie z --yes, aby potwierdzić.',
   },
   plurals: {},
 }

@@ -75,6 +75,17 @@ describe('home-server account', () => {
     assert.doesNotMatch(html, /pair=1/)
   })
 
+  it('sends a stale creation form to the sign-in page instead of a dead end', async () => {
+    const body = new URLSearchParams({ code: 'ABCD-EFGH', email: 'me@example.com', password: PASSWORD, password2: PASSWORD })
+    const r = await fetch(`${base}/api/auth/setup`, { method: 'POST', body, headers: { 'accept-language': 'en' } })
+    assert.equal(r.status, 409)
+    const html = await r.text()
+    assert.match(html, /action="\/api\/auth\/login"/)
+    assert.doesNotMatch(html, /action="\/api\/auth\/setup"/)
+    assert.match(html, /An account already exists on this server\. Sign in with its email and password\./)
+    assert.match(html, /value="me@example\.com"/)
+  })
+
   it('signs in with email and password', async () => {
     assert.equal((await json('/api/auth/login', { email: 'me@example.com', password: 'wrong passphrase!!' })).status, 401)
     const r = await json('/api/auth/login', { email: 'ME@example.com', password: PASSWORD, name: 'Test Mac' })

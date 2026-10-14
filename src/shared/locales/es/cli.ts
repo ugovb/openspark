@@ -71,14 +71,14 @@ const dict: Dictionary = {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
-  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`]: `Otros:
   octo status · octo sync [cuenta] · octo history [--limit N] · octo daemon (sincronización sin ventana)
   octo serve [--port 8787]   servidor doméstico (p. ej. Raspberry Pi): motor 24/7 + API + interfaz web
   octo server pair | devices | revoke <ID>    códigos de emparejamiento y dispositivos emparejados
-  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               la cuenta del servidor doméstico (recuperación en el NAS)
   octo mcp   (servidor MCP por stdio para Claude Code / Claude Desktop)
 Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes el correo nuevo)`,
@@ -284,6 +284,8 @@ La aplicación de escritorio también puede emparejarse. Código nuevo: octo ser
     'New password: ': 'Nueva contraseña: ',
     'Repeat the password: ': 'Repite la contraseña: ',
     'Password changed for {email}. The account is unlocked.': 'Contraseña cambiada para {email}. La cuenta está desbloqueada.',
+    'Account deleted. Open the server address in a browser and create a new one with this pairing code (valid 15 min): {code}': 'Cuenta eliminada. Abre la dirección del servidor en un navegador y crea una nueva con este código de emparejamiento (válido 15 min): {code}',
+    'This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.': 'Esto elimina la cuenta {email} y cierra la sesión en todos los dispositivos. Las cuentas de correo y los mensajes se conservan. Vuelve a ejecutarlo con --yes para confirmar.',
   },
   plurals: {},
 }

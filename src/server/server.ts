@@ -223,7 +223,12 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         const { fields, json } = parseFields((await readBody(req, 8192)).toString('utf8'))
         const fail = (status: number, text: string) =>
           json ? send(res, status, { error: text }) : page(status, { view: 'setup', error: { text }, email: fields.email })
-        if (hasOwner()) return fail(403, withLang(lang, () => t('An account already exists on this server.')))
+        // a stale or repeated form: there is nothing to create any more, so send the person to the sign-in page
+        if (hasOwner()) {
+          return json
+            ? send(res, 403, { error: withLang(lang, () => t('An account already exists on this server.')) })
+            : page(409, { view: 'login', error: 'account-exists', email: fields.email, allowPairing: pairingAllowed() })
+        }
         if (tooManyFailures(ip)) return fail(429, authMessage('too-many'))
         const problem = withLang(lang, () =>
           emailProblem(fields.email || '') || (fields.password !== (fields.password2 ?? fields.password) ? t('The passwords do not match.') : passwordProblem(fields.password || '', fields.email)))

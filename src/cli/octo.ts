@@ -18,7 +18,7 @@ import { addr, addrs, fmtTime, table, trunc } from './format'
 const VERSION = APP_VERSION
 const BOOL_FLAGS = new Set([
   'json', 'wait', 'stream', 'no-signature', 'signature', 'reply-all', 'new-senders', 'all', 'force', 'help', 'unread',
-  'no-sync', 'ascending', 'download-attachments', 'html', 'quiet', 'no-wait', 'personal',
+  'no-sync', 'ascending', 'download-attachments', 'html', 'quiet', 'no-wait', 'personal', 'yes',
 ])
 
 interface Args {
@@ -205,7 +205,7 @@ function help(): string {
   octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
   octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
   octo server pair | devices | revoke <ID>    pairing codes and paired devices
-  octo server account | reset-password | 2fa-off | sign-out-all | pairing on|off
+  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               the account of the home server (recovery on the NAS)
   octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`),
@@ -309,7 +309,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       } else if (sub === 'revoke') {
         if (!a._[0]) throw new CliError(t('Give a device ID (octo server devices)'))
         console.log(auth.revokeDevice(a._[0]) ? t('Access revoked.') : t('No such device.'))
-      } else if (sub === 'account' || sub === 'reset-password' || sub === '2fa-off' || sub === 'sign-out-all' || sub === 'pairing') {
+      } else if (sub === 'account' || sub === 'reset-password' || sub === 'reset-account' || sub === '2fa-off' || sub === 'sign-out-all' || sub === 'pairing') {
         // recovery commands: being able to run them on the NAS (docker exec) is the proof of ownership
         const users = await import('../server/users')
         const owner = users.getOwner()
@@ -329,7 +329,14 @@ The desktop app can also pair with it. New code: octo server pair · Device list
           return
         }
         if (!owner) throw new CliError(t('No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).'))
-        if (sub === '2fa-off') {
+        if (sub === 'reset-account') {
+          // starts over: deletes the account, signs every device out and opens account creation again
+          if (!a.b.has('yes')) throw new CliError(t('This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.', { email: owner.email }))
+          users.deleteOwner()
+          auth.revokeAllDevices()
+          const { code } = auth.createPairingCode()
+          console.log(t('Account deleted. Open the server address in a browser and create a new one with this pairing code (valid 15 min): {code}', { code }))
+        } else if (sub === '2fa-off') {
           users.disableTotp(owner.id)
           console.log(t('Two-step verification is off. Turn it on again in Settings → Home server.'))
         } else if (sub === 'sign-out-all') {
@@ -346,7 +353,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
           }
           console.log(t('Password changed for {email}. The account is unlocked.', { email: owner.email }))
         }
-      } else throw new CliError('octo server pair [--name …] | devices | revoke <ID> | account | reset-password | 2fa-off | sign-out-all | pairing on|off')
+      } else throw new CliError('octo server pair [--name …] | devices | revoke <ID> | account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off')
       return
     }
     case 'daemon': {

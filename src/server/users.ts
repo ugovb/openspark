@@ -2,7 +2,7 @@
 // (RFC 6238) with one-time recovery codes. Everything uses node:crypto, no extra dependency.
 import crypto from 'node:crypto'
 import { promisify } from 'node:util'
-import { all, get, now, run } from '../core/db'
+import { all, get, now, run, tx } from '../core/db'
 import { getSecret, setSecret, totpKeyName } from '../core/secrets'
 import { t } from '../shared/i18n'
 
@@ -199,11 +199,20 @@ export async function createOwner(email: string, password: string): Promise<User
   const bad = emailProblem(email) || passwordProblem(password, email)
   if (bad) throw new AuthError(bad)
   const hash = await hashPassword(password)
-  const id = run(
-    'INSERT INTO users(email, password_hash, created_at, password_changed_at) VALUES (?, ?, ?, ?)',
-    normEmail(email), hash, now(), now(),
-  ).lastInsertRowid
+  // hashing takes a moment: two requests may both have passed the first check, so look again right before inserting
+  const id = tx(() => {
+    if (hasOwner()) throw new AuthError(t('An account already exists on this server.'))
+    return run(
+      'INSERT INTO users(email, password_hash, created_at, password_changed_at) VALUES (?, ?, ?, ?)',
+      normEmail(email), hash, now(), now(),
+    ).lastInsertRowid
+  })
   return getUser(id)!
+}
+
+/** Deletes the owner account (recovery command on the NAS): sign-up opens again. Returns false when there was none. */
+export function deleteOwner(): boolean {
+  return run('DELETE FROM users').changes > 0
 }
 
 let dummyHash: Promise<string> | null = null

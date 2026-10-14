@@ -44,6 +44,9 @@ You sign in to them with **one OpenSpark account**:
 3. From now on every new device signs in with email + password + the 6-digit code. Pairing codes are switched off
    (they can be allowed again in *My account*).
 
+Seeing "An account already exists on this server"? A first attempt worked: reload the page and sign in
+(forgot the password? `reset-password` above).
+
 After 10 wrong attempts the account is locked for 15 minutes. Changing the password, the 2FA settings or signing out
 everywhere asks for the password (and a code) again.
 
@@ -55,6 +58,8 @@ Being able to run a command on the NAS is the proof that the server is yours:
 sudo docker exec -it openspark-mail octo server account          # who is the owner, is 2FA on
 sudo docker exec -it openspark-mail octo server reset-password   # new password (also unlocks the account)
 sudo docker exec openspark-mail octo server 2fa-off              # lost phone and recovery codes
+sudo docker exec openspark-mail octo server reset-account --yes  # delete the account (wrong email?) and start over;
+                                                                 # mail accounts and messages are kept
 sudo docker exec openspark-mail octo server sign-out-all         # sign every device out
 sudo docker exec openspark-mail octo server pairing on           # allow pairing codes again (off = default)
 ```

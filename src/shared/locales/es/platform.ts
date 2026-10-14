@@ -101,6 +101,7 @@ const dict: Dictionary = {
     'Enter a valid email address.': 'Introduce un correo válido.',
     'The passwords do not match.': 'Las contraseñas no coinciden.',
     'Forbidden': 'Prohibido',
+    'An account already exists on this server. Sign in with its email and password.': 'Ya existe una cuenta en este servidor. Inicia sesión con su correo y su contraseña.',
   },
   plurals: {
     '{n} new message': ['{n} mensaje nuevo', '{n} mensajes nuevos', '{n} mensajes nuevos'],

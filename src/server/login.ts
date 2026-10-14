@@ -40,7 +40,7 @@ export function browserDeviceName(lang: Lang, userAgent: string, ip: string): st
   })
 }
 
-export type LoginError = 'too-many' | 'bad-code' | 'invalid' | 'locked' | 'bad-totp' | 'expired'
+export type LoginError = 'too-many' | 'bad-code' | 'invalid' | 'locked' | 'bad-totp' | 'expired' | 'account-exists'
 
 export type AuthView =
   | { view: 'login'; error?: LoginError | { text: string }; email?: string; allowPairing?: boolean }
@@ -65,6 +65,7 @@ function errorText(e: LoginError | { text: string } | undefined): string {
     locked: t('Too many wrong attempts — this account is locked for 15 minutes.'),
     'bad-totp': t('Wrong code.'),
     expired: t('This sign-in expired. Start again.'),
+    'account-exists': t('An account already exists on this server. Sign in with its email and password.'),
   }[e]
 }
 
@@ -78,7 +79,7 @@ input{width:100%;box-sizing:border-box;height:44px;border:1px solid #e3e3ea;bord
 input:focus{outline:2px solid var(--a);outline-offset:-1px;border-color:var(--a)}
 input.code{font-size:20px;letter-spacing:3px;text-align:center;text-transform:uppercase}
 input.num{font-size:24px;letter-spacing:6px;text-align:center}
-button{margin-top:16px;width:100%;height:44px;border:0;border-radius:10px;background:var(--a);color:#fff;font-size:15px;font-weight:600}
+button{margin-top:16px;cursor:pointer;width:100%;height:44px;border:0;border-radius:10px;background:var(--a);color:#fff;font-size:15px;font-weight:600}
 a.alt{display:block;margin-top:16px;font-size:13px;color:var(--a);text-decoration:none}
 .err{color:#d93a3a;font-size:13px;margin-top:12px}
 code{font-size:12.5px}
@@ -128,7 +129,7 @@ export function authPage(lang: Lang, v: AuthView): string {
     return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${t('Octopus Mail — sign in')}</title>
 <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="theme-color" content="#1c1c1e">
-<style>${STYLE}</style></head><body><form class="card" method="post" action="${action}">
+<style>${STYLE}</style></head><body><form class="card" method="post" action="${action}" onsubmit="var b=this.querySelector('button[type=submit]');if(b){if(b.disabled)return false;b.disabled=true;b.style.opacity='.6';b.textContent='…'}">
 <img src="/logo.svg" alt="" onerror="this.remove()"><h1>${title}</h1>
 ${body}${err ? `<div class="err" role="alert">${err}</div>` : ''}${alt}
 </form></body></html>`
