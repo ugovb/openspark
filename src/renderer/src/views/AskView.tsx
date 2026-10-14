@@ -42,7 +42,7 @@ export default function AskView() {
         acc += d
         upd({ a: acc })
       })
-      upd({ a: r.text, sources: r.sources, busy: false })
+      upd({ a: r?.text ?? acc, sources: r?.sources ?? [], busy: false })
     } catch (e) {
       upd({ busy: false, error: errorText(e) })
     }

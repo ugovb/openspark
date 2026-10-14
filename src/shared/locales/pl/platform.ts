@@ -3,6 +3,8 @@ import type { Dictionary } from '../../i18n'
 
 const dict: Dictionary = {
   strings: {
+    'Something went wrong': 'Coś poszło nie tak',
+    'Reload': 'Odśwież',
     // src/main/index.ts — window, context menu, notifications, tray
     'Octopus Mail — DEMO (test profile)': 'Octopus Mail — DEMO (profil testowy)',
     'Add to dictionary': 'Dodaj do słownika',

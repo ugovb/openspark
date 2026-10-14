@@ -118,7 +118,7 @@ const ThreadRow = memo(function ThreadRow({
         ) : (
           <>
             <Avatar addr={th.from} size={compact ? 28 : 34} className="group-hover:opacity-0" />
-            <div className="absolute inset-0 hidden items-center justify-center rounded-full border-2 border-line bg-surface group-hover:flex" />
+            <div className="absolute inset-0 hidden items-center justify-center rounded-full border-2 border-accent/40 bg-surface text-accent/30 hover:border-accent hover:text-accent group-hover:flex"><Check size={compact ? 13 : 16} strokeWidth={2.5} /></div>
           </>
         )}
       </div>

@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { getLang, initLang, type LangSetting } from '../../shared/i18n'
 import './index.css'
+import ErrorBoundary from './components/ErrorBoundary'
 import { LANG_KEY } from './lib/lang'
 import { installWebBridge } from './lib/web-bridge'
 
@@ -22,7 +23,9 @@ document.documentElement.lang = getLang()
 void import('./App').then(({ default: App }) =>
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </StrictMode>,
   ),
 )
