@@ -37,7 +37,7 @@
     "dist:linux": "npm run build && electron-builder --linux",
     "dist:server": "npm run build && node scripts/pack-server.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
-    "dist:mac": "npm run build && electron-builder --mac --arm64"
+    "dist:mac": "npm run build && electron-builder --mac --arm64 --publish never"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
