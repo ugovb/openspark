@@ -9,6 +9,7 @@ import type { Category, ThreadSummary } from '../../../shared/types'
 import { api } from '../lib/api'
 import { dayHeader, displayName, listDate } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
+import { useSwipe } from '../lib/swipe'
 import { useOnePane, useStore } from '../lib/store'
 import DraftList from './DraftList'
 import DrawerButton from './DrawerButton'
@@ -113,6 +114,31 @@ function HoverActions({ th, onMore }: { th: ThreadSummary; onMore: (e: React.Mou
   )
 }
 
+/** Phone swipe actions (Settings → Swipes). */
+const SWIPE: Record<string, { color: string; icon: React.ReactNode; label: (th: ThreadSummary) => string }> = {
+  archive: { color: 'var(--success)', icon: <Check size={20} />, label: () => t('Done') },
+  trash: { color: 'var(--danger)', icon: <Trash2 size={20} />, label: () => t('Trash') },
+  pin: { color: 'var(--pin)', icon: <Pin size={20} />, label: (th) => (th.pinned ? t('Unpin') : t('Pin')) },
+  snooze: { color: 'var(--warning)', icon: <Clock size={20} />, label: () => t('Snooze') },
+  read: { color: 'var(--accent)', icon: <MailOpen size={20} />, label: (th) => (th.unread ? t('Read') : t('Unread')) },
+  aside: { color: 'var(--newsletter)', icon: <Coffee size={20} />, label: (th) => (th.set_aside ? t('Back to Inbox') : t('Set aside')) },
+  priority: { color: 'var(--notification)', icon: <Zap size={20} />, label: (th) => (th.priority ? t('Remove priority') : t('Priority')) },
+}
+
+function runSwipe(action: string, th: ThreadSummary) {
+  const { act } = useStore.getState()
+  const ids = [th.thread_id]
+  switch (action) {
+    case 'archive': return void act('archive', ids)
+    case 'trash': return void act('trash', ids)
+    case 'pin': return void act(th.pinned ? 'unpin' : 'pin', ids)
+    case 'snooze': return useStore.setState({ snoozeFor: ids, pickerMode: 'snooze' })
+    case 'read': return void act(th.unread ? 'read' : 'unread', ids)
+    case 'aside': return void act(th.set_aside ? 'unaside' : 'aside', ids)
+    case 'priority': return void act(th.priority ? 'unpriority' : 'priority', ids)
+  }
+}
+
 function names(th: ThreadSummary): string {
   return th.participants.length > 1 && th.message_count > 1
     ? th.participants.slice(-3).map((p) => (p.name === 'Ja' || p.name === t('Me') ? t('Me') : displayName(p).split(' ')[0])).join(', ')
@@ -133,15 +159,22 @@ function Chips({ th }: { th: ThreadSummary }) {
 }
 
 const ThreadRow = memo(function ThreadRow({
-  t: th, selected, checked, nested, compact, variant, doneIsUndo, onOpen, onCheck, onMenu,
+  t: th, selected, checked, nested, compact, variant, doneIsUndo, swipe, onOpen, onCheck, onMenu,
 }: {
   t: ThreadSummary; selected: boolean; checked: boolean; nested?: boolean; compact: boolean; variant: Variant; doneIsUndo: boolean
+  swipe?: { left: string; right: string }
   onOpen: (t: ThreadSummary, e: React.MouseEvent) => void; onCheck: (t: ThreadSummary, e: React.MouseEvent) => void; onMenu: (t: ThreadSummary, e: React.MouseEvent) => void
 }) {
   const act = useStore((s) => s.act)
   const showAccount = useStore((s) => s.accounts.length > 1)
   const done = () => void act(doneIsUndo ? 'moveToInbox' : 'archive', [th.thread_id])
   const highlighted = selected || checked
+  const sw = useSwipe({
+    enabled: !!swipe,
+    onLeft: swipe && SWIPE[swipe.left] ? () => runSwipe(swipe.left, th) : undefined,
+    onRight: swipe && SWIPE[swipe.right] ? () => runSwipe(swipe.right, th) : undefined,
+    onLong: () => useStore.getState().toggleCheck(th.thread_id),
+  })
 
   if (variant === 'wide') {
     return (
@@ -188,15 +221,29 @@ const ThreadRow = memo(function ThreadRow({
     )
   }
 
+  const left = swipe ? SWIPE[swipe.left] : undefined
+  const right = swipe ? SWIPE[swipe.right] : undefined
+  const shown = sw.dx > 0 ? right : sw.dx < 0 ? left : undefined
   return (
+    <div className={cx('relative mx-2 overflow-hidden rounded-xl', nested && 'ml-6')}>
+      {shown && (
+        <div
+          className={cx('absolute inset-0 flex items-center px-6 text-white transition-opacity', sw.dx > 0 ? 'justify-start' : 'justify-end', !sw.armed && 'opacity-60')}
+          style={{ background: shown.color }}
+        >
+          <span className="flex flex-col items-center gap-0.5 text-[11px] font-medium">{shown.icon}{shown.label(th)}</span>
+        </div>
+      )}
     <div
+      {...sw.handlers}
       onClick={(e) => onOpen(th, e)}
       onContextMenu={(e) => onMenu(th, e)}
+      style={{ transform: sw.dx ? `translateX(${sw.dx}px)` : undefined, touchAction: swipe ? 'pan-y' : undefined }}
       className={cx(
-        'group relative mx-2 flex cursor-default gap-3 rounded-xl px-3 transition-colors',
+        'group relative flex cursor-default gap-3 rounded-xl px-3',
+        sw.dx ? '' : 'transition-[transform,background-color] duration-200',
         compact ? 'py-2' : 'py-2.5',
-        nested && 'ml-6',
-        highlighted ? 'bg-row-hover' : 'hover:bg-row-hover',
+        highlighted ? 'bg-row-hover' : 'bg-surface hover:bg-row-hover',
       )}
     >
       {th.unread && <span className="absolute left-0.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-accent" />}
@@ -223,6 +270,7 @@ const ThreadRow = memo(function ThreadRow({
         {!compact && <div className="line-clamp-1 text-[13px] text-muted">{th.snippet || ' '}</div>}
         <div className="mt-1 flex flex-wrap gap-1 empty:hidden"><Chips th={th} /></div>
       </div>
+    </div>
     </div>
   )
 })
@@ -309,7 +357,7 @@ function GroupRow({ category, threads, expanded, variant, onToggle }: { category
 }
 
 /** Title row of the mail list: back, title and subtitle, search and compose. */
-function ListHeader({ loading, bulk }: { loading: boolean; bulk: React.ReactNode }) {
+function ListHeader({ loading, bulk, scrolled }: { loading: boolean; bulk: React.ReactNode; scrolled: boolean }) {
   const { mailbox, accountFilter, accounts, setMailbox, setView, compose, refreshList } = useStore()
   const narrow = useNarrow()
   const { title, subtitle } = useMailboxTitle()
@@ -326,8 +374,38 @@ function ListHeader({ loading, bulk }: { loading: boolean; bulk: React.ReactNode
     if (!window.confirm(tp(all.length, 'Delete {n} conversation forever?', 'Delete {n} conversations forever?'))) return
     await useStore.getState().act('deleteForever', all.map((x) => x.thread_id))
   }
+  if (narrow) {
+    // phone: compact bar, large title underneath that folds into the bar while scrolling
+    return (
+      <header className="shrink-0 bg-surface">
+        <div className="flex h-12 items-center gap-1 px-2">
+          <DrawerButton />
+          {!home && <IconButton aria-label={t('Back to Inbox')} onClick={() => setMailbox({ kind: 'smart' })}><ArrowLeft size={18} /></IconButton>}
+          <span className={cx('min-w-0 flex-1 truncate text-center text-[16px] font-semibold transition-opacity duration-200', scrolled || bulk ? 'opacity-100' : 'opacity-0')}>{bulk ? '' : title}</span>
+          {bulk || (
+            <>
+              {loading && <Spinner className="text-muted" />}
+              {trashLike && <button onClick={() => void empty()} className="rounded-full px-2 py-1 text-[13px] font-medium text-danger">{t('Empty')}</button>}
+              <span className="w-10" />
+            </>
+          )}
+        </div>
+        <div className={cx('overflow-hidden px-4 transition-[max-height,opacity] duration-200', scrolled ? 'max-h-0 opacity-0' : 'max-h-20 pb-2 opacity-100')}>
+          <button
+            onClick={(e) => mailbox.kind === 'smart' && accounts.length > 1 && setMenu({ x: e.clientX, y: e.clientY + 14 })}
+            className="flex max-w-full items-center gap-1 text-left text-[30px] font-bold leading-tight tracking-tight"
+          >
+            <span className="truncate">{title}</span>
+            {mailbox.kind === 'smart' && accounts.length > 1 && <ChevronDown size={20} className="shrink-0 text-muted" />}
+          </button>
+          {subtitle && <div className="truncate text-[13px] text-muted">{subtitle}</div>}
+        </div>
+        <Menu items={inboxItems} anchor={menu} onClose={() => setMenu(null)} />
+      </header>
+    )
+  }
   return (
-    <header className="flex h-[72px] shrink-0 items-center gap-2 px-6 pt-2 max-md:h-14 max-md:px-2 max-md:pt-0">
+    <header className="flex h-[72px] shrink-0 items-center gap-2 px-6 pt-2">
       <DrawerButton />
       {!home && !narrow && (
         <Tip label={t('Back to Inbox')} kbd="G I">
@@ -372,6 +450,8 @@ export default function ThreadList() {
   const parentRef = useRef<HTMLDivElement>(null)
   const [expanded, setExpanded] = useState<Set<Category>>(new Set())
   const [menu, setMenu] = useState<{ x: number; y: number; t: ThreadSummary } | null>(null)
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => setScrolled(false), [mailbox])
   const smart = mailbox.kind === 'smart' && settings?.smartInbox !== false
   const doneIsUndo = mailbox.kind === 'unified' && (mailbox.role === 'archive' || mailbox.role === 'trash')
   const groupCats = useMemo(() => {
@@ -385,6 +465,7 @@ export default function ThreadList() {
     [threads, smart, groupCats, expanded, settings?.gatekeeper, counts?.newsenders],
   )
   const compact = settings?.density === 'compact'
+  const swipe = useMemo(() => (narrow && settings ? { left: settings.swipeLeft, right: settings.swipeRight } : undefined), [narrow, settings?.swipeLeft, settings?.swipeRight])
   const virt = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -462,8 +543,8 @@ export default function ThreadList() {
 
   return (
     <section className={cx('flex h-full shrink-0 flex-col bg-surface', one ? 'min-w-0 flex-1' : 'w-[420px] border-r border-line')}>
-      <ListHeader loading={loading} bulk={bulk} />
-      <div ref={parentRef} className="min-h-0 flex-1 overflow-y-auto pb-24">
+      <ListHeader loading={loading} bulk={bulk} scrolled={scrolled} />
+      <div ref={parentRef} onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 24)} className="min-h-0 flex-1 overflow-y-auto pb-24">
         {!loading && rows.length === 0 ? (
           <Empty icon={mailbox.kind === 'smart' ? <InboxZero /> : <NoResults />} title={mailbox.kind === 'smart' ? t('All done!') : mailbox.kind === 'search' ? t('Nothing found') : t('Nothing here')} hint={mailbox.kind === 'smart' ? t('Nothing left to deal with in your inbox.') : mailbox.kind === 'search' ? t('Try other words or operators, e.g. from:, newer_than:30d, in:anywhere.') : undefined} />
         ) : (
@@ -506,6 +587,7 @@ export default function ThreadList() {
                       compact={compact}
                       variant={variant}
                       doneIsUndo={doneIsUndo}
+                      swipe={swipe}
                       selected={selected === r.t.thread_id}
                       checked={checked.includes(r.t.thread_id)}
                       onOpen={open}

@@ -131,6 +131,13 @@ body,
   }
 }
 
+/* phones: the strip under the bottom bar (home indicator) matches the bar */
+@media (max-width: 767px) {
+  body {
+    background: var(--surface) !important;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -167,7 +174,8 @@ button {
   cursor: default;
 }
 
-:focus-visible {
+/* text fields show focus with their own border; everything else gets the ring */
+:focus-visible:not(input, textarea, select, [contenteditable="true"]) {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }

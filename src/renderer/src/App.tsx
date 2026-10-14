@@ -6,6 +6,7 @@ import { MovePicker, SnoozePicker } from './components/Pickers'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
 import ThreadView from './components/ThreadView'
+import TabBar from './components/TabBar'
 import Toasts from './components/Toasts'
 import { PromptHost, Spinner } from './components/ui'
 import { api } from './lib/api'
@@ -196,7 +197,7 @@ export default function App() {
                 <button
                   title={t('New message')}
                   onClick={() => useStore.getState().compose({ mode: 'new' })}
-                  className="absolute bottom-5 right-5 z-20 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-fg"
+                  className="absolute bottom-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform active:scale-95"
                   style={{ boxShadow: 'var(--shadow)' }}
                 >
                   <PenSquare size={22} />
@@ -212,6 +213,7 @@ export default function App() {
           {view === 'search' && <SearchView />}
         </Suspense>
         {view === 'ask' && <AskView />}
+        {narrow && !phoneThread && (view === 'mail' || view === 'search' || view === 'ask') && <TabBar />}
       </main>
       {floatingComposer && <Composer key={composer.key} request={{ ...composer, inline: false }} />}
       <SnoozePicker />
