@@ -1031,7 +1031,9 @@ const SHORTCUTS: [string, string][] = [
 
 function AboutTab() {
   const [dir, setDir] = useState('')
+  const [legacy, setLegacy] = useState<string | null>(null)
   useEffect(() => void window.octo.dataDir().then(setDir), [])
+  useEffect(() => void window.octo.legacyProfile().then(setLegacy), [])
   return (
     <Section title={`OpenMail ${APP_VERSION}`}>
       <div className="py-1 text-[13px]">{t('A free email client with Smart Inbox, Gatekeeper, AI, a calendar and access for AI agents.')}</div>
@@ -1042,6 +1044,14 @@ function AboutTab() {
         <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/ugovb/openspark/issues')}>{t('report a bug')}</button>
       </div>
       <div className="py-1 text-[12.5px] text-muted">{t('App data:')} <button className="text-accent hover:underline" onClick={() => void window.octo.showItem(dir)}>{dir}</button></div>
+      {legacy && (
+        <div className="flex items-center gap-2 py-1 text-[12.5px] text-muted">
+          <span>{t('Old Octopus Mail profile kept at:')} <button className="text-accent hover:underline" onClick={() => void window.octo.showItem(legacy)}>{legacy}</button></span>
+          <Button size="sm" variant="danger" onClick={() => {
+            if (window.confirm(t('Delete the old Octopus Mail profile? OpenMail already has its own copy of your accounts and mail. This cannot be undone.'))) void window.octo.deleteLegacyProfile().then(() => setLegacy(null))
+          }}>{t('Delete old profile')}</Button>
+        </div>
+      )}
     </Section>
   )
 }

@@ -30,6 +30,9 @@ const api = {
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   showItem: (p: string) => ipcRenderer.invoke('show-item', p),
   dataDir: () => ipcRenderer.invoke('data-dir'),
+  /** folder of the old Octopus Mail profile (kept after the copy), or null */
+  legacyProfile: (): Promise<string | null> => ipcRenderer.invoke('legacy-profile'),
+  deleteLegacyProfile: (): Promise<boolean> => ipcRenderer.invoke('delete-legacy-profile'),
   cliPath: () => ipcRenderer.invoke('cli-path'),
   setBadge: (dataUrl: string | null, count: number) => ipcRenderer.invoke('set-badge', dataUrl, count),
   setLoginItem: (on: boolean) => ipcRenderer.invoke('set-login-item', on),

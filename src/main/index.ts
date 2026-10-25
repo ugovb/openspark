@@ -8,7 +8,8 @@ import { getLang, initLang, t, tp, type Lang, type LangSetting } from '../shared
 import type { CoreEvent } from '../shared/types'
 import { log } from '../core/events'
 import { startOAuth, type OAuthClient, type OAuthProvider } from '../core/oauth'
-import { dataDir } from '../core/paths'
+import { dataDir, platformConfigDir } from '../core/paths'
+import { legacyProfilePath } from '../core/migrate'
 import { parseConnectLink } from '../shared/connect-link'
 import { createServerAccount, pollCodeLogin, startCodeLogin } from './server-client'
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
@@ -414,6 +415,14 @@ function registerIpc(): void {
   })
   ipcMain.handle('show-item', (_e, p: string) => shell.showItemInFolder(p))
   ipcMain.handle('data-dir', () => dataDir())
+  // the Octopus Mail folder that stays next to the copied OpenMail profile
+  ipcMain.handle('legacy-profile', () => (env('HOME') ? null : legacyProfilePath(platformConfigDir())))
+  ipcMain.handle('delete-legacy-profile', () => {
+    const old = env('HOME') ? null : legacyProfilePath(platformConfigDir())
+    if (!old) return false
+    fs.rmSync(old, { recursive: true, force: true })
+    return true
+  })
   ipcMain.handle('cli-path', () => {
     // installed: the openmail wrapper next to the executable runs the CLI with Electron's own Node; dev: plain node + bundle
     const wrapper = process.platform === 'win32' ? 'openmail.cmd' : 'openmail'

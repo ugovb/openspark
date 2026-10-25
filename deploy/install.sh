@@ -28,7 +28,7 @@ if [ "${1:-}" = "--uninstall" ]; then
   rm -f "$UNIT" /usr/local/bin/openmail /usr/local/bin/octo
   systemctl daemon-reload
   rm -rf "$APP"
-  say "Usunięto program. Dane (konta, poczta) zostały w katalogu ~/.config/Octopus Mail użytkownika serwera."
+  say "Usunięto program. Dane (konta, poczta) zostały w katalogu ~/.config/OpenMail użytkownika serwera."
   exit 0
 fi
 

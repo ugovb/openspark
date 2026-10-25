@@ -387,6 +387,9 @@ const dict: Dictionary = {
     'Only approve a device that is yours: it will see all your mail. For your security, enter your password again.': 'Zatwierdzaj tylko własne urządzenie: zobaczy całą Twoją pocztę. Dla bezpieczeństwa wpisz hasło ponownie.',
     'On the new device choose “Sign in with a code”, then type the code it shows here. No password to type on that device.': 'Na nowym urządzeniu wybierz „Zaloguj się kodem z innego urządzenia”, potem wpisz tutaj pokazany kod. Na tamtym urządzeniu nie wpisujesz hasła.',
     'Enter a code': 'Wpisz kod',
+    'Old Octopus Mail profile kept at:': 'Stary profil Octopus Mail zachowany w:',
+    'Delete the old Octopus Mail profile? OpenMail already has its own copy of your accounts and mail. This cannot be undone.': 'Usunąć stary profil Octopus Mail? OpenMail ma już własną kopię Twoich kont i poczty. Tego nie da się cofnąć.',
+    'Delete old profile': 'Usuń stary profil',
   },
   plurals: {
     'Applied to {n} existing conversation': [

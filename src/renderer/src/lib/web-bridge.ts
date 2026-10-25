@@ -161,6 +161,8 @@ export function installWebBridge(): void {
     },
     showItem: async () => undefined,
     dataDir: async () => t('(home server)'),
+    legacyProfile: async () => null,
+    deleteLegacyProfile: async () => false,
     cliPath: async () => ({ script: '', node: '', packaged: false }),
     setBadge: async (_dataUrl: string | null, count: number) => {
       document.title = count ? `(${count}) OpenMail` : 'OpenMail'

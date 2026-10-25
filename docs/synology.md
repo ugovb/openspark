@@ -95,3 +95,9 @@ and per-device tokens. The TOTP secret is encrypted in the database; mailbox pas
 file) so the server can sync while you are signed out.
 For a stricter setup keep port 443 closed and use Tailscale (Synology package + iPhone app) with the same URL on the tailnet.
 Back up `/volume1/docker/openspark` (database, secrets, attachments).
+
+## Upgrading from Octopus Mail
+
+- **Docker / Container Manager:** keep the same data folder or volume. The container reads the old `octopus.db` as it is, nothing is copied or renamed. Stop and remove the old container, then start the new one (`openspark-mail`).
+- **Raspberry Pi / Debian (systemd):** run `sudo bash install.sh` from the new archive. The first start copies `~/.config/Octopus Mail` to `~/.config/OpenMail` and leaves the old folder in place. Then stop the old service for good: `sudo systemctl disable --now octopus-mail`.
+- **Mac / Windows app:** on first launch OpenMail copies the old profile and reads the old keychain entries. *Settings → About* can delete the old profile once you are happy.
