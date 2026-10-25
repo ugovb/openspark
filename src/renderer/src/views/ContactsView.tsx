@@ -429,7 +429,7 @@ export default function ContactsView() {
   latest.current = load
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null
-    const off = window.octo.on('core-event', (e: CoreEvent) => {
+    const off = window.openmail.on('core-event', (e: CoreEvent) => {
       if (e.type !== 'contacts-changed') return
       if (timer) clearTimeout(timer)
       timer = setTimeout(() => {

@@ -61,8 +61,10 @@ const api = {
   filePath: (f: File) => webUtils.getPathForFile(f),
 }
 
+contextBridge.exposeInMainWorld('openmail', api)
+// old name, for pages that were open during the update; removed with the other legacy names
 contextBridge.exposeInMainWorld('octo', api)
-export type OctoBridge = typeof api
+export type OpenMailBridge = typeof api
 
 // lets the stylesheet adapt to the host window chrome (e.g. macOS traffic lights); the preload has no DOM typings
 const dom = globalThis as unknown as { addEventListener(t: string, f: () => void): void; document: { documentElement: { dataset: Record<string, string> } } }

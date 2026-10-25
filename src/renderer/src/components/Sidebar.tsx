@@ -110,7 +110,7 @@ function AccountChildren({ refTo, count }: { refTo: MailboxRef; count?: (a: Acco
 function useOpen(key: string, initial = false): { open: boolean; toggle: () => void } {
   const [open, setOpen] = useState(() => {
     try {
-      const v = localStorage.getItem(`octo.sb.${key}`)
+      const v = localStorage.getItem(`openmail.sb.${key}`)
       return v === null ? initial : v === '1'
     } catch {
       return initial
@@ -121,7 +121,7 @@ function useOpen(key: string, initial = false): { open: boolean; toggle: () => v
     toggle: () => {
       setOpen(!open)
       try {
-        localStorage.setItem(`octo.sb.${key}`, open ? '0' : '1')
+        localStorage.setItem(`openmail.sb.${key}`, open ? '0' : '1')
       } catch {
         /* private mode */
       }
@@ -239,7 +239,7 @@ function FullSidebar({ onMore, moreOpen }: { onMore: () => void; moreOpen: boole
 function AccountChip({ onOpen }: { onOpen: () => void }) {
   const [email, setEmail] = useState('')
   useEffect(() => {
-    void (window.octo.serverAccount('/api/account') as Promise<{ user?: { email: string } | null }>)
+    void (window.openmail.serverAccount('/api/account') as Promise<{ user?: { email: string } | null }>)
       .then((a) => setEmail(a.user?.email || ''))
       .catch(() => undefined)
   }, [])

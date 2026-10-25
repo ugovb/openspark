@@ -39,7 +39,7 @@ function OAuthSetup({ provider, onSaved }: { provider: 'google' | 'microsoft'; o
             <b>Mobile and desktop</b> {t('with the redirect URI')} <code>http://localhost</code>.
           </>
         )}
-        <button className="ml-1 inline-flex items-center gap-0.5 text-accent hover:underline" onClick={() => void window.octo.openExternal(provider === 'google' ? 'https://console.cloud.google.com/apis/credentials' : 'https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade')}>
+        <button className="ml-1 inline-flex items-center gap-0.5 text-accent hover:underline" onClick={() => void window.openmail.openExternal(provider === 'google' ? 'https://console.cloud.google.com/apis/credentials' : 'https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade')}>
           {t('open console')} <ExternalLink size={11} />
         </button>
       </div>
@@ -112,7 +112,7 @@ export default function AccountWizard({ welcome, remote, onDone }: { welcome?: b
         return
       }
       toast({ level: 'info', message: t('Finish signing in in your browser…') })
-      const acc = await window.octo.oauthAddAccount(p, email || undefined, name || undefined)
+      const acc = await window.openmail.oauthAddAccount(p, email || undefined, name || undefined)
       toast({ level: 'success', message: t('Added {email}', { email: acc.email }) })
       await refreshMeta()
       onDone?.()
@@ -179,7 +179,7 @@ export default function AccountWizard({ welcome, remote, onDone }: { welcome?: b
           <input className={inputCls} type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void add()} />
         </Field>
         {cfg?.provider === 'gmail' && (
-          <button className="mb-1 inline-flex items-center gap-1 text-[12px] text-accent hover:underline" onClick={() => void window.octo.openExternal('https://myaccount.google.com/apppasswords')}>
+          <button className="mb-1 inline-flex items-center gap-1 text-[12px] text-accent hover:underline" onClick={() => void window.openmail.openExternal('https://myaccount.google.com/apppasswords')}>
             {t('Create a Google app password')} <ExternalLink size={11} />
           </button>
         )}

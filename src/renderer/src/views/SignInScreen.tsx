@@ -57,7 +57,7 @@ export function SignInScreen({ onLocal, initialUrl }: { onLocal: () => void; ini
 
   const contact = () =>
     run(async () => {
-      const info = (await window.octo.serverProbe(url)) as Probe
+      const info = (await window.openmail.serverProbe(url)) as Probe
       remember(url.trim())
       setProbe(info)
       setMode(info.setup ? 'create' : 'signin')
@@ -66,10 +66,10 @@ export function SignInScreen({ onLocal, initialUrl }: { onLocal: () => void; ini
   const signIn = () =>
     run(async () => {
       if (mode === 'totp') {
-        await window.octo.serverLogin2fa(url, ticket, totp)
+        await window.openmail.serverLogin2fa(url, ticket, totp)
         return
       }
-      const r = (await window.octo.serverLogin(url, email, password, '')) as { needs2fa?: boolean; ticket?: string } | undefined
+      const r = (await window.openmail.serverLogin(url, email, password, '')) as { needs2fa?: boolean; ticket?: string } | undefined
       if (r?.needs2fa && r.ticket) {
         setTicket(r.ticket)
         setMode('totp')
@@ -79,19 +79,19 @@ export function SignInScreen({ onLocal, initialUrl }: { onLocal: () => void; ini
   const create = () =>
     run(async () => {
       if (password !== password2) throw new Error(t('The passwords do not match.'))
-      await window.octo.serverCreateAccount(url, email, password, setupCode, '')
+      await window.openmail.serverCreateAccount(url, email, password, setupCode, '')
     })
 
   const startCode = () =>
     run(async () => {
       stop.current = false
-      const s = (await window.octo.serverCodeStart(url, '')) as { userCode: string; deviceCode: string; interval: number }
+      const s = (await window.openmail.serverCodeStart(url, '')) as { userCode: string; deviceCode: string; interval: number }
       setCode(s)
       setMode('code')
       const tick = async (): Promise<void> => {
         if (stop.current) return
         try {
-          const r = (await window.octo.serverCodePoll(url, s.deviceCode)) as { status: string }
+          const r = (await window.openmail.serverCodePoll(url, s.deviceCode)) as { status: string }
           if (r.status === 'approved') return // the app restarts into the signed-in view
           if (r.status === 'denied' || r.status === 'expired') {
             setCode(null)

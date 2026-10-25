@@ -141,7 +141,7 @@ export const useStore = create<State>((set, get) => ({
     // the language is applied before the UI loads: reload if the saved choice was out of date
     if (syncLanguage(settings.language)) return location.reload()
     set({ settings, accounts, secretStore: platform.secretStore })
-    const st = await window.octo.serverStatus().catch(() => null)
+    const st = await window.openmail.serverStatus().catch(() => null)
     if (st?.mode === 'remote') set({ server: { url: st.url, online: st.online } })
     applyTheme(settings)
     await get().refreshMeta()
@@ -149,7 +149,7 @@ export const useStore = create<State>((set, get) => ({
     const statuses = await api.syncStatus()
     set({ sync: Object.fromEntries(statuses.map((s) => [s.account_id, s])), ready: true })
 
-    window.octo.on('core-event', (ev: CoreEvent) => {
+    window.openmail.on('core-event', (ev: CoreEvent) => {
       switch (ev.type) {
         case 'mailbox-changed':
         case 'thread-changed':
@@ -173,7 +173,7 @@ export const useStore = create<State>((set, get) => ({
           get().toast({
             level: ev.level,
             message: ev.message,
-            action: ev.action?.command === 'openExternal' ? { label: ev.action.label, run: () => void window.octo.openExternal(String(ev.action!.args)) } : undefined,
+            action: ev.action?.command === 'openExternal' ? { label: ev.action.label, run: () => void window.openmail.openExternal(String(ev.action!.args)) } : undefined,
           })
           break
         case 'contacts-changed':
@@ -188,7 +188,7 @@ export const useStore = create<State>((set, get) => ({
           break
       }
     })
-    window.octo.on('badge-request', (n: number) => void drawBadge(n))
+    window.openmail.on('badge-request', (n: number) => void drawBadge(n))
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(get().settings))
   },
 
@@ -461,7 +461,7 @@ export function applyTheme(s: AppSettings | null) {
 
 async function drawBadge(n: number) {
   if (!n) {
-    await window.octo.setBadge(null, 0)
+    await window.openmail.setBadge(null, 0)
     return
   }
   const c = document.createElement('canvas')
@@ -476,5 +476,5 @@ async function drawBadge(n: number) {
   g.textAlign = 'center'
   g.textBaseline = 'middle'
   g.fillText(n > 99 ? '99+' : String(n), 16, 17)
-  await window.octo.setBadge(c.toDataURL('image/png'), n)
+  await window.openmail.setBadge(c.toDataURL('image/png'), n)
 }

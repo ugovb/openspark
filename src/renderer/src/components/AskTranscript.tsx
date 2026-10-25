@@ -24,7 +24,7 @@ export function AskTurnView({ turn, compact }: { turn: AskTurn; compact?: boolea
               const id = a.getAttribute('data-msg')
               const href = a.getAttribute('href') || ''
               if (id) void openAskSource(Number(id))
-              else if (/^https?:/i.test(href)) void window.octo.openExternal(href)
+              else if (/^https?:/i.test(href)) void window.openmail.openExternal(href)
             }}
             dangerouslySetInnerHTML={{ __html: mdToHtml(turn.a) }}
           />

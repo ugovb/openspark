@@ -445,7 +445,7 @@ export default function Composer({ request }: { request: ComposerRequest }) {
     for (const f of files) {
       let p = ''
       try {
-        p = window.octo.filePath(f)
+        p = window.openmail.filePath(f)
       } catch {
         p = ''
       }
@@ -630,7 +630,7 @@ export default function Composer({ request }: { request: ComposerRequest }) {
           {aiBusy ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} AI
         </button>
       </Tip>
-      <TipButton label={t('Attach files')} onClick={async () => setAttachments([...attachments, ...(await window.octo.pickFiles())])}><Paperclip size={16} /></TipButton>
+      <TipButton label={t('Attach files')} onClick={async () => setAttachments([...attachments, ...(await window.openmail.pickFiles())])}><Paperclip size={16} /></TipButton>
       <TipButton label={t('Templates')} onClick={async (e) => {
         const el = e.currentTarget
         setTemplates(await api.listTemplates())

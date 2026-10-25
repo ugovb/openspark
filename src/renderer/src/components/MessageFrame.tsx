@@ -132,7 +132,7 @@ export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers
 export function mailCsp(allowRemote: boolean): string {
   return [
     "default-src 'none'",
-    `img-src octo-cid: data: ${window.__OCTO_WEB__ ? "'self'" : ''} ${allowRemote ? 'https: http:' : ''}`,
+    `img-src octo-cid: data: ${window.__OPENMAIL_WEB__ ? "'self'" : ''} ${allowRemote ? 'https: http:' : ''}`,
     `style-src 'unsafe-inline' ${allowRemote ? 'https:' : ''}`,
     `font-src data: ${allowRemote ? 'https:' : ''}`,
     `media-src ${allowRemote ? 'https:' : "'none'"}`,

@@ -34,7 +34,7 @@ export async function loadFullThread(threadId: number): Promise<ThreadView> {
 
 /** Link that opens the conversation: the app's own protocol on the desktop, a URL in the browser version. */
 export function threadLink(threadId: number): string {
-  return window.__OCTO_WEB__ ? `${location.origin}/#/thread/${threadId}` : `openmail://thread/${threadId}`
+  return window.__OPENMAIL_WEB__ ? `${location.origin}/#/thread/${threadId}` : `openmail://thread/${threadId}`
 }
 
 /** Copy text (and optionally an HTML flavour); works on plain-HTTP pages where the async clipboard is missing. */
@@ -120,7 +120,7 @@ export function threadMarkdown(tv: ThreadView): string {
 
 export async function printThread(threadId: number): Promise<void> {
   try {
-    await window.octo.printHtml(threadPrintHtml(await loadFullThread(threadId)))
+    await window.openmail.printHtml(threadPrintHtml(await loadFullThread(threadId)))
   } catch (e) {
     fail(e)
   }
@@ -179,7 +179,7 @@ export async function groupBySender(from: Address): Promise<void> {
 }
 
 export function openInNewWindow(threadId: number): void {
-  void window.octo.openThreadWindow(threadId).catch(fail)
+  void window.openmail.openThreadWindow(threadId).catch(fail)
 }
 
 /** "Send again" fits conversations whose last message is ours, or anything opened from Sent. */

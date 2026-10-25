@@ -37,15 +37,15 @@ function Attachments({ list }: { list: AttachmentInfo[] }) {
       {files.map((a) => (
         <div key={a.id} className="group flex max-w-[260px] items-center gap-2 rounded-lg border border-line bg-surface-2 py-1.5 pl-2 pr-1">
           <FileText size={16} className="shrink-0 text-muted" />
-          <button className="min-w-0 flex-1 text-left" title={t('Open')} onClick={() => void run(window.octo.openAttachment(a.id))}>
+          <button className="min-w-0 flex-1 text-left" title={t('Open')} onClick={() => void run(window.openmail.openAttachment(a.id))}>
             <div className="truncate text-[12.5px] font-medium">{a.filename}</div>
             <div className="text-[11px] text-muted">{fileSize(a.size)}</div>
           </button>
-          <IconButton size="sm" title={t('Save as…')} onClick={() => void run(window.octo.saveAttachment(a.id))}><Download size={14} /></IconButton>
+          <IconButton size="sm" title={t('Save as…')} onClick={() => void run(window.openmail.saveAttachment(a.id))}><Download size={14} /></IconButton>
         </div>
       ))}
       {files.length > 1 && (
-        <Button size="sm" variant="ghost" onClick={() => void run(window.octo.saveAllAttachments(files.map((f) => f.id)))}>
+        <Button size="sm" variant="ghost" onClick={() => void run(window.openmail.saveAllAttachments(files.map((f) => f.id)))}>
           <Download size={13} /> {t('Save all')}
         </Button>
       )}
@@ -88,7 +88,7 @@ function InviteCard({ messageId }: { messageId: number }) {
           {i.start && <div className="text-[12.5px] text-muted">{fullDate(Number(i.start))}{i.end ? ` – ${new Date(Number(i.end)).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}` : ''}</div>}
           {i.location && <div className="text-[12.5px] text-muted">{i.location}</div>}
           {i.organizer && <div className="text-[12px] text-faint">{t('Organizer: {name}', { name: typeof i.organizer === 'string' ? i.organizer : i.organizer.name || i.organizer.email })}</div>}
-          {i.conference_url && <button className="mt-1 text-[12.5px] text-accent underline" onClick={() => void window.octo.openExternal(i.conference_url)}>{t('Join meeting')}</button>}
+          {i.conference_url && <button className="mt-1 text-[12.5px] text-accent underline" onClick={() => void window.openmail.openExternal(i.conference_url)}>{t('Join meeting')}</button>}
         </div>
       </div>
       {!cancelled && (
@@ -313,7 +313,7 @@ export default function ThreadView() {
   }, [selected])
 
   useEffect(() => {
-    return window.octo.on('core-event', (e: { type: string; threadIds?: number[] }) => {
+    return window.openmail.on('core-event', (e: { type: string; threadIds?: number[] }) => {
       const id = useStore.getState().selected
       if (!id) return
       if (e.type === 'mailbox-changed' || e.type === 'drafts-changed' || (e.type === 'thread-changed' && e.threadIds?.includes(id))) void load(id, false)

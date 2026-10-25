@@ -1,12 +1,12 @@
 // Browser version of the Electron preload bridge: when the UI is served by the home server
-// (`openmail serve`) there is no preload, so `window.octo` talks to the server's HTTP API instead.
+// (`openmail serve`) there is no preload, so `window.openmail` talks to the server's HTTP API instead.
 import { t } from '../../../shared/i18n'
 import type { CoreEvent, DraftAttachment } from '../../../shared/types'
 import { decodeWire, encodeWire } from '../../../shared/wire'
 
 declare global {
   interface Window {
-    __OCTO_WEB__?: boolean
+    __OPENMAIL_WEB__?: boolean
   }
 }
 
@@ -127,8 +127,8 @@ function printInFrame(html: string): Promise<void> {
 }
 
 export function installWebBridge(): void {
-  if (window.octo) return
-  window.__OCTO_WEB__ = true
+  if (window.openmail) return
+  window.__OPENMAIL_WEB__ = true
   const bridge = {
     call,
     stream,
@@ -231,10 +231,11 @@ export function installWebBridge(): void {
       return true
     },
   }
+  ;(window as unknown as { openmail: typeof bridge; octo: typeof bridge }).openmail = bridge
   ;(window as unknown as { octo: typeof bridge }).octo = bridge
 }
 
 /** URL of an inline (cid:) image: a custom protocol in the desktop app, the server API in a browser. */
 export function cidUrl(messageId: number, cid: string): string {
-  return window.__OCTO_WEB__ ? `/api/cid/${messageId}/${encodeURIComponent(cid)}` : `octo-cid://${messageId}/${encodeURIComponent(cid)}`
+  return window.__OPENMAIL_WEB__ ? `/api/cid/${messageId}/${encodeURIComponent(cid)}` : `octo-cid://${messageId}/${encodeURIComponent(cid)}`
 }

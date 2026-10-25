@@ -17,7 +17,7 @@ export default function DraftList({ kind }: { kind: 'scheduled' | 'local-drafts'
   }, [kind])
   useEffect(() => {
     void load()
-    return window.octo.on('core-event', (e: { type: string }) => {
+    return window.openmail.on('core-event', (e: { type: string }) => {
       if (e.type === 'drafts-changed' || e.type === 'mailbox-changed') void load()
     })
   }, [load])

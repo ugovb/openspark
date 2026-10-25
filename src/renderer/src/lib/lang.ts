@@ -1,7 +1,7 @@
 // The UI language is chosen in main.tsx before the app loads; changing it means reloading the page.
 import { detectLang, getLang, type LangSetting } from '../../../shared/i18n'
 
-export const LANG_KEY = 'octo.lang'
+export const LANG_KEY = 'openmail.lang'
 
 /** Keep the saved language in step with settings; true when the page must reload to apply it. */
 export function syncLanguage(setting: LangSetting): boolean {

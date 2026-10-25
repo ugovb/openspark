@@ -203,7 +203,7 @@ function Linkified({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         i % 2 ? (
-          <a key={i} href={p} className="break-all text-accent underline" onClick={(e) => (e.preventDefault(), void window.octo.openExternal(p))}>
+          <a key={i} href={p} className="break-all text-accent underline" onClick={(e) => (e.preventDefault(), void window.openmail.openExternal(p))}>
             {p}
           </a>
         ) : (
@@ -315,9 +315,9 @@ function writeLS(key: string, value: unknown): void {
   }
 }
 
-const HIDDEN_KEY = 'octo.calendar.hidden'
-const MODE_KEY = 'octo.calendar.mode'
-const SIDE_KEY = 'octo.calendar.side'
+const HIDDEN_KEY = 'openmail.calendar.hidden'
+const MODE_KEY = 'openmail.calendar.mode'
+const SIDE_KEY = 'openmail.calendar.side'
 
 function isTyping(e: KeyboardEvent): boolean {
   const el = e.target as HTMLElement | null
@@ -898,7 +898,7 @@ function EventDetails({ ev, onClose, onEdit, onDelete, onChanged }: {
         )}
         {ev.conference_url && (
           <DetailRow icon={<Video size={15} />}>
-            <Button size="sm" variant="primary" onClick={() => void window.octo.openExternal(ev.conference_url!)}>
+            <Button size="sm" variant="primary" onClick={() => void window.openmail.openExternal(ev.conference_url!)}>
               {t('Join meeting')}
             </Button>
             <div className="mt-1 truncate text-[11.5px] text-faint" title={ev.conference_url}>{ev.conference_url}</div>
@@ -1463,7 +1463,7 @@ export default function CalendarView() {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null
-    const off = window.octo.on('core-event', (e: CoreEvent) => {
+    const off = window.openmail.on('core-event', (e: CoreEvent) => {
       if (e.type !== 'calendar-changed') return
       if (timer) clearTimeout(timer)
       timer = setTimeout(() => {

@@ -1,8 +1,10 @@
-import type { OctoBridge } from './index'
+import type { OpenMailBridge } from './index'
 
 declare global {
   interface Window {
-    octo: OctoBridge
+    openmail: OpenMailBridge
+    /** @deprecated old name of `openmail` */
+    octo: OpenMailBridge
   }
 }
 export {}

@@ -295,7 +295,7 @@ function GeneralTab() {
       </Section>
       <Section title={t('Startup')}>
         <SettingRow icon={<Power size={16} />} title={t('Launch when Windows starts')} hint={t('Snoozed messages, reminders and scheduled sends then work without opening the window.')}>
-          <Toggle checked={s.launchAtLogin} onChange={(v) => (set({ launchAtLogin: v }), void window.octo.setLoginItem(v))} />
+          <Toggle checked={s.launchAtLogin} onChange={(v) => (set({ launchAtLogin: v }), void window.openmail.setLoginItem(v))} />
         </SettingRow>
         <SettingRow icon={<MonitorDown size={16} />} title={t('Closing the window keeps the app running in the tray')}>
           <Toggle checked={s.minimizeToTray} onChange={(v) => set({ minimizeToTray: v })} />
@@ -704,7 +704,7 @@ function AgentsTab() {
   const [cli, setCli] = useState<{ script: string; node: string; packaged: boolean } | null>(null)
   const [hist, setHist] = useState<Awaited<ReturnType<typeof api.history>>>([])
   useEffect(() => {
-    void window.octo.cliPath().then(setCli)
+    void window.openmail.cliPath().then(setCli)
     void api.history(40).then((h) => setHist(h.filter((x) => x.actor === 'cli' || x.actor === 'mcp')))
   }, [])
   const openmailCmd = cli ? (cli.packaged ? `"${cli.script}"` : `node "${cli.script}"`) : 'openmail'
@@ -789,7 +789,7 @@ function PairingCodeBox({ url }: { url: string }) {
   const create = async () => {
     setBusy(true)
     try {
-      const r = (await window.octo.serverNewCode(name.trim() || undefined)) as { code?: string; expires?: number; error?: string }
+      const r = (await window.openmail.serverNewCode(name.trim() || undefined)) as { code?: string; expires?: number; error?: string }
       if (!r.code || !r.expires) throw new Error(r.error || t('Could not create a code'))
       setRes({ code: r.code, expires: r.expires })
     } catch (e) {
@@ -862,7 +862,7 @@ function ServerTab() {
   const [password, setPassword] = useState('')
   const [ticket, setTicket] = useState('')
   const [totp, setTotp] = useState('')
-  const load = async () => setSt((await window.octo.serverStatus()) as ServerStatus)
+  const load = async () => setSt((await window.openmail.serverStatus()) as ServerStatus)
   useEffect(() => void load(), [])
   if (!st) return <Spinner />
 
@@ -870,7 +870,7 @@ function ServerTab() {
     const check = async () => {
       if (!url.trim()) return
       try {
-        const info = await window.octo.serverProbe(url)
+        const info = await window.openmail.serverProbe(url)
         setProbe(`✓ ${t('Found the server “{host}” (version {version})', { host: info.hostname, version: info.version })}`)
         setHow(info.account ? 'account' : 'code')
       } catch (e) {
@@ -881,10 +881,10 @@ function ServerTab() {
       if (!ticket && !window.confirm(t('After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?'))) return
       setBusy(true)
       try {
-        if (how === 'code') await window.octo.serverConnect(url, code, name)
-        else if (ticket) await window.octo.serverLogin2fa(url, ticket, totp)
+        if (how === 'code') await window.openmail.serverConnect(url, code, name)
+        else if (ticket) await window.openmail.serverLogin2fa(url, ticket, totp)
         else {
-          const r = (await window.octo.serverLogin(url, email, password, name)) as { needs2fa?: boolean; ticket?: string } | undefined
+          const r = (await window.openmail.serverLogin(url, email, password, name)) as { needs2fa?: boolean; ticket?: string } | undefined
           if (r?.needs2fa && r.ticket) {
             setTicket(r.ticket)
             setBusy(false)
@@ -981,7 +981,7 @@ function ServerTab() {
             size="sm"
             variant="danger"
             onClick={async () => {
-              if (window.confirm(t('Disconnect this app from the home server? It restarts in local mode (with the accounts added on this computer).'))) await window.octo.serverDisconnect()
+              if (window.confirm(t('Disconnect this app from the home server? It restarts in local mode (with the accounts added on this computer).'))) await window.openmail.serverDisconnect()
             }}
           >
             <Unplug size={14} /> {t('Disconnect')}
@@ -1004,7 +1004,7 @@ function ServerTab() {
               </div>
             </div>
             {d.id !== st.deviceId && (
-              <Button size="sm" variant="ghost" onClick={async () => window.confirm(t('Revoke access for the device “{name}”?', { name: d.name })) && (await window.octo.serverRevoke(d.id), void load())}>
+              <Button size="sm" variant="ghost" onClick={async () => window.confirm(t('Revoke access for the device “{name}”?', { name: d.name })) && (await window.openmail.serverRevoke(d.id), void load())}>
                 {t('Revoke access')}
               </Button>
             )}
@@ -1032,23 +1032,23 @@ const SHORTCUTS: [string, string][] = [
 function AboutTab() {
   const [dir, setDir] = useState('')
   const [legacy, setLegacy] = useState<string | null>(null)
-  useEffect(() => void window.octo.dataDir().then(setDir), [])
-  useEffect(() => void window.octo.legacyProfile().then(setLegacy), [])
+  useEffect(() => void window.openmail.dataDir().then(setDir), [])
+  useEffect(() => void window.openmail.legacyProfile().then(setLegacy), [])
   return (
     <Section title={`OpenMail ${APP_VERSION}`}>
       <div className="py-1 text-[13px]">{t('A free email client with Smart Inbox, Gatekeeper, AI, a calendar and access for AI agents.')}</div>
       <div className="py-1 text-[12.5px] text-muted">
         {t('Open source (MIT license):')}{' '}
-        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/ugovb/openspark')}>github.com/ugovb/openspark</button>
+        <button className="text-accent hover:underline" onClick={() => void window.openmail.openExternal('https://github.com/ugovb/openspark')}>github.com/ugovb/openspark</button>
         {' · '}
-        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/ugovb/openspark/issues')}>{t('report a bug')}</button>
+        <button className="text-accent hover:underline" onClick={() => void window.openmail.openExternal('https://github.com/ugovb/openspark/issues')}>{t('report a bug')}</button>
       </div>
-      <div className="py-1 text-[12.5px] text-muted">{t('App data:')} <button className="text-accent hover:underline" onClick={() => void window.octo.showItem(dir)}>{dir}</button></div>
+      <div className="py-1 text-[12.5px] text-muted">{t('App data:')} <button className="text-accent hover:underline" onClick={() => void window.openmail.showItem(dir)}>{dir}</button></div>
       {legacy && (
         <div className="flex items-center gap-2 py-1 text-[12.5px] text-muted">
-          <span>{t('Old Octopus Mail profile kept at:')} <button className="text-accent hover:underline" onClick={() => void window.octo.showItem(legacy)}>{legacy}</button></span>
+          <span>{t('Old Octopus Mail profile kept at:')} <button className="text-accent hover:underline" onClick={() => void window.openmail.showItem(legacy)}>{legacy}</button></span>
           <Button size="sm" variant="danger" onClick={() => {
-            if (window.confirm(t('Delete the old Octopus Mail profile? OpenMail already has its own copy of your accounts and mail. This cannot be undone.'))) void window.octo.deleteLegacyProfile().then(() => setLegacy(null))
+            if (window.confirm(t('Delete the old Octopus Mail profile? OpenMail already has its own copy of your accounts and mail. This cannot be undone.'))) void window.openmail.deleteLegacyProfile().then(() => setLegacy(null))
           }}>{t('Delete old profile')}</Button>
         </div>
       )}

@@ -22,7 +22,7 @@ interface AccountInfo {
   allowPairing: boolean
 }
 
-const call = <T,>(path: string, body?: Record<string, unknown>): Promise<T> => window.octo.serverAccount(path, body) as Promise<T>
+const call = <T,>(path: string, body?: Record<string, unknown>): Promise<T> => window.openmail.serverAccount(path, body) as Promise<T>
 
 function Block({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
   return (

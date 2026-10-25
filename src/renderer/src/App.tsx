@@ -170,7 +170,7 @@ export default function App() {
   const [stayLocal, setStayLocal] = useState(false)
   const [connectUrl, setConnectUrl] = useState('')
   useEffect(() => {
-    void window.octo.serverStatus().then((s: { mode: 'local' | 'remote' }) => setMode(s.mode)).catch(() => setMode('local'))
+    void window.openmail.serverStatus().then((s: { mode: 'local' | 'remote' }) => setMode(s.mode)).catch(() => setMode('local'))
   }, [])
   // picking a place in the drawer closes it
   useEffect(() => useStore.setState({ drawer: false }), [mailbox, view, composer?.key])
@@ -178,7 +178,7 @@ export default function App() {
   useEffect(() => {
     void boot().then(openThreadFromUrl)
     window.addEventListener('hashchange', openThreadFromUrl)
-    const offLink = window.octo.on('deep-link', async (p: { kind: string; id: number; url?: string }) => {
+    const offLink = window.openmail.on('deep-link', async (p: { kind: string; id: number; url?: string }) => {
       const st = useStore.getState()
       if (p.kind === 'connect') return (setConnectUrl(p.url || ''), setStayLocal(false))
       if (p.kind === 'draft') st.compose({ mode: 'edit', draftId: p.id, inline: false })
@@ -188,7 +188,7 @@ export default function App() {
         if (m) (st.setView('mail'), st.select(m.thread_id))
       }
     })
-    const offCmd = window.octo.on('command', (c: string) => c === 'compose' && useStore.getState().compose({ mode: 'new' }))
+    const offCmd = window.openmail.on('command', (c: string) => c === 'compose' && useStore.getState().compose({ mode: 'new' }))
     return () => {
       window.removeEventListener('hashchange', openThreadFromUrl)
       offLink()
@@ -198,7 +198,7 @@ export default function App() {
 
   // a conversation window closes once its conversation is gone (Done, deleted, moved…)
   useEffect(() => {
-    if (standalone && ready && selected === null) void window.octo.windowCmd('close')
+    if (standalone && ready && selected === null) void window.openmail.windowCmd('close')
   }, [standalone, ready, selected])
 
   if (!ready) return <div className="flex h-full items-center justify-center text-muted"><Spinner /></div>

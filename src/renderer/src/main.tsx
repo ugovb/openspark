@@ -4,10 +4,12 @@ import { getLang, initLang, type LangSetting } from '../../shared/i18n'
 import './index.css'
 import ErrorBoundary from './components/ErrorBoundary'
 import { LANG_KEY } from './lib/lang'
+import { migrateStorage } from './lib/legacy-storage'
 import { installWebBridge } from './lib/web-bridge'
 
 // served by the home server in a browser: no Electron preload, talk to the server API instead
 installWebBridge()
+migrateStorage()
 
 // Pick the UI language before any component module loads (labels may be built at import time).
 // The saved choice mirrors settings.language; the store reloads the page if the setting differs.
