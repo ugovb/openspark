@@ -306,6 +306,10 @@ Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server 
       if (sub === 'pair') {
         const { code, expires } = auth.createPairingCode(one(a, 'name'))
         print(a, { code, expires }, () => t('Pairing code: {code}\nValid until: {time} (single use)', { code, time: fmtTime(expires) }))
+      } else if (sub === 'setup-code') {
+        const { getSetupCode } = await import('../server/setup')
+        const code = getSetupCode()
+        print(a, { code }, () => (code ? t('Setup code: {code}', { code }) : t('The account already exists: sign in with its email and password.')))
       } else if (sub === 'devices') {
         const list = auth.listDevices()
         print(a, list, () => table(list.map((d) => ({ id: d.id, name: d.name, created: fmtTime(d.createdAt), seen: fmtTime(d.lastSeen), ip: d.lastIp || '' })), [
@@ -358,7 +362,7 @@ Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server 
           }
           console.log(t('Password changed for {email}. The account is unlocked.', { email: owner.email }))
         }
-      } else throw new CliError('openmail server pair [--name …] | devices | revoke <ID> | account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off')
+      } else throw new CliError('openmail server pair [--name …] | setup-code | devices | revoke <ID> | account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off')
       return
     }
     case 'daemon': {

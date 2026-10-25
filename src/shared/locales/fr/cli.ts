@@ -287,6 +287,8 @@ Vous pouvez choisir le code vous-même avec OPENMAIL_SETUP_CODE. Liste des appar
     'Password changed for {email}. The account is unlocked.': 'Mot de passe modifié pour {email}. Le compte est déverrouillé.',
     'Account deleted. Open the server address in a browser and create a new one with this pairing code (valid 15 min): {code}': 'Compte supprimé. Ouvrez l’adresse du serveur dans un navigateur et créez-en un nouveau avec ce code de jumelage (valable 15 min) : {code}',
     'This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.': 'Cela supprime le compte {email} et déconnecte tous les appareils. Les comptes mail et les messages sont conservés. Relancez avec --yes pour confirmer.',
+    'The account already exists: sign in with its email and password.': 'Le compte existe déjà : connectez-vous avec son e-mail et son mot de passe.',
+    'Setup code: {code}': 'Code d’installation : {code}',
   },
   plurals: {},
 }

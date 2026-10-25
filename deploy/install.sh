@@ -120,19 +120,19 @@ curl -fsS "http://127.0.0.1:$PORT/api/info" >/dev/null 2>&1 || die "serwer nie o
 
 host="$(hostname)"
 ips="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+\.' | head -n3 | sed "s|.*|http://&:$PORT|" | tr '\n' ' ')"
-code="$(runuser -u "$RUN_USER" -- env HOME="$RUN_HOME" /usr/local/bin/openmail server pair --name "Pierwsze urządzenie" 2>/dev/null | grep -oE '[A-Z0-9]{4}-[A-Z0-9]{4}' | head -n1 || true)"
+code="$(runuser -u "$RUN_USER" -- env HOME="$RUN_HOME" /usr/local/bin/openmail server setup-code 2>/dev/null | grep -oE '[A-Za-z0-9-]{8,64}$' | head -n1 || true)"
 
 cat <<TXT
 
   OpenMail — serwer domowy działa (uruchamia się sam po restarcie).
 
   Adres:  http://$host.local:$PORT  ${ips}
-  Kod parowania (15 min):  ${code:-uruchom: openmail server pair}
+  Kod konfiguracji:  ${code:-uruchom: openmail server setup-code}
 
-  Komputer:  OpenMail → Ustawienia → Serwer domowy → adres + kod
-  Telefon:   otwórz adres w przeglądarce, wpisz kod, potem „Dodaj do ekranu głównego”
+  Konto:     otwórz adres w przeglądarce (albo w aplikacji OpenMail), wpisz kod, e-mail i hasło
+  Telefon:   otwórz adres w przeglądarce, zaloguj się (albo kodem z innego urządzenia), potem „Dodaj do ekranu głównego”
 
-  Kolejny kod:   openmail server pair
+  Kod konfiguracji:  openmail server setup-code
   Urządzenia:    openmail server devices
   Log:           journalctl -u openmail -f
   Aktualizacja:  rozpakuj nowe archiwum i uruchom ponownie sudo ./install.sh

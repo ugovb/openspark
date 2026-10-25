@@ -9,6 +9,7 @@ import type { CoreEvent } from '../shared/types'
 import { log } from '../core/events'
 import { startOAuth, type OAuthClient, type OAuthProvider } from '../core/oauth'
 import { dataDir } from '../core/paths'
+import { parseConnectLink } from '../shared/connect-link'
 import { createServerAccount, pollCodeLogin, startCodeLogin } from './server-client'
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
@@ -208,6 +209,8 @@ function send(channel: string, payload: unknown): void {
 }
 
 function openDeepLink(link: string): void {
+  const target = parseConnectLink(link)
+  if (target) return send('deep-link', { kind: 'connect', url: target })
   const m = link.match(/^openmail:\/\/(draft|thread|message)\/(\d+)/)
   if (m) send('deep-link', { kind: m[1], id: Number(m[2]) })
 }

@@ -286,6 +286,8 @@ Puedes elegir el código tú mismo con OPENMAIL_SETUP_CODE. Lista de dispositivo
     'Password changed for {email}. The account is unlocked.': 'Contraseña cambiada para {email}. La cuenta está desbloqueada.',
     'Account deleted. Open the server address in a browser and create a new one with this pairing code (valid 15 min): {code}': 'Cuenta eliminada. Abre la dirección del servidor en un navegador y crea una nueva con este código de emparejamiento (válido 15 min): {code}',
     'This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.': 'Esto elimina la cuenta {email} y cierra la sesión en todos los dispositivos. Las cuentas de correo y los mensajes se conservan. Vuelve a ejecutarlo con --yes para confirmar.',
+    'The account already exists: sign in with its email and password.': 'La cuenta ya existe: inicia sesión con su correo y contraseña.',
+    'Setup code: {code}': 'Código de configuración: {code}',
   },
   plurals: {},
 }

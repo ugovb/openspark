@@ -168,6 +168,7 @@ export default function App() {
   // local app or signed in to a home server: decides what a fresh app (no mailbox yet) shows first
   const [mode, setMode] = useState<'local' | 'remote' | null>(null)
   const [stayLocal, setStayLocal] = useState(false)
+  const [connectUrl, setConnectUrl] = useState('')
   useEffect(() => {
     void window.octo.serverStatus().then((s: { mode: 'local' | 'remote' }) => setMode(s.mode)).catch(() => setMode('local'))
   }, [])
@@ -177,8 +178,9 @@ export default function App() {
   useEffect(() => {
     void boot().then(openThreadFromUrl)
     window.addEventListener('hashchange', openThreadFromUrl)
-    const offLink = window.octo.on('deep-link', async (p: { kind: string; id: number }) => {
+    const offLink = window.octo.on('deep-link', async (p: { kind: string; id: number; url?: string }) => {
       const st = useStore.getState()
+      if (p.kind === 'connect') return (setConnectUrl(p.url || ''), setStayLocal(false))
       if (p.kind === 'draft') st.compose({ mode: 'edit', draftId: p.id, inline: false })
       else if (p.kind === 'thread') (st.setView('mail'), st.select(p.id))
       else if (p.kind === 'message') {
@@ -204,7 +206,7 @@ export default function App() {
   // a fresh app starts at "Sign in to OpenMail"; a signed-in app with no mailbox yet goes straight to adding one
   if (!accounts.length && mode === 'local' && !stayLocal) return (
     <>
-      <SignInScreen onLocal={() => setStayLocal(true)} />
+      <SignInScreen key={connectUrl} initialUrl={connectUrl} onLocal={() => setStayLocal(true)} />
       <Toasts />
       <PromptHost />
     </>

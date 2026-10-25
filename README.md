@@ -71,7 +71,7 @@ Spark's public feature set was only the to-do list.
   snoozed mail and reminders while your computers are off.
 - Every computer sees the same accounts, snoozes and drafts. Phones and browsers get a web UI with a
   phone layout that you can add to the home screen.
-- One owner account on the server (email + password + optional TOTP two-step verification); each device gets its own revocable key. Pairing codes remain for first setup.
+- One owner account on the server (email + password + optional TOTP two-step verification); each device gets its own revocable key. The first account is created in the browser or in the app with a setup code that the server prints in its log (or that you choose with `OPENMAIL_SETUP_CODE`). A new device can also sign in with a code approved from a device that is already signed in.
 
 **AI agents: CLI and MCP**
 - `openmail`: a CLI and an **MCP server** for Claude Code / Claude Desktop with per-account access levels
@@ -109,17 +109,17 @@ sudo bash install.sh
 
 The installer puts a private Node.js 24 in `/opt/openmail`, installs the `openmail` systemd
 service (starts on boot, restarts after a crash) and the `openmail` command, then prints the server address
-and a pairing code. Run it again with a newer archive to update; `sudo bash install.sh --uninstall`
+and a setup code. Run it again with a newer archive to update; `sudo bash install.sh --uninstall`
 removes it and keeps your data.
 
 **Docker** (Synology, QNAP, Unraid…):
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml exec octopus openmail server pair
+docker compose -f deploy/docker-compose.yml logs openmail   # shows the setup code (or set OPENMAIL_SETUP_CODE)
 ```
 
-**Connecting devices:** in the app open *Settings → Home server* and enter the address and code. On a phone, open the server address in the browser and type the code.
+**Your OpenMail account:** the first time, open the server address in a browser (or *Sign in to OpenMail* in the app) and create your account with the setup code. Every other device signs in with email and password, or with *Sign in with a code*: the new device shows a code and a device that is already signed in approves it in *Settings → Home server → Approve a device*. A link like `openmail://connect?url=http://nas.local:8787` fills the server address in the app.
 Keep the server on your home network and use a VPN such as Tailscale or WireGuard from outside;
 see [SECURITY.md](SECURITY.md).
 

@@ -9,11 +9,14 @@ Over SSH (or paste `deploy/docker-compose.synology.yml` into *Container Manager 
 ```bash
 sudo mkdir -p /volume1/docker/openspark && sudo chown 1000:1000 /volume1/docker/openspark
 sudo docker compose -f deploy/docker-compose.synology.yml up -d
-sudo docker exec openspark-mail openmail server pair      # prints a one-time code, valid 15 minutes
 ```
 
-The first time, that code is only used to create **your account** (step 3). Nobody else can create one: sign-up closes
-as soon as the account exists.
+No terminal needed to get the setup code. Either:
+- open *Container Manager → Container → openspark-mail → Log*: the server prints `Setup code: XXXX-XXXX` at every start until the account exists, or
+- choose the code yourself: uncomment `OPENMAIL_SETUP_CODE` in the compose file (8 to 64 letters, digits or hyphens).
+
+The code only creates **your account** (step 3). It stays valid until the account exists, then it is gone. Nobody else can
+create an account: sign-up closes as soon as yours exists.
 
 The image `ghcr.io/ugovb/openspark` is built by GitHub Actions for amd64 + arm64: no build on the NAS.
 If the package is private, make it public in GitHub (*Packages → Package settings*) or `docker login ghcr.io`.
@@ -36,12 +39,14 @@ so the "10 failed codes → locked for 10 minutes" rule hits the attacker, not e
 All the mail accounts you connect live on the NAS (SQLite database in `/volume1/docker/openspark`, nothing in the cloud).
 You sign in to them with **one OpenSpark account**:
 
-1. Open `https://mail.your-domain.tld` in a browser. With no account yet, the page asks for the pairing code from step 1,
+1. Open `https://mail.your-domain.tld` in a browser. With no account yet, the page asks for the setup code from step 1,
    an email address and a password (10 characters or more). That creates the owner account and signs the browser in.
    Already paired a device before? Create the account from it instead: *Settings → Home server → My account*.
 2. *Settings → Home server → My account → Two-step verification → Turn on*: scan the QR code with Google Authenticator,
    1Password, Authy… type the first code, then **save the 10 recovery codes** somewhere outside the NAS.
-3. From now on every new device signs in with email + password + the 6-digit code. Pairing codes are switched off
+3. From now on every new device signs in with email + password + the 6-digit code, or **with a code approved from another device**:
+   on the new device choose *Sign in with a code*, then on a device that is signed in open *Settings → Home server → Approve a device*
+   and type the code. The approval asks for your password again. Pairing codes are switched off
    (they can be allowed again in *My account*).
 
 Seeing "An account already exists on this server"? A first attempt worked: reload the page and sign in
@@ -61,6 +66,7 @@ sudo docker exec openspark-mail openmail server 2fa-off              # lost phon
 sudo docker exec openspark-mail openmail server reset-account --yes  # delete the account (wrong email?) and start over;
                                                                  # mail accounts and messages are kept
 sudo docker exec openspark-mail openmail server sign-out-all         # sign every device out
+sudo docker exec openspark-mail openmail server setup-code       # show the setup code again (before the account exists)
 sudo docker exec openspark-mail openmail server pairing on           # allow pairing codes again (off = default)
 ```
 
