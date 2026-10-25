@@ -405,6 +405,7 @@ const dict: Dictionary = {
     'Writing': 'Rédaction',
     'Other': 'Autre',
     'Edit list': 'Modifier la liste',
+    'OpenMail account': 'Compte OpenMail',
   },
   plurals: {
     '{n} new': ['{n} nouveau', '{n} nouveaux', '{n} nouveaux'],

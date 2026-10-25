@@ -380,6 +380,14 @@ const dict: Dictionary = {
     'Verify and turn on': 'Verificar y activar',
     'Your recovery codes': 'Tus códigos de recuperación',
     'recovery codes': 'códigos de recuperación',
+    'Device approved: it is signed in now': 'Dispositivo aprobado: ya ha iniciado sesión',
+    'Approve a device': 'Aprobar un dispositivo',
+    'Refuse': 'Rechazar',
+    'Approve': 'Aprobar',
+    'Code shown on the other device': 'Código que muestra el otro dispositivo',
+    'Only approve a device that is yours: it will see all your mail. For your security, enter your password again.': 'Aprueba solo un dispositivo tuyo: verá todo tu correo. Por seguridad, vuelve a introducir tu contraseña.',
+    'On the new device choose “Sign in with a code”, then type the code it shows here. No password to type on that device.': 'En el dispositivo nuevo elige «Iniciar sesión con un código desde otro dispositivo» y escribe aquí el código que muestra. Sin contraseña en ese dispositivo.',
+    'Enter a code': 'Introducir un código',
   },
   plurals: {
     'Applied to {n} existing conversation': [

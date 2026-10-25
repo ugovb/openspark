@@ -1,6 +1,6 @@
 // "My account" on the home server's settings page: create the owner account, change the password,
 // two-step verification (QR code + recovery codes), pairing codes, sign out everywhere.
-import { Copy, Download, KeyRound, ShieldCheck, ShieldOff, UserRound } from 'lucide-react'
+import { Copy, Download, KeyRound, MonitorSmartphone, ShieldCheck, ShieldOff, UserRound } from 'lucide-react'
 import qrcode from 'qrcode-generator'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Button, cx, Field, inputCls, Modal, Spinner, Toggle } from '../components/ui'
@@ -245,6 +245,73 @@ function ChangePassword({ onClose }: { onClose: () => void }) {
   )
 }
 
+/** Another device shows a code; type it here, check which device it is, confirm with the password. */
+function ApproveDevice({ needCode, onClose }: { needCode: boolean; onClose: () => void }) {
+  const toast = useStore((s) => s.toast)
+  const [userCode, setUserCode] = useState('')
+  const [device, setDevice] = useState<{ name: string; ip: string | null; createdAt: number } | null>(null)
+  const [password, setPassword] = useState('')
+  const [totp, setTotp] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const run = async (fn: () => Promise<void>) => {
+    setBusy(true)
+    setError('')
+    try {
+      await fn()
+    } catch (e) {
+      setError(errorText(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+  const lookup = () => run(async () => setDevice(await call<{ name: string; ip: string | null; createdAt: number }>('/api/account/device/lookup', { userCode })))
+  const approve = () =>
+    run(async () => {
+      await call('/api/account/device/approve', { userCode, password, code: totp })
+      toast({ level: 'info', message: t('Device approved: it is signed in now') })
+      onClose()
+    })
+  const deny = () =>
+    run(async () => {
+      await call('/api/account/device/deny', { userCode })
+      onClose()
+    })
+  const ready = password.length > 0 && (!needCode || totp.trim().length >= 6)
+  return (
+    <Modal open onClose={onClose} title={t('Approve a device')} width={420}
+      footer={device
+        ? <><Button variant="ghost" disabled={busy} onClick={() => void deny()}>{t('Refuse')}</Button><Button variant="primary" disabled={busy || !ready} onClick={() => void approve()}>{busy && <Spinner />} {t('Approve')}</Button></>
+        : <><Button variant="ghost" onClick={onClose}>{t('Cancel')}</Button><Button variant="primary" disabled={busy || userCode.replace(/[\s-]/g, '').length < 8} onClick={() => void lookup()}>{busy && <Spinner />} {t('Continue')}</Button></>}>
+      <form className="p-5" onSubmit={(e) => (e.preventDefault(), device ? ready && void approve() : void lookup())}>
+        {!device ? (
+          <Field label={t('Code shown on the other device')}>
+            <input className={cx(inputCls, 'uppercase tracking-widest')} placeholder="XXXX-XXXX" autoFocus maxLength={9} value={userCode} onChange={(e) => setUserCode(e.target.value)} />
+          </Field>
+        ) : (
+          <>
+            <div className="mb-3 rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13px]">
+              <div className="font-medium">{device.name}</div>
+              <div className="text-[12px] text-muted">{device.ip || ''}</div>
+            </div>
+            <div className="mb-2 text-[12.5px] text-muted">{t('Only approve a device that is yours: it will see all your mail. For your security, enter your password again.')}</div>
+            <Field label={t('Password')}>
+              <input className={inputCls} type="password" autoFocus autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </Field>
+            {needCode && (
+              <Field label={t('Code from your authenticator app (or a recovery code)')}>
+                <input className={cx(inputCls, 'tracking-widest')} inputMode="numeric" autoComplete="one-time-code" value={totp} onChange={(e) => setTotp(e.target.value)} />
+              </Field>
+            )}
+          </>
+        )}
+        {error && <div className="mt-2 text-[12.5px] text-danger" role="alert">{error}</div>}
+        <button type="submit" className="hidden" />
+      </form>
+    </Modal>
+  )
+}
+
 export default function AccountSection() {
   const toast = useStore((s) => s.toast)
   const [info, setInfo] = useState<AccountInfo | null>(null)
@@ -253,6 +320,7 @@ export default function AccountSection() {
     | { kind: 'confirm'; title: string; needCode: boolean; run: (pw: string, code: string) => Promise<void> }
     | { kind: 'totp'; secret: string; uri: string }
     | { kind: 'codes'; codes: string[] }
+    | { kind: 'approve' }
     | null
   >(null)
   const load = () => void call<AccountInfo>('/api/account').then(setInfo).catch((e) => toast({ level: 'error', message: errorText(e) }))
@@ -302,6 +370,9 @@ export default function AccountSection() {
             })}>{t('Turn on')}</Button>
           )}
         </Row>
+        <Row icon={<MonitorSmartphone size={18} />} title={t('Approve a device')} hint={t('On the new device choose “Sign in with a code”, then type the code it shows here. No password to type on that device.')}>
+          <Button size="sm" variant="primary" onClick={() => setDialog({ kind: 'approve' })}>{t('Enter a code')}</Button>
+        </Row>
         <Row icon={<KeyRound size={18} />} title={t('Pairing codes')} hint={t('Let a new device connect with a one-time code instead of the password. Off by default: sign in with your email.')}>
           <Toggle checked={info.allowPairing} onChange={(v) => confirm(v ? t('Allow pairing codes') : t('Switch off pairing codes'), true, async (password, code) => {
             setInfo(await call<AccountInfo>('/api/account/pairing', { allow: v, password, code }))
@@ -327,6 +398,7 @@ export default function AccountSection() {
           }}
         />
       )}
+      {dialog?.kind === 'approve' && <ApproveDevice needCode={user.totpEnabled} onClose={() => setDialog(null)} />}
       {dialog?.kind === 'codes' && <RecoveryCodes codes={dialog.codes} onDone={() => setDialog(null)} />}
     </>
   )

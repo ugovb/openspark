@@ -379,6 +379,14 @@ const dict: Dictionary = {
     'Verify and turn on': 'Zweryfikuj i włącz',
     'Your recovery codes': 'Twoje kody zapasowe',
     'recovery codes': 'kody zapasowe',
+    'Device approved: it is signed in now': 'Urządzenie zatwierdzone: jest już zalogowane',
+    'Approve a device': 'Zatwierdź urządzenie',
+    'Refuse': 'Odrzuć',
+    'Approve': 'Zatwierdź',
+    'Code shown on the other device': 'Kod widoczny na drugim urządzeniu',
+    'Only approve a device that is yours: it will see all your mail. For your security, enter your password again.': 'Zatwierdzaj tylko własne urządzenie: zobaczy całą Twoją pocztę. Dla bezpieczeństwa wpisz hasło ponownie.',
+    'On the new device choose “Sign in with a code”, then type the code it shows here. No password to type on that device.': 'Na nowym urządzeniu wybierz „Zaloguj się kodem z innego urządzenia”, potem wpisz tutaj pokazany kod. Na tamtym urządzeniu nie wpisujesz hasła.',
+    'Enter a code': 'Wpisz kod',
   },
   plurals: {
     'Applied to {n} existing conversation': [

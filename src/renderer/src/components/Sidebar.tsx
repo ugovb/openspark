@@ -1,9 +1,9 @@
 import {
   AlarmClock, Archive, Ban, Bell, BookmarkPlus, CalendarDays, ChevronDown, ChevronRight, Clock, Coffee, Contact, FileEdit, Folder as FolderIcon,
-  Inbox, Menu as MenuIcon, MoreHorizontal, Newspaper, PanelLeftClose, Pin, PinOff, Plus, RefreshCw, Search, Send, Settings, ShieldQuestion,
+  Inbox, Menu as MenuIcon, MoreHorizontal, Newspaper, PanelLeftClose, Pin, PinOff, Plus, RefreshCw, Search, Send, Settings, ShieldQuestion, UserRound,
   Sparkles, Trash2, TriangleAlert, Users, X,
 } from 'lucide-react'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import type { Account, Folder, MailboxRef } from '../../../shared/types'
 import { api } from '../lib/api'
 import { useNarrow } from '../lib/narrow'
@@ -224,12 +224,30 @@ function FullSidebar({ onMore, moreOpen }: { onMore: () => void; moreOpen: boole
             <TriangleAlert size={14} /> <span className="truncate">{errors[0].email}: {errors[0].error}</span>
           </button>
         )}
+        {server && <AccountChip onOpen={() => setView('settings')} />}
         <Item icon={<Sparkles size={15} />} label={t('Ask AI')} onClick={() => setView('ask')} active={view === 'ask'} />
         <Item icon={<CalendarDays size={15} />} label={t('Calendar')} onClick={() => setView('calendar')} active={view === 'calendar'} />
         <Item icon={<Contact size={15} />} label={t('Contacts')} onClick={() => setView('contacts')} active={view === 'contacts'} />
         <Item icon={<Settings size={15} />} label={t('Settings')} onClick={() => setView('settings')} active={view === 'settings'} />
       </div>
     </aside>
+  )
+}
+
+
+/** The OpenMail account this app is signed in to (home server owner), shown above the shortcuts. */
+function AccountChip({ onOpen }: { onOpen: () => void }) {
+  const [email, setEmail] = useState('')
+  useEffect(() => {
+    void (window.octo.serverAccount('/api/account') as Promise<{ user?: { email: string } | null }>)
+      .then((a) => setEmail(a.user?.email || ''))
+      .catch(() => undefined)
+  }, [])
+  if (!email) return null
+  return (
+    <button onClick={onOpen} title={t('OpenMail account')} className="mb-1.5 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[12px] text-muted hover:bg-hover">
+      <UserRound size={14} /> <span className="truncate">{email}</span>
+    </button>
   )
 }
 
