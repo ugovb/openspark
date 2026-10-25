@@ -7,3 +7,4 @@ tools/
 # local-only notes (never published)
 private/
 .env
+.DS_Store
