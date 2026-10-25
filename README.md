@@ -16,7 +16,7 @@
 
 </div>
 
-> OpenMail is a fork of [Octopus Mail](https://github.com/CFGPeter/octopus-mail) by Krabi (MIT). Existing profiles keep working: the data folder and keychain entry keep their legacy `Octopus Mail` name.
+> OpenMail is a fork of [Octopus Mail](https://github.com/CFGPeter/octopus-mail) by Krabi (MIT). Existing profiles keep working: on first launch OpenMail copies the `Octopus Mail` profile to `OpenMail` (the old one stays until you delete it in *Settings → About*) and reads the old keychain entries. The old `octo` command and `OCTO_*` variables still work for now.
 
 ---
 

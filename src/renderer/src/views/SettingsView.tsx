@@ -1023,7 +1023,7 @@ function ServerTab() {
 
 const SHORTCUTS: [string, string][] = [
   ['C / Ctrl+N', t('New message')], ['Ctrl+K', t('Command palette')], [t('/ or Ctrl+F'), t('Search')], ['J / K, ↓ / ↑', t('Next / previous conversation')],
-  ['E', t('Done (archive)')], ['#, Delete', t('Move to Trash')], ['S', t('Pin / unpin')], ['H', t('Snooze')], ['V', t('Move to folder')],
+  ['E, D', t('Done (archive)')], ['#, Delete', t('Move to Trash')], ['S', t('Pin / unpin')], ['H', t('Snooze')], ['V', t('Move to folder')],
   ['U', t('Read / unread')], ['M', t('Mute')], ['!', 'Spam'], ['R / A / F', t('Reply / reply all / forward')], ['X', t('Select')],
   ['Ctrl+Z', t('Undo last action')], ['Ctrl+Enter', t('Send (in the editor)')], ['Esc', t('Close / deselect')],
   [t('G then I / S / D / P / Z / A / T / N'), t('Go to: Inbox / Sent / Drafts / Pinned / Snoozed / Archive / Trash / New senders')], [t('G then C'), t('Calendar')],

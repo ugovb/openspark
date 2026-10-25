@@ -15,8 +15,8 @@ import { noteOutgoing } from './smart'
 import { sync } from './sync'
 
 export function newMessageId(fromEmail: string): string {
-  const domain = fromEmail.split('@')[1] || 'octopus.local'
-  return `<octo.${Date.now().toString(36)}.${crypto.randomBytes(6).toString('hex')}@${domain}>`
+  const domain = fromEmail.split('@')[1] || 'openmail.local'
+  return `<openmail.${Date.now().toString(36)}.${crypto.randomBytes(6).toString('hex')}@${domain}>`
 }
 
 function fmtDate(ts: number): string {

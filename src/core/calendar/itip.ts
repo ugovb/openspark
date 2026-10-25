@@ -51,14 +51,14 @@ export const itipTransport = {
 }
 
 export async function buildItipMime(m: ItipMail): Promise<{ raw: Buffer; envelope: { from: string; to: string[] } }> {
-  const domain = m.from.email.split('@')[1] || 'octopus.local'
+  const domain = m.from.email.split('@')[1] || 'openmail.local'
   const composer = new MailComposer({
     from: { name: m.from.name || '', address: m.from.email },
     to: m.to.map((a) => ({ name: a.name || '', address: a.email })),
     subject: m.subject,
     text: m.text,
     icalEvent: { method: m.method, content: m.ics, filename: 'invite.ics' },
-    messageId: `<octo.cal.${Date.now().toString(36)}.${crypto.randomBytes(6).toString('hex')}@${domain}>`,
+    messageId: `<openmail.cal.${Date.now().toString(36)}.${crypto.randomBytes(6).toString('hex')}@${domain}>`,
     headers: { 'X-Mailer': 'OpenMail' },
     date: new Date(),
   })
