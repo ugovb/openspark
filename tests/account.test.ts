@@ -119,6 +119,37 @@ describe('home-server account', () => {
     assert.equal((await get('/api/me', b.token)).status, 200)
   })
 
+  it('the sign-in page offers a code sign-in, and the code page signs in through a cookie', async () => {
+    const en = { 'accept-language': 'en' }
+    const login = await (await fetch(`${base}/`, { headers: en })).text()
+    assert.match(login, /href="\/\?code=1"/)
+    const page = await (await fetch(`${base}/?code=1`, { headers: en })).text()
+    assert.match(page, /\/api\/auth\/device\/start/)
+    assert.match(page, /Settings → Home server → Approve a device/)
+    // what the page's script does: start, approve from the signed-in device, poll for the cookie
+    const s = (await (await json('/api/auth/device/start', { name: 'Browser' })).json()) as { userCode: string; deviceCode: string }
+    assert.equal((await json('/api/account/device/approve', { userCode: s.userCode, password: PASSWORD }, token)).status, 200)
+    const r = await json('/api/auth/device/poll', { deviceCode: s.deviceCode, cookie: '1' })
+    const body = (await r.json()) as { status: string; token?: string }
+    assert.deepEqual(body, { status: 'approved' })
+    assert.match(r.headers.get('set-cookie') || '', /^octo_token=octo_[^;]+; Path=\/; HttpOnly; SameSite=Strict/)
+  })
+
+  it('the setup page asks for the setup code, not a terminal command', async () => {
+    const { deleteOwner } = await import('../src/server/users')
+    const { revokeAllDevices } = await import('../src/server/auth')
+    deleteOwner()
+    revokeAllDevices()
+    const html = await (await fetch(`${base}/`, { headers: { 'accept-language': 'en' } })).text()
+    assert.match(html, /Setup code/)
+    assert.doesNotMatch(html, /openmail server pair/)
+    // restore the account the next tests expect
+    const { getSetupCode } = await import('../src/server/setup')
+    const ok = await json('/api/auth/setup', { code: getSetupCode(), email: 'me@example.com', password: PASSWORD })
+    assert.equal(ok.status, 200)
+    token = ((await ok.json()) as { token: string }).token
+  })
+
   it('asks for the password before security changes', async () => {
     assert.equal((await get('/api/account')).status, 401)
     assert.equal((await json('/api/account/totp/begin', { password: 'nope nope nope' }, token)).status, 403)

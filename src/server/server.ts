@@ -235,6 +235,10 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         const r = pollDeviceLogin(fields.deviceCode || '', ip)
         if (r.status === 'expired') noteFailure(ip)
         if (r.status === 'approved') log('server', `signed in with a code "${r.device.name}" from ${ip}`)
+        // the sign-in page asks for the cookie instead of the token, so the token never reaches its script
+        if (r.status === 'approved' && fields.cookie === '1') {
+          return send(res, 200, { status: 'approved' }, { 'Set-Cookie': `octo_token=${encodeURIComponent(r.token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secureFlag(req)}` })
+        }
         return send(res, 200, r)
       }
       if (url.pathname === '/api/auth/setup' && req.method === 'POST') {
@@ -284,6 +288,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         if (!device && !PUBLIC_FILES.has(url.pathname) && !url.pathname.startsWith('/assets/')) {
           res.writeHead(200, HTML)
           if (!hasOwner()) return res.end(authPage(lang, url.searchParams.get('pair') ? { view: 'pair' } : { view: 'setup' }))
+          if (url.searchParams.get('code')) return res.end(authPage(lang, { view: 'code' }))
           if (url.searchParams.get('pair') && pairingAllowed()) return res.end(authPage(lang, { view: 'pair', hasOwner: true }))
           return res.end(authPage(lang, { view: 'login', allowPairing: pairingAllowed() }))
         }

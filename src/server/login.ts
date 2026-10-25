@@ -47,6 +47,7 @@ export type AuthView =
   | { view: 'totp'; ticket: string; error?: LoginError | { text: string } }
   | { view: 'setup'; error?: LoginError | { text: string }; email?: string }
   | { view: 'pair'; error?: LoginError | { text: string }; hasOwner?: boolean }
+  | { view: 'code'; error?: undefined }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 
@@ -81,10 +82,22 @@ input.code{font-size:20px;letter-spacing:3px;text-align:center;text-transform:up
 input.num{font-size:24px;letter-spacing:6px;text-align:center}
 button{margin-top:16px;cursor:pointer;width:100%;height:44px;border:0;border-radius:10px;background:var(--a);color:#fff;font-size:15px;font-weight:600}
 a.alt{display:block;margin-top:16px;font-size:13px;color:var(--a);text-decoration:none}
+.bigcode{font:600 30px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:4px;margin:6px 0 14px}
 .err{color:#d93a3a;font-size:13px;margin-top:12px}
 code{font-size:12.5px}
 @media (prefers-color-scheme:dark){body{background:#111113;color:#ececf2}.card{background:#1c1c1e!important;border-color:#2c2c30!important}input{background:#111113;color:#ececf2;border-color:#2c2c30!important}}
 `
+
+
+/** Inline script of the "sign in with a code" page: start, show the code, poll, then reload as signed in. */
+function codeScript(): string {
+  const msg = { denied: t('The other device refused this sign-in.'), expired: t('This code expired. Reload the page for a new one.'), wait: t('Waiting for approval…') }
+  return `(function(){var M=${JSON.stringify(msg)},uc=document.getElementById('uc'),st=document.getElementById('st');
+function post(u,b){return fetch(u,{method:'POST',body:JSON.stringify(b)}).then(function(r){return r.json()})}
+post('/api/auth/device/start',{}).then(function(s){if(!s.userCode){uc.textContent='';st.textContent=s.error||M.expired;return}
+uc.textContent=s.userCode;var t=setInterval(function(){post('/api/auth/device/poll',{deviceCode:s.deviceCode,cookie:'1'}).then(function(r){
+if(r.status==='approved'){clearInterval(t);location.href='/'}else if(r.status==='denied'||r.status==='expired'){clearInterval(t);uc.textContent='';st.textContent=M[r.status]}else if(r.error){clearInterval(t);st.textContent=r.error}})},(s.interval||2)*1000)})})();`
+}
 
 /** Sign-in, second step, first-time account creation, or the pairing-code form, in the browser's language. */
 export function authPage(lang: Lang, v: AuthView): string {
@@ -101,7 +114,8 @@ export function authPage(lang: Lang, v: AuthView): string {
 <label for="e">${t('Email')}</label><input id="e" name="email" type="email" autocomplete="username" required autofocus value="${esc(v.email || '')}">
 <label for="p">${t('Password')}</label><input id="p" name="password" type="password" autocomplete="current-password" required>
 <button type="submit">${t('Sign in')}</button>`
-      if (v.allowPairing) alt = `<a class="alt" href="/?pair=1">${t('Use a pairing code instead')}</a>`
+      alt = `<a class="alt" href="/?code=1">${t('Sign in with a code from another device')}</a>`
+      if (v.allowPairing) alt += `<a class="alt" href="/?pair=1">${t('Use a pairing code instead')}</a>`
     } else if (v.view === 'totp') {
       action = '/api/auth/totp'
       title = t('Two-step verification')
@@ -113,12 +127,19 @@ export function authPage(lang: Lang, v: AuthView): string {
     } else if (v.view === 'setup') {
       action = '/api/auth/setup'
       title = t('Create your account')
-      body = `<p>${t('Choose the email and password you will use to sign in on every device.')}<br>${t('Pairing code from the server:')} <code>openmail server pair</code></p>
-<label for="c">${t('Pairing code')}</label><input class="code" id="c" name="code" placeholder="XXXX-XXXX" autocomplete="one-time-code" required autofocus maxlength="9">
+      body = `<p>${t('Choose the email and password you will use to sign in on every device.')}<br>${t('The setup code is in the server log, or in OPENMAIL_SETUP_CODE.')}</p>
+<label for="c">${t('Setup code')}</label><input class="code" id="c" name="code" placeholder="XXXX-XXXX" autocomplete="one-time-code" required autofocus maxlength="64">
 <label for="e">${t('Email')}</label><input id="e" name="email" type="email" autocomplete="username" required value="${esc(v.email || '')}">
 <label for="p">${t('Password')}</label><input id="p" name="password" type="password" autocomplete="new-password" required minlength="10">
 <label for="p2">${t('Repeat the password')}</label><input id="p2" name="password2" type="password" autocomplete="new-password" required minlength="10">
 <button type="submit">${t('Create account')}</button>`
+    } else if (v.view === 'code') {
+      // the page starts the request itself, shows the code and polls until another device approves it
+      title = t('Sign in with a code')
+      body = `<p>${t('On a device where you are signed in to OpenMail, open Settings → Home server → Approve a device and enter this code.')}</p>
+<div id="uc" class="bigcode" aria-live="polite">…</div><p id="st">${t('Waiting for approval…')}</p>
+<script>${codeScript()}</script>`
+      alt = `<a class="alt" href="/">${t('Back to sign in')}</a>`
     } else {
       title = 'OpenMail'
       body = `<p>${t('Enter the pairing code from your home server.')}<br>${t('New code:')} <code>openmail server pair</code><br>${t('or ask from a paired device')}</p>
