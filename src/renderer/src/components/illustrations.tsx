@@ -29,29 +29,18 @@ function Letter({ x = 0, y = 0, scale = 1 }: { x?: number; y?: number; scale?: n
   )
 }
 
-function Octopus({ x = 0, y = 0, scale = 1, relaxed = false, mail = false }: {
+/** The mark of the app: an envelope. Open with a letter coming out, or closed when `relaxed` (nothing left to do). */
+function OpenEnvelope({ x = 0, y = 0, scale = 1, relaxed = false, mail = false }: {
   x?: number; y?: number; scale?: number; relaxed?: boolean; mail?: boolean
 }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <g stroke={ink} strokeWidth="8" strokeLinecap="round">
-        <path d="M30 61C22 78 12 80 8 71M70 61C78 78 88 80 92 71" opacity=".4" />
-        <path d={relaxed
-          ? 'M29 53C16 41 9 47 9 56M71 53C84 41 91 47 91 56'
-          : 'M30 53C18 66 6 59 9 48M70 53C82 66 94 59 91 48'} />
-        <path d="M35 69C33 84 24 95 14 87M65 69C67 84 76 95 86 87M44 74C44 85 44 95 37 99M56 74C56 85 56 95 63 99" />
-      </g>
-      <path d="M22 46C22 23 33 10 50 10C67 10 78 23 78 46C78 65 67 77 50 77C33 77 22 65 22 46Z" fill={ink} />
-      {relaxed ? (
-        <path d="M34 42Q39 47 44 42M56 42Q61 47 66 42" stroke={paper} strokeWidth="2.8" strokeLinecap="round" />
-      ) : (
-        <g fill={paper}>
-          <rect x="36" y="38" width="4.5" height="6.5" rx="2.25" />
-          <rect x="59.5" y="38" width="4.5" height="6.5" rx="2.25" />
-        </g>
-      )}
-      <path d="M46 50Q50 54 54 50" stroke={paper} strokeWidth="1.8" strokeLinecap="round" />
-      {mail && <Letter x={26} y={57} scale={0.8} />}
+    <g transform={`translate(${x} ${y}) scale(${scale})`} strokeLinejoin="round" strokeLinecap="round">
+      {!relaxed && <path d="M10 48L50 14L90 48Z" fill={ink} stroke={ink} strokeWidth="4" />}
+      {!relaxed && <Letter x={24} y={mail ? 26 : 34} scale={0.87} />}
+      <rect x="8" y="44" width="84" height="52" rx="10" fill={ink} />
+      <path d="M8 52L50 78L92 52" stroke={paper} strokeWidth="4" fill="none" />
+      {relaxed && <path d="M8 50L50 28L92 50" stroke={ink} strokeWidth="4" fill={ink} />}
+      {relaxed && <path d="M38 70Q50 80 62 70" stroke={paper} strokeWidth="3" fill="none" />}
     </g>
   )
 }
@@ -60,7 +49,7 @@ export function InboxZero() {
   return (
     <Scene>
       <ellipse cx="85" cy="118" rx="43" ry="5" fill={line} opacity=".5" />
-      <g transform="rotate(-8 83 80)"><Octopus x={33} y={20} relaxed /></g>
+      <g transform="rotate(-8 83 80)"><OpenEnvelope x={33} y={20} relaxed /></g>
       <g transform="rotate(9 133 104)"><Letter x={110} y={91} scale={0.64} /></g>
       <circle cx="136" cy="36" r="14" fill={paper} stroke={line} strokeWidth="1.5" />
       <path d="M129 36L134 41L143 31" stroke={ink} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -89,7 +78,7 @@ export function NoResults() {
   return (
     <Scene>
       <path d="M35 65V49Q35 42 42 42H62L71 51H125Q132 51 132 58V109H35Z" fill="var(--surface-2)" stroke={line} strokeWidth="1.5" strokeLinejoin="round" />
-      <Octopus x={52} y={34} scale={0.67} />
+      <OpenEnvelope x={52} y={34} scale={0.67} />
       <path d="M30 73Q29 68 35 68H69L76 74H134Q139 74 138 79L131 113Q130 118 124 118H45Q39 118 38 113Z" fill={paper} stroke={line} strokeWidth="1.5" />
       <path d="M51 94H70" stroke={quiet} strokeWidth="2" strokeLinecap="round" />
       <circle cx="122" cy="81" r="20" fill={soft} stroke={ink} strokeWidth="2.5" />
@@ -140,7 +129,7 @@ export function NoContact() {
       <rect x="42" y="33" width="86" height="84" rx="9" fill={paper} stroke={line} strokeWidth="1.5" />
       <path d="M128 48H133Q136 48 136 51V59Q136 62 133 62H128M128 69H133Q136 69 136 72V80Q136 83 133 83H128" fill={ink} opacity=".7" />
       <circle cx="85" cy="63" r="21" fill={soft} />
-      <Octopus x={66} y={44} scale={0.38} />
+      <OpenEnvelope x={66} y={44} scale={0.38} />
       <path d="M67 96H103M74 104H96" stroke={quiet} strokeWidth="2" strokeLinecap="round" opacity=".6" />
       <path d="M38 52H47M38 71H47M38 90H47" stroke={ink} strokeWidth="3" strokeLinecap="round" />
       <circle cx="148" cy="88" r="3" fill={ink} opacity=".3" />
@@ -152,7 +141,7 @@ export function Welcome() {
   return (
     <Scene>
       <ellipse cx="90" cy="119" rx="45" ry="5" fill={line} opacity=".5" />
-      <Octopus x={40} y={20} mail />
+      <OpenEnvelope x={40} y={20} mail />
       <g transform="rotate(-17 34 54)"><Letter x={19} y={43} scale={0.48} /></g>
       <g transform="rotate(14 145 47)"><Letter x={131} y={37} scale={0.44} /></g>
       <path d="M135 86Q148 78 148 66M41 31Q48 24 58 24" stroke={quiet} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 5" />
@@ -164,7 +153,7 @@ export function Welcome() {
 export function AskAI() {
   return (
     <Scene>
-      <Octopus x={31} y={39} scale={0.79} mail />
+      <OpenEnvelope x={31} y={39} scale={0.79} mail />
       <path d="M103 25H147Q154 25 154 32V65Q154 72 147 72H117L102 83L105 72H103Q96 72 96 65V32Q96 25 103 25Z" fill={paper} stroke={line} strokeWidth="1.5" strokeLinejoin="round" />
       <Letter x={108} y={35} scale={0.42} />
       <g fill={ink}><circle cx="113" cy="62" r="1.8" /><circle cx="121" cy="62" r="1.8" /><circle cx="129" cy="62" r="1.8" /></g>
