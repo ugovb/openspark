@@ -34,7 +34,7 @@ export async function loadFullThread(threadId: number): Promise<ThreadView> {
 
 /** Link that opens the conversation: the app's own protocol on the desktop, a URL in the browser version. */
 export function threadLink(threadId: number): string {
-  return window.__OCTO_WEB__ ? `${location.origin}/#/thread/${threadId}` : `octopus-mail://thread/${threadId}`
+  return window.__OCTO_WEB__ ? `${location.origin}/#/thread/${threadId}` : `openmail://thread/${threadId}`
 }
 
 /** Copy text (and optionally an HTML flavour); works on plain-HTTP pages where the async clipboard is missing. */

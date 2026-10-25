@@ -25,7 +25,7 @@ if [ -f "$APPARMOR_PROFILE_DEST" ]; then
   fi
   rm -f "$APPARMOR_PROFILE_DEST"
 fi
-# Octopus Mail: remove the `octo` CLI link
+# OpenMail: remove the `octo` CLI link
 if [ "$(readlink /usr/bin/octo 2>/dev/null)" = '/opt/${sanitizedProductName}/octo' ]; then
   rm -f '/usr/bin/octo'
 fi

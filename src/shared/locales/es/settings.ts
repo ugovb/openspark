@@ -60,8 +60,8 @@ const dict: Dictionary = {
     'Saved': 'Guardado',
     'Save': 'Guardar',
     'Account {email}': 'Cuenta {email}',
-    'Remove the account {email} from Octopus Mail? Your mail on the server stays untouched.':
-      '¿Quitar la cuenta {email} de Octopus Mail? Tu correo en el servidor no se modifica.',
+    'Remove the account {email} from OpenMail? Your mail on the server stays untouched.':
+      '¿Quitar la cuenta {email} de OpenMail? Tu correo en el servidor no se modifica.',
     'Remove account': 'Quitar cuenta',
     'Cancel': 'Cancelar',
     'Sender name': 'Nombre del remitente',
@@ -277,8 +277,8 @@ const dict: Dictionary = {
     'Found the server “{host}” (version {version})': 'Se encontró el servidor «{host}» (versión {version})',
     'After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?':
       'Tras conectar, la aplicación se reinicia y usa las cuentas del servidor doméstico. Las cuentas añadidas en este equipo se quedan aquí, pero no se usan hasta que desconectes el servidor. ¿Continuar?',
-    'An always-on computer (Raspberry Pi, NAS, old laptop) running Octopus Mail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
-      'Un equipo siempre encendido (Raspberry Pi, NAS, portátil viejo) con Octopus Mail. Envía los mensajes programados y recupera los mensajes pospuestos y los recordatorios incluso cuando tus equipos están apagados, y todos tus equipos y el navegador del teléfono ven las mismas cuentas.',
+    'An always-on computer (Raspberry Pi, NAS, old laptop) running OpenMail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
+      'Un equipo siempre encendido (Raspberry Pi, NAS, portátil viejo) con OpenMail. Envía los mensajes programados y recupera los mensajes pospuestos y los recordatorios incluso cuando tus equipos están apagados, y todos tus equipos y el navegador del teléfono ven las mismas cuentas.',
     '1. On the server, run:': '1. En el servidor, ejecuta:',
     'It prints the address (e.g. {example}) and a pairing code. Installing on a Raspberry Pi: README, section “Home server”.':
       'Mostrará la dirección (p. ej. {example}) y un código de emparejamiento. Instalación en una Raspberry Pi: README, sección «Servidor doméstico».',

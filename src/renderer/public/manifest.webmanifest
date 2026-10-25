@@ -1,7 +1,7 @@
 {
-  "name": "Octopus Mail",
-  "short_name": "Octopus",
-  "description": "Your mail from the Octopus Mail home server",
+  "name": "OpenMail",
+  "short_name": "OpenMail",
+  "description": "Your mail from the OpenMail home server",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

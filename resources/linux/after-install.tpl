@@ -56,6 +56,6 @@ if apparmor_status --enabled > /dev/null 2>&1; then
   fi
 fi
 
-# Octopus Mail: expose the `octo` CLI / MCP server on PATH
+# OpenMail: expose the `octo` CLI / MCP server on PATH
 chmod 755 '/opt/${sanitizedProductName}/octo' || true
 ln -sf '/opt/${sanitizedProductName}/octo' '/usr/bin/octo'

@@ -1,6 +1,6 @@
-# Octopus Mail — serwer domowy (instaluje go deploy/install.sh; znaczniki @…@ uzupełnia instalator)
+# OpenMail — serwer domowy (instaluje go deploy/install.sh; znaczniki @…@ uzupełnia instalator)
 [Unit]
-Description=Octopus Mail — serwer domowy
+Description=OpenMail — serwer domowy
 Wants=network-online.target
 After=network-online.target
 

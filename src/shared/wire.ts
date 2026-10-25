@@ -39,7 +39,7 @@ export function decodeWire<T = unknown>(text: string): T {
 export const SERVER_DEFAULT_PORT = 8787
 
 export interface ServerInfo {
-  name: 'octopus-mail-server'
+  name: 'openmail-server'
   version: string
   hostname: string
   accounts: number

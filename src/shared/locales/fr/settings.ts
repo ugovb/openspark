@@ -60,8 +60,8 @@ const dict: Dictionary = {
     'Saved': 'Enregistré',
     'Save': 'Enregistrer',
     'Account {email}': 'Compte {email}',
-    'Remove the account {email} from Octopus Mail? Your mail on the server stays untouched.':
-      'Supprimer le compte {email} d’Octopus Mail ? Votre courrier sur le serveur reste intact.',
+    'Remove the account {email} from OpenMail? Your mail on the server stays untouched.':
+      'Supprimer le compte {email} d’OpenMail ? Votre courrier sur le serveur reste intact.',
     'Remove account': 'Supprimer le compte',
     'Cancel': 'Annuler',
     'Sender name': 'Nom de l’expéditeur',
@@ -277,8 +277,8 @@ const dict: Dictionary = {
     'Found the server “{host}” (version {version})': 'Serveur « {host} » trouvé (version {version})',
     'After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?':
       'Après la connexion, l’application redémarre et utilise les comptes du serveur domestique. Les comptes ajoutés sur cet ordinateur restent ici, mais ne sont pas utilisés tant que vous ne déconnectez pas le serveur. Continuer ?',
-    'An always-on computer (Raspberry Pi, NAS, old laptop) running Octopus Mail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
-      'Un ordinateur toujours allumé (Raspberry Pi, NAS, vieux portable) qui fait tourner Octopus Mail. Il envoie les messages programmés et ramène les messages reportés et les rappels même lorsque vos ordinateurs sont éteints ; tous vos ordinateurs et le navigateur de votre téléphone voient les mêmes comptes.',
+    'An always-on computer (Raspberry Pi, NAS, old laptop) running OpenMail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
+      'Un ordinateur toujours allumé (Raspberry Pi, NAS, vieux portable) qui fait tourner OpenMail. Il envoie les messages programmés et ramène les messages reportés et les rappels même lorsque vos ordinateurs sont éteints ; tous vos ordinateurs et le navigateur de votre téléphone voient les mêmes comptes.',
     '1. On the server, run:': '1. Sur le serveur, exécutez :',
     'It prints the address (e.g. {example}) and a pairing code. Installing on a Raspberry Pi: README, section “Home server”.':
       'Il affiche l’adresse (par ex. {example}) et un code de jumelage. Installation sur Raspberry Pi : README, section « Serveur domestique ».',

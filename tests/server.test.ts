@@ -39,10 +39,10 @@ async function waitFor(cond: () => Promise<boolean>, ms = 20000, label = 'condit
   throw new Error(`timeout: ${label}`)
 }
 
-describe('Octopus Mail home server', () => {
+describe('OpenMail home server', () => {
   before(async () => {
     const webRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-web-'))
-    fs.writeFileSync(path.join(webRoot, 'index.html'), '<!doctype html><title>Octopus Mail</title>')
+    fs.writeFileSync(path.join(webRoot, 'index.html'), '<!doctype html><title>OpenMail</title>')
     server = await runServer({ port: 0, host: '127.0.0.1', webRoot })
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
     await nodemailer.createTransport({ host: '127.0.0.1', port: 3025, secure: false, ignoreTLS: true }).sendMail({
@@ -57,7 +57,7 @@ describe('Octopus Mail home server', () => {
 
   it('is reachable but refuses unpaired clients', async () => {
     const info = await (await fetch(`${base}/api/info`)).json()
-    assert.equal(info.name, 'octopus-mail-server')
+    assert.equal(info.name, 'openmail-server')
     const r = await fetch(`${base}/api/call`, { method: 'POST', body: encodeWire({ method: 'listAccounts', args: [] }) })
     assert.equal(r.status, 401)
     const bad = await fetch(`${base}/api/pair`, { method: 'POST', body: encodeWire({ code: 'AAAA-BBBB', name: 'x' }) })
@@ -136,7 +136,7 @@ describe('Octopus Mail home server', () => {
     const cookie = (login.headers.get('set-cookie') || '').split(';')[0]
     assert.match(cookie, /^octo_token=/)
     const app = await fetch(`${base}/`, { headers: { cookie } })
-    assert.match(await app.text(), /<title>Octopus Mail<\/title>/)
+    assert.match(await app.text(), /<title>OpenMail<\/title>/)
     const forged = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie }, body: encodeWire({ method: 'listAccounts', args: [] }) })
     assert.equal(forged.status, 403, 'cookie-only writes need the X-Octo header')
     const ok = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie, 'X-Octo': '1' }, body: encodeWire({ method: 'listAccounts', args: [] }) })

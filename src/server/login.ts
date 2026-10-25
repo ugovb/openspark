@@ -97,7 +97,7 @@ export function authPage(lang: Lang, v: AuthView): string {
     if (v.view === 'login') {
       action = '/api/auth/login'
       title = t('Sign in')
-      body = `<p>${t('Use the email and password of your Octopus Mail account.')}</p>
+      body = `<p>${t('Use the email and password of your OpenMail account.')}</p>
 <label for="e">${t('Email')}</label><input id="e" name="email" type="email" autocomplete="username" required autofocus value="${esc(v.email || '')}">
 <label for="p">${t('Password')}</label><input id="p" name="password" type="password" autocomplete="current-password" required>
 <button type="submit">${t('Sign in')}</button>`
@@ -120,14 +120,14 @@ export function authPage(lang: Lang, v: AuthView): string {
 <label for="p2">${t('Repeat the password')}</label><input id="p2" name="password2" type="password" autocomplete="new-password" required minlength="10">
 <button type="submit">${t('Create account')}</button>`
     } else {
-      title = 'Octopus Mail'
+      title = 'OpenMail'
       body = `<p>${t('Enter the pairing code from your home server.')}<br>${t('New code:')} <code>octo server pair</code><br>${t('or ask from a paired device')}</p>
 <input class="code" name="code" placeholder="XXXX-XXXX" autocomplete="one-time-code" autofocus required maxlength="9">
 <button type="submit">${t('Connect')}</button>`
       if (v.hasOwner) alt = `<a class="alt" href="/">${t('Back to sign in')}</a>`
     }
     return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${t('Octopus Mail — sign in')}</title>
+<title>${t('OpenMail — sign in')}</title>
 <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="theme-color" content="#1c1c1e">
 <style>${STYLE}</style></head><body><form class="card" method="post" action="${action}" onsubmit="var b=this.querySelector('button[type=submit]');if(b){if(b.disabled)return false;b.disabled=true;b.style.opacity='.6';b.textContent='…'}">
 <img src="/logo.svg" alt="" onerror="this.remove()"><h1>${title}</h1>

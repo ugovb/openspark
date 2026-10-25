@@ -61,7 +61,7 @@ const dict: Dictionary = {
     'Added {email} — first sync in progress': 'Se añadió {email} — primera sincronización en curso',
     'Finish signing in in your browser…': 'Termina de iniciar sesión en tu navegador…',
     'Added {email}': 'Se añadió {email}',
-    'Welcome to Octopus Mail': 'Te damos la bienvenida a Octopus Mail',
+    'Welcome to OpenMail': 'Te damos la bienvenida a OpenMail',
     'Free email with Smart Inbox, AI and a calendar. Everything stays on this computer, and passwords are kept {secretStore}.':
       'Correo gratuito con Smart Inbox, IA y calendario. Todo se queda en este equipo y las contraseñas se guardan {secretStore}.',
     'Email address': 'Dirección de correo',

@@ -41,8 +41,8 @@ const dict: Dictionary = {
     'Saved': 'Zapisano',
     'Save': 'Zapisz',
     'Account {email}': 'Konto {email}',
-    'Remove the account {email} from Octopus Mail? Your mail on the server stays untouched.':
-      'Usunąć konto {email} z Octopus Mail? Poczta na serwerze zostaje nietknięta.',
+    'Remove the account {email} from OpenMail? Your mail on the server stays untouched.':
+      'Usunąć konto {email} z OpenMail? Poczta na serwerze zostaje nietknięta.',
     'Remove account': 'Usuń konto',
     'Cancel': 'Anuluj',
     'Sender name': 'Nazwa nadawcy',
@@ -270,8 +270,8 @@ const dict: Dictionary = {
     'Found the server “{host}” (version {version})': 'Znaleziono serwer „{host}” (wersja {version})',
     'After connecting, the app restarts and uses the accounts on the home server. Accounts added on this computer stay here, but are not used until you disconnect the server. Continue?':
       'Po połączeniu aplikacja uruchomi się ponownie i będzie korzystać z kont na serwerze domowym. Konta dodane na tym komputerze zostają tutaj, ale nie będą używane, dopóki nie odłączysz serwera. Kontynuować?',
-    'An always-on computer (Raspberry Pi, NAS, old laptop) running Octopus Mail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
-      'Komputer stale włączony (Raspberry Pi, NAS, stary laptop) z Octopus Mail. Wysyła zaplanowane wiadomości i budzi odłożone oraz przypomnienia także wtedy, gdy Twoje komputery są wyłączone, a wszystkie komputery i przeglądarka w telefonie widzą te same konta.',
+    'An always-on computer (Raspberry Pi, NAS, old laptop) running OpenMail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.':
+      'Komputer stale włączony (Raspberry Pi, NAS, stary laptop) z OpenMail. Wysyła zaplanowane wiadomości i budzi odłożone oraz przypomnienia także wtedy, gdy Twoje komputery są wyłączone, a wszystkie komputery i przeglądarka w telefonie widzą te same konta.',
     '1. On the server, run:': '1. Na serwerze uruchom:',
     'It prints the address (e.g. {example}) and a pairing code. Installing on a Raspberry Pi: README, section “Home server”.':
       'Wypisze adres (np. {example}) i kod parowania. Instalacja na Raspberry Pi: README, sekcja „Serwer domowy”.',

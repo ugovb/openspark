@@ -1,4 +1,4 @@
-// Octopus Mail home server (`octo serve`): runs the whole engine 24/7 (sync, Send Later, snooze,
+// OpenMail home server (`octo serve`): runs the whole engine 24/7 (sync, Send Later, snooze,
 // reminders, rules) and exposes the service API to paired desktop apps and browsers.
 import fs from 'node:fs'
 import http from 'node:http'
@@ -140,7 +140,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
       // ---------- public endpoints ----------
       if (url.pathname === '/api/info') {
         const info: Omit<ServerInfo, 'accounts' | 'engine'> & { pairing: boolean; account: boolean } = {
-          name: 'octopus-mail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: pairingAllowed(), account: hasOwner(),
+          name: 'openmail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: pairingAllowed(), account: hasOwner(),
         }
         return send(res, 200, info)
       }

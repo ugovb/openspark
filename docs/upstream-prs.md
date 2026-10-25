@@ -1,11 +1,11 @@
-# Pull requests prepared for CFGPeter/octopus-mail
+# Pull requests prepared for ugovb/openspark
 
 Five independent branches, each based on upstream `main` (10696f3). Branch names: `pr/<name>` in `ugovb/openspark`.
-Open them from your own fork (push the branches there, then "Compare & pull request" against `CFGPeter/octopus-mail:main`).
+Open them from your own fork (push the branches there, then "Compare & pull request" against `ugovb/openspark:main`).
 
 ```bash
 git clone https://github.com/ugovb/openspark && cd openspark
-git remote add fork https://github.com/<you>/octopus-mail      # your fork, created with the Fork button
+git remote add fork https://github.com/<you>/openmail      # your fork, created with the Fork button
 for b in macos-app proxy-synology infomaniak french-spanish-sorting openai-compatible-ai; do
   git fetch origin pr/$b && git push fork origin/pr/$b:refs/heads/$b
 done
@@ -34,7 +34,7 @@ Tested: typecheck, `i18n:check`, `electron-vite build`; the workflow ran green o
 - `OCTO_TRUST_PROXY=1`: use the left-most `X-Forwarded-For` as client address (otherwise every client looks like the proxy and the "10 failed codes" lockout hits everybody) and add `Secure` to the cookie when `X-Forwarded-Proto: https`. Off by default.
 - CSP `connect-src` allows `wss:` (live updates over HTTPS), Apple home-screen meta tags
 - `deploy/docker-compose.synology.yml`, `docs/synology.md` (DSM reverse proxy, Let's Encrypt, iPhone, pairing)
-- `.github/workflows/docker.yml`: multi-arch image to `ghcr.io/<repo>` (the compose file points at `ghcr.io/cfgpeter/octopus-mail`; adjust if you publish elsewhere)
+- `.github/workflows/docker.yml`: multi-arch image to `ghcr.io/<repo>` (the compose file points at `ghcr.io/cfgpeter/openmail`; adjust if you publish elsewhere)
 
 Test: `tests/proxy.test.ts` (header honoured only with the env var set).
 
@@ -57,7 +57,7 @@ Fourth AI provider next to Ollama / Claude / off: any endpoint with `POST {base}
 
 # Second batch
 
-Open the first batch first. Branches below are on `ugovb/octopus-mail`. Order: `draft-prompt`, `pairing-code-ui`, `lang-fr-es`, then `anthropic-compat` (needs `openai-compatible-ai` merged; or the PR shows both commits), then `default-provider-badge` (needs `anthropic-compat`).
+Open the first batch first. Branches below are on `ugovb/openmail`. Order: `draft-prompt`, `pairing-code-ui`, `lang-fr-es`, then `anthropic-compat` (needs `openai-compatible-ai` merged; or the PR shows both commits), then `default-provider-badge` (needs `anthropic-compat`).
 
 ## `draft-prompt` — Custom writing instructions for AI replies
 Adds Settings → AI → "Writing instructions". Empty = short built-in default prompt. The text replaces only the role/style part of the reply-draft prompt. The rule that email content is data, the language and tone rules and the "return only the body" line are always added. 4000 character cap, "Show default" and "Restore default". Summaries, categorisation, rewrite and Ask keep their fixed prompts. Test: `node scripts/run-tests.mjs draft-prompt` (fake Ollama server, no mail server).

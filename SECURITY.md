@@ -1,6 +1,6 @@
 # Security
 
-Octopus Mail stores mail passwords and OAuth tokens, so security reports are very welcome.
+OpenMail stores mail passwords and OAuth tokens, so security reports are very welcome.
 
 ## Reporting a vulnerability
 

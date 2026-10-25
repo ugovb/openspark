@@ -1,5 +1,5 @@
 // npm run dist:server — archive for a home server (Raspberry Pi / Linux):
-// dist/octopus-mail-server-<version>.tar.gz with the CLI bundle, the web UI and deploy/install.sh.
+// dist/openmail-server-<version>.tar.gz with the CLI bundle, the web UI and deploy/install.sh.
 // Dependencies are installed on the target by install.sh (native modules must match its CPU).
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -13,35 +13,35 @@ for (const f of ['out/cli/octo.js', 'out/renderer/index.html']) {
 }
 
 const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-server-'))
-const dir = path.join(stage, 'octopus-mail-server')
+const dir = path.join(stage, 'openmail-server')
 const copy = (from, to = from) => fs.cpSync(path.join(root, from), path.join(dir, to), { recursive: true })
 copy('out/cli')
 copy('out/renderer')
 copy('package.json')
 copy('package-lock.json')
 copy('deploy/install.sh', 'install.sh')
-copy('deploy/octopus-mail.service', 'octopus-mail.service')
+copy('deploy/openmail.service', 'openmail.service')
 fs.writeFileSync(
   path.join(dir, 'CZYTAJ.txt'),
-  `Octopus Mail ${pkg.version} — serwer domowy
+  `OpenMail ${pkg.version} — serwer domowy
 
 Instalacja (Raspberry Pi OS 64-bit, Debian, Ubuntu; arm64 albo x86_64):
 
-  tar xzf octopus-mail-server-${pkg.version}.tar.gz
-  cd octopus-mail-server
+  tar xzf openmail-server-${pkg.version}.tar.gz
+  cd openmail-server
   sudo bash install.sh
 
-Instalator pobiera Node.js 24 do /opt/octopus-mail, instaluje usługę systemd "octopus-mail"
+Instalator pobiera Node.js 24 do /opt/openmail, instaluje usługę systemd "openmail"
 i wypisuje adres serwera oraz kod parowania. Aktualizacja: to samo z nowym archiwum.
 Odinstalowanie: sudo bash install.sh --uninstall (konta i poczta zostają).
 `,
 )
 
-const out = path.join(root, 'dist', `octopus-mail-server-${pkg.version}.tar.gz`)
+const out = path.join(root, 'dist', `openmail-server-${pkg.version}.tar.gz`)
 fs.mkdirSync(path.dirname(out), { recursive: true })
 fs.rmSync(out, { force: true })
 // relative archive path: Windows bsdtar treats "C:" in -f as a remote host
-const r = spawnSync('tar', ['-czf', path.relative(stage, out), 'octopus-mail-server'], { cwd: stage, stdio: 'inherit' })
+const r = spawnSync('tar', ['-czf', path.relative(stage, out), 'openmail-server'], { cwd: stage, stdio: 'inherit' })
 fs.rmSync(stage, { recursive: true, force: true })
 if (r.status !== 0) throw new Error('tar nie utworzył archiwum')
 console.log(`Serwer → ${path.relative(root, out)} (${(fs.statSync(out).size / 1e6).toFixed(1)} MB)`)

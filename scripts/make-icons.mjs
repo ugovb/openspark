@@ -109,7 +109,7 @@ function proofSvg(appFrames, trayFrames, unreadFrames, illustrations, themes, in
   const sample = (frames, size, x, y, color) => image(x, y, size, size, frames.find((f) => f.size === size).png) + text(x, y + size + 18, `${size} px`, color, 10)
   const content = [
     '<rect width="1200" height="1560" fill="#eeedf5"/>',
-    text(40, 49, 'Octopus Mail', '#292538', 28, 600),
+    text(40, 49, 'OpenMail', '#292538', 28, 600),
     text(40, 74, 'Identyfikacja wizualna / SVG / Windows / jasny i ciemny motyw', '#6b6b78', 13),
     text(959, 49, 'ARKUSZ PODGLĄDU', '#6b6b78', 11),
   ]
@@ -147,7 +147,7 @@ function proofSvg(appFrames, trayFrames, unreadFrames, illustrations, themes, in
 const icon = await read(resource('brand/icon.svg'))
 const small = await read(resource('brand/icon-small.svg'))
 const tray = await read(resource('brand/tray.svg'))
-const unread = tray.replace('</svg>', '<circle cx="25" cy="7" r="5.3" fill="#5b4cf0" stroke="#f6f4ff" stroke-width="1.8"/></svg>')
+const unread = tray.replace('</svg>', '<circle cx="25" cy="7" r="5.3" fill="#3b82f6" stroke="#f3f7ff" stroke-width="1.8"/></svg>')
 const frames = (sizes, source) => {
   const pngs = raster(sizes.map((size) => ({ svg: source(size), width: size, height: size })))
   return sizes.map((size, index) => ({ size, png: pngs[index] }))

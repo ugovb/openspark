@@ -2,22 +2,22 @@
 
 [English](README.md) · **Polski**
 
-<img src="resources/brand/icon.svg" width="96" alt="Logo Octopus Mail" />
+<img src="resources/brand/icon.svg" width="96" alt="Logo OpenMail" />
 
-# Octopus Mail
+# OpenMail
 
 ### Darmowy klient poczty z Smart Inbox, AI i własnym serwerem domowym zamiast cudzej chmury.
 
 [![Licencja MIT](https://img.shields.io/badge/licencja-MIT-f4c430?style=flat-square)](LICENSE)
 [![Windows · Linux](https://img.shields.io/badge/system-Windows%20%C2%B7%20Linux-5b4cf0?style=flat-square)](#instalacja)
 
-<img src="docs/screenshots/pl/desktop.png" alt="Octopus Mail: Smart Inbox i rozmowa" width="1100" />
+<img src="docs/screenshots/pl/desktop.png" alt="OpenMail: Smart Inbox i rozmowa" width="1100" />
 
 </div>
 
 ---
 
-Octopus Mail daje zwykłym kontom IMAP/SMTP to, co najwygodniejsze w nowoczesnych programach pocztowych:
+OpenMail daje zwykłym kontom IMAP/SMTP to, co najwygodniejsze w nowoczesnych programach pocztowych:
 Smart Inbox, sprawdzanie nowych nadawców, odkładanie, wysyłkę zaplanowaną, przypomnienia o braku
 odpowiedzi, szablony, pomoc AI i kalendarz. **Bez wysyłania skrzynki do chmury producenta.** Poczta,
 hasła i dane AI zostają na Twoim komputerze albo na małym serwerze w Twoim domu.
@@ -25,7 +25,7 @@ hasła i dane AI zostają na Twoim komputerze albo na małym serwerze w Twoim do
 ## Skąd ten projekt
 
 Spark to świetny program, ale trzyma konta i zaplanowane wysyłki w swojej chmurze, a jego CLI dla agentów
-działa tylko przy włączonej aplikacji. Octopus Mail powstał jako eksperyment po filmie *„Every app on
+działa tylko przy włączonej aplikacji. OpenMail powstał jako eksperyment po filmie *„Every app on
 Earth is now open source… whether it likes it or not”* o [REA](https://github.com/morluto/rea): czy jedna
 osoba z agentem AI ([Claude Code](https://claude.com/claude-code)) odtworzy funkcje, których używa na co
 dzień, jako otwarty program działający lokalnie? Wyszedł działający klient w jeden dzień. Kod, grafika
@@ -85,22 +85,22 @@ i nazwa są własne; publiczna lista funkcji Sparka posłużyła tylko jako list
 
 ## Instalacja
 
-**Windows:** pobierz `Octopus-Mail-Setup-<wersja>.exe` z
-[Releases](https://github.com/CFGPeter/octopus-mail/releases). Instalator nie jest jeszcze podpisany,
+**Windows:** pobierz `OpenMail-Setup-<wersja>.exe` z
+[Releases](https://github.com/ugovb/openspark/releases). Instalator nie jest jeszcze podpisany,
 więc Windows pokaże „Nieznany wydawca”: wybierz *Więcej informacji → Uruchom mimo to*.
 
 **Linux (aplikacja):** zbuduj AppImage / .deb ze źródeł (niżej). Każda zmiana jest testowana na Ubuntu.
 
 **Serwer domowy (Raspberry Pi 3/4/5/Zero 2 W z 64-bitowym Raspberry Pi OS, Debian, Ubuntu):** pobierz
-`octopus-mail-server-<wersja>.tar.gz` z Releases i na serwerze:
+`openmail-server-<wersja>.tar.gz` z Releases i na serwerze:
 
 ```bash
-tar xzf octopus-mail-server-*.tar.gz && cd octopus-mail-server
+tar xzf openmail-server-*.tar.gz && cd openmail-server
 sudo bash install.sh
 ```
 
-Instalator pobiera Node.js 24 do `/opt/octopus-mail` (systemowego Node nie rusza), instaluje usługę
-systemd `octopus-mail` (startuje z systemem, wstaje po awarii) i polecenie `octo`, a na końcu wypisuje
+Instalator pobiera Node.js 24 do `/opt/openmail` (systemowego Node nie rusza), instaluje usługę
+systemd `openmail` (startuje z systemem, wstaje po awarii) i polecenie `octo`, a na końcu wypisuje
 adres serwera i kod parowania. Aktualizacja: to samo z nowym archiwum. Odinstalowanie:
 `sudo bash install.sh --uninstall` (konta i poczta zostają).
 
@@ -135,7 +135,7 @@ npm run icon          # ikony z resources/brand/*.svg (pip install -r scripts/re
 Dane programu: Windows `%APPDATA%\Octopus Mail`, Linux `~/.config/Octopus Mail`. Hasła i tokeny trafiają
 do systemowego magazynu haseł (Menedżer poświadczeń Windows, GNOME Keyring / KWallet), nigdy do bazy.
 
-Antywirusy przechwytujące pocztę (np. Kaspersky) podmieniają certyfikaty serwerów — Octopus Mail ufa
+Antywirusy przechwytujące pocztę (np. Kaspersky) podmieniają certyfikaty serwerów — OpenMail ufa
 certyfikatom systemu, więc działa z nimi tak jak Outlook.
 
 ## CLI i MCP
@@ -151,7 +151,7 @@ octo action snooze t12 --until "pon 8:00"
 
 Gotowe polecenie `claude mcp add …` do Claude Code jest w aplikacji: Ustawienia → Agenci AI i CLI.
 Przy serwerze domowym agent łączy się przez SSH:
-`claude mcp add octopus-mail --scope user -- ssh pi@raspberrypi.local octo mcp`.
+`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local octo mcp`.
 
 Domyślnie każde konto ma dla agentów poziom **Odczyt**. Zmienisz go tylko w aplikacji.
 
@@ -179,6 +179,6 @@ Testy i profil demonstracyjny (`npm run demo:seed && npm run demo`) nigdy nie do
 
 ## Licencja i znaki towarowe
 
-[MIT](LICENSE). Octopus Mail to niezależny projekt, niezwiązany z Readdle ani przez nią niepopierany.
+[MIT](LICENSE). OpenMail to niezależny projekt, niezwiązany z Readdle ani przez nią niepopierany.
 Spark i inne nazwy produktów są znakami towarowymi ich właścicieli. Program nie zawiera kodu, grafik
 ani tekstów ze Sparka.

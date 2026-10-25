@@ -7,8 +7,8 @@ const dict: Dictionary = {
     // the same in French
     'newsl.': 'newsl.',
     // ── help (octo help) ──
-    'octo {version} — Octopus Mail from the command line (local times with UTC offset)':
-      'octo {version} — Octopus Mail en ligne de commande (heures locales avec décalage UTC)',
+    'octo {version} — OpenMail from the command line (local times with UTC offset)':
+      'octo {version} — OpenMail en ligne de commande (heures locales avec décalage UTC)',
     [`Reading:
   octo accounts                              accounts, agent access levels
   octo folders [account]                     folders with counts
@@ -184,10 +184,10 @@ Global : --json (données lisibles par machine), --no-sync (ne pas récupérer d
     file: 'fichier',
     'Status: draft (the ID will not change)': 'Statut : brouillon (l’ID ne changera pas)',
     'Attachments: {list}': 'Pièces jointes : {list}',
-    'Send: octo send {id}  ·  Open: octopus-mail://draft/{id}': 'Envoi : octo send {id}  ·  Ouvrir : octopus-mail://draft/{id}',
+    'Send: octo send {id}  ·  Open: openmail://draft/{id}': 'Envoi : octo send {id}  ·  Ouvrir : openmail://draft/{id}',
     'Give a draft ID': 'Indiquez un ID de brouillon',
-    'Warning: the app is not running — the message will go out only when you start Octopus Mail or `octo daemon`.':
-      'Attention : l’application n’est pas lancée — le message ne partira que lorsque vous démarrerez Octopus Mail ou `octo daemon`.',
+    'Warning: the app is not running — the message will go out only when you start OpenMail or `octo daemon`.':
+      'Attention : l’application n’est pas lancée — le message ne partira que lorsque vous démarrerez OpenMail ou `octo daemon`.',
     'Scheduled: {subject}\nSend at: {time}\nCancel: octo unschedule {id}': 'Programmé : {subject}\nEnvoi : {time}\nAnnulation : octo unschedule {id}',
     'Sent: {subject} ({time})': 'Envoyé : {subject} ({time})',
     'Not sent (status: {status}): {error}': 'Non envoyé (statut : {status}) : {error}',
@@ -230,7 +230,7 @@ Global : --json (données lisibles par machine), --no-sync (ne pas récupérer d
     'Syncing {email}…': 'Synchronisation de {email}…',
     'Done.': 'Terminé.',
     'Sync is already running (the app or another daemon).': 'La synchronisation est déjà en cours (l’application ou un autre daemon).',
-    'Octopus Mail daemon is running (Ctrl+C to stop).': 'Le daemon Octopus Mail est actif (Ctrl+C pour arrêter).',
+    'OpenMail daemon is running (Ctrl+C to stop).': 'Le daemon OpenMail est actif (Ctrl+C pour arrêter).',
     WHEN: 'QUAND',
     WHO: 'QUI',
     ACTION: 'ACTION',
@@ -241,24 +241,24 @@ Global : --json (données lisibles par machine), --no-sync (ne pas récupérer d
     // ── home server (octo serve / octo server) ──
     'A sync engine is already running on this computer (the app or a daemon). Close it before starting the server.':
       'Un moteur de synchronisation tourne déjà sur cet ordinateur (l’application ou un daemon). Fermez-le avant de démarrer le serveur.',
-    [`Octopus Mail — home server is running.
+    [`OpenMail — home server is running.
 
 Address:  {addresses}
 
 Sign in with your email and password (and your authenticator code).
-Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `Octopus Mail — le serveur domestique est actif.
+Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `OpenMail — le serveur domestique est actif.
 
 Adresse :  {addresses}
 
 Connectez-vous avec votre e-mail et votre mot de passe (et le code de votre application d’authentification).
 Mot de passe oublié ? octo server reset-password · Compte : octo server account · Ctrl+C pour arrêter.`,
-    [`Octopus Mail — home server is running.
+    [`OpenMail — home server is running.
 
 Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
 Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — le serveur domestique est actif.
+The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `OpenMail — le serveur domestique est actif.
 
 Adresse :  {addresses}
 Code de jumelage (valable 15 min) : {code}

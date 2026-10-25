@@ -17,15 +17,15 @@ afterEach(() => initLang('en', 'en-GB'))
 describe('t() and tp()', () => {
   it('returns English in the English UI', () => {
     setLang('en')
-    assert.equal(t('Open Octopus Mail'), 'Open Octopus Mail')
-    assert.equal(t('Octopus Mail — {n} unread', { n: 3 }), 'Octopus Mail — 3 unread')
+    assert.equal(t('Open OpenMail'), 'Open OpenMail')
+    assert.equal(t('OpenMail — {n} unread', { n: 3 }), 'OpenMail — 3 unread')
     assert.equal(t('No such key {x} {y}', { x: 1 }), 'No such key 1 {y}')
   })
 
   it('returns Polish in the Polish UI and falls back to English', () => {
     setLang('pl')
-    assert.equal(t('Open Octopus Mail'), 'Otwórz Octopus Mail')
-    assert.equal(t('Octopus Mail — {n} unread', { n: 3 }), 'Octopus Mail — nieprzeczytane: 3')
+    assert.equal(t('Open OpenMail'), 'Otwórz OpenMail')
+    assert.equal(t('OpenMail — {n} unread', { n: 3 }), 'OpenMail — nieprzeczytane: 3')
     assert.equal(t("Can't connect to {url}: {error}", { url: 'http://x', error: 'timeout' }), 'Nie mogę połączyć się z http://x: timeout')
     assert.equal(t('Not translated yet'), 'Not translated yet')
   })

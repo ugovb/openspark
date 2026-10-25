@@ -1,4 +1,4 @@
-# Octopus Mail — instrukcje dla agentów (Codex / Astra)
+# OpenMail — instrukcje dla agentów (Codex / Astra)
 
 Darmowy, lokalny klient poczty dla Windows i Linuksa (Electron 44 + React 19 + TypeScript + Tailwind v4). Funkcje
 w stylu Spark Mail, ale cały kod, grafika i teksty są własne — nie kopiujemy niczego z Readdle/Spark.
@@ -29,6 +29,6 @@ Najpierw przeczytaj `README_pl.md` (albo `README.md`) i `CONTRIBUTING.md`.
 ## Zasady
 - Nie zmieniaj logiki aplikacji, danych ani testów, jeśli zadanie tego nie wymaga.
 - Nowe zależności npm tylko gdy są konieczne (devDependencies), z dokładną wersją.
-- Nigdy nie dotykaj `%APPDATA%\Octopus Mail` / `~/.config/Octopus Mail` (prawdziwe dane użytkownika) ani systemowego
+- Nigdy nie dotykaj `%APPDATA%\OpenMail` / `~/.config/OpenMail` (prawdziwe dane użytkownika) ani systemowego
   magazynu haseł. Testy i demo: zawsze `OCTO_HOME` w katalogu tymczasowym i `OCTO_SECRETS=memory|file`.
 - Logi i błędy w raporcie ucinaj do ostatnich 30 linii.

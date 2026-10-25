@@ -55,7 +55,7 @@ async function waitFor(cond: () => boolean | Promise<boolean>, ms = 15000, label
 let accId = 0
 const subj = (s: string) => `${s} [${RUN}]`
 
-describe('Octopus Mail engine (GreenMail)', () => {
+describe('OpenMail engine (GreenMail)', () => {
   before(async () => {
     // clean alice's mailbox from previous runs
     const c = await imapAs('alice')

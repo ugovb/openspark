@@ -2,23 +2,25 @@
 
 **English** · [Polski](README_pl.md)
 
-<img src="resources/brand/icon.svg" width="96" alt="Octopus Mail logo" />
+<img src="resources/brand/icon.svg" width="96" alt="OpenMail logo" />
 
-# Octopus Mail
+# OpenMail
 
 ### A free, local-first email client with a Smart Inbox, AI and your own home server instead of somebody else's cloud.
 
 [![MIT license](https://img.shields.io/badge/license-MIT-f4c430?style=flat-square)](LICENSE)
-[![Windows · Linux](https://img.shields.io/badge/platform-Windows%20%C2%B7%20Linux-5b4cf0?style=flat-square)](#install)
+[![macOS · Windows · Linux](https://img.shields.io/badge/platform-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-2f7bf0?style=flat-square)](#install)
 [![MCP](https://img.shields.io/badge/AI%20agents-MCP%20%2B%20CLI-5c4ee5?style=flat-square)](#ai-agents-cli-and-mcp)
 
-<img src="docs/screenshots/desktop.png" alt="Octopus Mail: Smart Inbox and a conversation" width="1100" />
+<img src="docs/screenshots/desktop.png" alt="OpenMail: Smart Inbox and a conversation" width="1100" />
 
 </div>
 
+> OpenMail is a fork of [Octopus Mail](https://github.com/CFGPeter/octopus-mail) by Krabi (MIT). Existing profiles keep working: the data folder and keychain entry keep their legacy `Octopus Mail` name.
+
 ---
 
-Octopus Mail brings the comfortable parts of modern mail apps (Smart Inbox, screening new senders,
+OpenMail brings the comfortable parts of modern mail apps (Smart Inbox, screening new senders,
 snooze, send later, follow-up reminders, templates, AI writing help, calendar) to plain IMAP/SMTP
 accounts, **without sending your mailbox to a vendor's cloud**. Your mail, passwords and AI data stay
 on your computer, or on a small server in your home if you want sync and a phone view.
@@ -29,7 +31,7 @@ The app speaks **English and Polish**: it follows your system language, and you 
 ## Why
 
 Spark is a lovely mail client, but it keeps your accounts and scheduled mail in its cloud, and its
-agent CLI only works while the desktop app is running. Octopus Mail started as an experiment after the
+agent CLI only works while the desktop app is running. Octopus Mail, the project OpenMail forks, started as an experiment after the
 video *"Every app on Earth is now open source… whether it likes it or not"* about
 [REA](https://github.com/morluto/rea): could one person with an AI coding agent
 ([Claude Code](https://claude.com/claude-code)) rebuild the features they use every day as an open,
@@ -88,21 +90,24 @@ Spark's public feature set was only the to-do list.
 
 ## Install
 
-**Windows:** download `Octopus-Mail-Setup-<version>.exe` from
-[Releases](https://github.com/CFGPeter/octopus-mail/releases). The installer is not code-signed yet,
+**macOS (Apple Silicon):** download `OpenMail-<version>-arm64.dmg` from
+[Releases](https://github.com/ugovb/openspark/releases). The app is not notarized: right-click it, then *Open*.
+
+**Windows:** download `OpenMail-Setup-<version>.exe` from
+[Releases](https://github.com/ugovb/openspark/releases). The installer is not code-signed yet,
 so Windows SmartScreen shows "Unknown publisher": choose *More info → Run anyway*.
 
 **Linux desktop:** build an AppImage / .deb from source (see below). CI tests every commit on Ubuntu.
 
 **Home server (Raspberry Pi 3/4/5/Zero 2 W with 64-bit Raspberry Pi OS, Debian, Ubuntu):** download
-`octopus-mail-server-<version>.tar.gz` from Releases, then on the server:
+`openmail-server-<version>.tar.gz` from Releases, then on the server:
 
 ```bash
-tar xzf octopus-mail-server-*.tar.gz && cd octopus-mail-server
+tar xzf openmail-server-*.tar.gz && cd openmail-server
 sudo bash install.sh
 ```
 
-The installer puts a private Node.js 24 in `/opt/octopus-mail`, installs the `octopus-mail` systemd
+The installer puts a private Node.js 24 in `/opt/openmail`, installs the `openmail` systemd
 service (starts on boot, restarts after a crash) and the `octo` command, then prints the server address
 and a pairing code. Run it again with a newer archive to update; `sudo bash install.sh --uninstall`
 removes it and keeps your data.
@@ -145,7 +150,7 @@ octo unschedule 45
 
 To connect Claude Code, copy the ready-made `claude mcp add …` command from the app
 (*Settings → AI agents & CLI*). With a home server, the agent can talk to it over SSH:
-`claude mcp add octopus-mail --scope user -- ssh pi@raspberrypi.local octo mcp`.
+`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local octo mcp`.
 
 Each account starts with **read-only** agent access. Only you can raise it, in the app.
 
@@ -167,6 +172,6 @@ out on purpose.
 
 ## License and trademarks
 
-[MIT](LICENSE). Octopus Mail is an independent project and is not affiliated with, endorsed by or
+[MIT](LICENSE). OpenMail is an independent project and is not affiliated with, endorsed by or
 connected to Readdle. Spark and other product names are trademarks of their respective owners.
 No code, graphics or text from Spark are used.

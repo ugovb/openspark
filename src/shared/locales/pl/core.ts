@@ -254,8 +254,8 @@ const dict: Dictionary = {
     triage: 'porządkowanie',
     send: 'wysyłka',
     'no access': 'brak',
-    'Account {email} has agent access level “{current}”, but this operation needs “{needed}”. Change it in Octopus Mail → Settings → AI agents & CLI.':
-      'Konto {email} ma poziom dostępu dla agentów „{current}”, a ta operacja wymaga „{needed}”. Zmień to w Octopus Mail → Ustawienia → Agenci AI.',
+    'Account {email} has agent access level “{current}”, but this operation needs “{needed}”. Change it in OpenMail → Settings → AI agents & CLI.':
+      'Konto {email} ma poziom dostępu dla agentów „{current}”, a ta operacja wymaga „{needed}”. Zmień to w OpenMail → Ustawienia → Agenci AI.',
     'Accounts can only be added in the app.': 'Konta można dodawać tylko w aplikacji.',
     'OAuth sign-in only in the app.': 'Logowanie OAuth tylko w aplikacji.',
     'Account settings can only be changed in the app.': 'Ustawienia kont zmienia się tylko w aplikacji.',

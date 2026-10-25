@@ -1,4 +1,4 @@
-// `octo` — command-line access to Octopus Mail for people and AI agents.
+// `octo` — command-line access to OpenMail for people and AI agents.
 // Works whether or not the desktop app is running: it reads the shared SQLite database
 // directly and executes queued IMAP/SMTP work itself. All times are local (with offset).
 import './quiet'
@@ -168,7 +168,7 @@ async function ensureFresh(a: Args): Promise<void> {
 
 function help(): string {
   return [
-    t('octo {version} — Octopus Mail from the command line (local times with UTC offset)', { version: VERSION }),
+    t('octo {version} — OpenMail from the command line (local times with UTC offset)', { version: VERSION }),
     t(`Reading:
   octo accounts                              accounts, agent access levels
   octo folders [account]                     folders with counts
@@ -276,7 +276,7 @@ async function main(): Promise<void> {
       const urls = host === '0.0.0.0' ? lanAddresses(port) : [`http://${host}:${port}`]
       const users = await import('../server/users')
       if (users.hasOwner()) {
-        console.log(t(`Octopus Mail — home server is running.
+        console.log(t(`OpenMail — home server is running.
 
 Address:  {addresses}
 
@@ -284,7 +284,7 @@ Sign in with your email and password (and your authenticator code).
 Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`, { addresses: urls.join('  ') }))
       } else {
         const { code } = createPairingCode()
-        console.log(t(`Octopus Mail — home server is running.
+        console.log(t(`OpenMail — home server is running.
 
 Address:  {addresses}
 Pairing code (valid for 15 min): {code}
@@ -360,7 +360,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       if (engineRunning()) throw new CliError(t('Sync is already running (the app or another daemon).'))
       process.env.OCTO_QUIET = a.b.has('quiet') ? '1' : ''
       await startEngine('daemon')
-      console.log(t('Octopus Mail daemon is running (Ctrl+C to stop).'))
+      console.log(t('OpenMail daemon is running (Ctrl+C to stop).'))
       await new Promise(() => undefined)
       return
     }
@@ -616,7 +616,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
         ...(d.cc.length ? [t('Cc: {cc}', { cc: addrs(d.cc) })] : []),
         t('Subject: {subject}', { subject: d.subject }),
         t('Attachments: {list}', { list: d.attachments.map((x) => x.filename).join(', ') || '-' }),
-        t('Send: octo send {id}  ·  Open: octopus-mail://draft/{id}', { id: d.id }),
+        t('Send: octo send {id}  ·  Open: openmail://draft/{id}', { id: d.id }),
       ].join('\n'))
       return
     }
@@ -627,7 +627,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       const remindAt = when(one(a, 'remind'), '--remind')
       const d = svc.sendDraft(id, { sendAt, remindAt })
       if (sendAt) {
-        const warn = engineRunning() ? '' : '\n' + t('Warning: the app is not running — the message will go out only when you start Octopus Mail or `octo daemon`.')
+        const warn = engineRunning() ? '' : '\n' + t('Warning: the app is not running — the message will go out only when you start OpenMail or `octo daemon`.')
         print(a, d, () => t('Scheduled: {subject}\nSend at: {time}\nCancel: octo unschedule {id}', { subject: d.subject, time: fmtTime(d.send_at), id: d.id }) + warn)
         return
       }

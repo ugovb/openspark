@@ -10,7 +10,7 @@ import { Entry } from '@napi-rs/keyring'
 import { t } from '../shared/i18n'
 import { dataDir } from './paths'
 
-const SERVICE = 'Octopus Mail'
+const SERVICE = 'Octopus Mail' // legacy keychain service name, kept so stored passwords keep working
 const memory = new Map<string, string>()
 let fileFallback = false
 /** mtime of the secrets file when it was last read (-1 = never): other processes (CLI, server) may change it */

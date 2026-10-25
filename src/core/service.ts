@@ -55,7 +55,7 @@ export function createService(actor: ServiceActor) {
       if (LEVEL[acc.agent_access] < LEVEL[level]) {
         const names: Record<string, string> = { read: t('read'), triage: t('triage'), send: t('send') }
         throw new AccessError(
-          t('Account {email} has agent access level “{current}”, but this operation needs “{needed}”. Change it in Octopus Mail → Settings → AI agents & CLI.', {
+          t('Account {email} has agent access level “{current}”, but this operation needs “{needed}”. Change it in OpenMail → Settings → AI agents & CLI.', {
             email: acc.email,
             current: names[acc.agent_access] || t('no access'),
             needed: names[level],

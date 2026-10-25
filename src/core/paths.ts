@@ -17,6 +17,7 @@ function platformConfigDir(): string {
 /** Root data directory shared by the desktop app, the CLI and the MCP server. */
 export function dataDir(): string {
   if (process.env.OCTO_HOME) return ensure(process.env.OCTO_HOME)
+  // folder keeps its legacy name so existing profiles keep working
   return ensure(path.join(platformConfigDir(), 'Octopus Mail'))
 }
 

@@ -1,4 +1,4 @@
-// MCP server (stdio) exposing Octopus Mail to AI agents such as Claude Code / Claude Desktop.
+// MCP server (stdio) exposing OpenMail to AI agents such as Claude Code / Claude Desktop.
 // Every tool goes through the same service layer as the CLI, so per-account access levels apply.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -104,14 +104,14 @@ function mailbox(spec?: string): { ref: MailboxRef; accountId?: number } {
   return { ref: { kind: 'folder', folderId: f.id } }
 }
 
-const INSTRUCTIONS = `Octopus Mail — the user's local mail client. All times are local (the time zone set in the app) with an explicit UTC offset (ISO 8601).
+const INSTRUCTIONS = `OpenMail — the user's local mail client. All times are local (the time zone set in the app) with an explicit UTC offset (ISO 8601).
 IDs: message_id (a number) points to a message; thread_id looks like "t123". Actions accept both.
 Draft IDs never change — after creating a draft you can edit, send or delete it with the same ID.
 Rules: (1) when replying in an existing conversation, always use reply_to with the ID of the thread's latest message; (2) never send without the user's explicit consent — create drafts;
 (3) every account has an agent access level (read/triage/send) set by the user in the app; an access error means you must ask the user to change it, not work around it.`
 
 export async function runMcp(): Promise<void> {
-  const server = new McpServer({ name: 'octopus-mail', version: APP_VERSION }, { instructions: INSTRUCTIONS })
+  const server = new McpServer({ name: 'openmail', version: APP_VERSION }, { instructions: INSTRUCTIONS })
 
   server.registerTool('accounts', {
     description: 'Mail accounts with their agent access level and sync status.',
@@ -225,7 +225,7 @@ export async function runMcp(): Promise<void> {
       template_id: a.template ? svc.getTemplate(a.template).id : undefined, placeholders: a.placeholders,
       signature: a.no_signature ? false : undefined, source: 'mcp',
     })
-    return ok({ draft_id: d.id, from: d.from_email, to: d.to, cc: d.cc, subject: d.subject, attachments: d.attachments.map((x) => x.filename), open_link: `octopus-mail://draft/${d.id}` }, 'Draft saved. Show the user the open_link link.')
+    return ok({ draft_id: d.id, from: d.from_email, to: d.to, cc: d.cc, subject: d.subject, attachments: d.attachments.map((x) => x.filename), open_link: `openmail://draft/${d.id}` }, 'Draft saved. Show the user the open_link link.')
   }))
 
   server.registerTool('delete_draft', { description: 'Permanently deletes a draft.', inputSchema: { draft_id: z.number().int() } },
@@ -241,7 +241,7 @@ export async function runMcp(): Promise<void> {
   }, wrap(async ({ draft_id, send_at, remind_at }: { draft_id: number; send_at?: string; remind_at?: string }) => {
     const sendAt = when(send_at)
     const d = svc.sendDraft(draft_id, { sendAt, remindAt: when(remind_at) })
-    if (sendAt) return ok({ draft_id, status: d.status, send_at: isoLocal(d.send_at) }, engineRunning() ? 'Scheduled.' : 'Scheduled, but the app is not running — the message will go out once Octopus Mail is started.')
+    if (sendAt) return ok({ draft_id, status: d.status, send_at: isoLocal(d.send_at) }, engineRunning() ? 'Scheduled.' : 'Scheduled, but the app is not running — the message will go out once OpenMail is started.')
     await drainOps(120_000)
     const after = svc.getDraft(draft_id)
     if (after.status !== 'sent') throw new Error(`Not sent (${after.status}): ${after.error || ''}`)
