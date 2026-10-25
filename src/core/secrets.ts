@@ -11,7 +11,8 @@ import { t } from '../shared/i18n'
 import { dataDir } from './paths'
 import { env } from '../shared/env'
 
-const SERVICE = 'Octopus Mail' // legacy keychain service name, kept so stored passwords keep working
+const SERVICE = 'OpenMail'
+const LEGACY_SERVICE = 'Octopus Mail' // read as a fallback and copied over; never deleted by the migration
 const memory = new Map<string, string>()
 let fileFallback = false
 /** mtime of the secrets file when it was last read (-1 = never): other processes (CLI, server) may change it */
@@ -65,9 +66,37 @@ export function secretStoreName(): string {
   return t('in the system password store (GNOME Keyring / KWallet)')
 }
 
-function entry(key: string): Entry {
-  return new Entry(SERVICE, key)
+function entry(key: string, service = SERVICE): Entry {
+  return new Entry(service, key)
 }
+
+interface KeychainIo {
+  getNew(): string | null
+  getOld(): string | null
+  setNew(value: string): void
+}
+
+/** Value under the new service name; else the old one, copied to the new name (the old entry stays). */
+export function readMigrating(io: KeychainIo): string | null {
+  const v = io.getNew()
+  if (v !== null) return v
+  const old = io.getOld()
+  if (old === null) return null
+  try {
+    io.setNew(old)
+    // trust the copy only after reading it back; a failed write just leaves the old entry in use
+    if (io.getNew() !== old) return old
+  } catch {
+    /* the old entry keeps serving */
+  }
+  return old
+}
+
+const keychainIo = (key: string): KeychainIo => ({
+  getNew: () => entry(key).getPassword() ?? null,
+  getOld: () => entry(key, LEGACY_SERVICE).getPassword() ?? null,
+  setNew: (value) => entry(key).setPassword(value),
+})
 
 export function setSecret(key: string, value: string): void {
   if (mode() === 'memory') {
@@ -91,7 +120,7 @@ export function getSecret(key: string): string | null {
   if (mode() === 'memory') return memory.get(key) ?? null
   if (!usesFile()) {
     try {
-      return entry(key).getPassword() ?? null
+      return readMigrating(keychainIo(key))
     } catch (e) {
       // "no entry" is a normal miss; anything else on Linux means the store itself is missing
       if (process.platform !== 'linux' || /no (matching )?entry|not found/i.test((e as Error).message)) return null
@@ -108,10 +137,12 @@ export function deleteSecret(key: string): void {
     return
   }
   if (!usesFile()) {
-    try {
-      entry(key).deletePassword()
-    } catch {
-      /* not present */
+    for (const service of [SERVICE, LEGACY_SERVICE]) {
+      try {
+        entry(key, service).deletePassword()
+      } catch {
+        /* not present */
+      }
     }
     return
   }
