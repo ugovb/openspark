@@ -4,9 +4,9 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-bench-'))
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-bench-'))
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
 
 import { insert, now, run, tx } from '../src/core/db'
 import { ftsPut } from '../src/core/fts'

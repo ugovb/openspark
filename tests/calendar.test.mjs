@@ -14,9 +14,9 @@ import { build } from 'esbuild'
 process.env.TZ = 'Europe/Warsaw'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-calendar-test-'))
-process.env.OCTO_HOME = path.join(tmp, 'home')
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = path.join(tmp, 'home')
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
 
 const projectRequire = createRequire(path.join(root, 'package.json'))
 let M // bundled modules

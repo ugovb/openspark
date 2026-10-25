@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, describe, it } from 'node:test'
 
-delete process.env.OCTO_LANG // a forced language would override initLang() below
+delete process.env.OPENMAIL_LANG // a forced language would override initLang() below
 
 import { dateLocale, detectLang, getLang, initLang, setLang, t, tp } from '../src/shared/i18n'
 import { browserDeviceName, langFromAcceptLanguage, loginPage, withLang } from '../src/server/login'
@@ -126,16 +126,16 @@ describe('French and Spanish', () => {
     assert.equal(dateLocale(), 'pl-PL')
   })
 
-  it('lets OCTO_LANG override the setting', () => {
+  it('lets OPENMAIL_LANG override the setting', () => {
     try {
       for (const l of ['en', 'pl', 'fr', 'es'] as const) {
-        process.env.OCTO_LANG = l
+        process.env.OPENMAIL_LANG = l
         assert.equal(initLang(l === 'en' ? 'pl' : 'en', 'de-DE'), l)
       }
-      process.env.OCTO_LANG = 'xx'
+      process.env.OPENMAIL_LANG = 'xx'
       assert.equal(initLang('fr', 'en-US'), 'fr', 'an unknown value is ignored')
     } finally {
-      delete process.env.OCTO_LANG
+      delete process.env.OPENMAIL_LANG
     }
   })
 

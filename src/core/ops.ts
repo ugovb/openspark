@@ -8,6 +8,7 @@ import { all, get, inList, insert, now, parseJson, type Row, run, tx } from './d
 import { bus, log } from './events'
 import { sync } from './sync'
 import { pruneEmptyThreads } from './threading'
+import { env } from '../shared/env'
 
 export type OpKind =
   | 'flags' | 'move' | 'copy' | 'expunge' | 'labels' | 'send' | 'save-draft-remote' | 'delete-draft-remote'
@@ -72,7 +73,7 @@ let running = false
 let onIdleWaiters: (() => void)[] = []
 
 function scheduleKick(delayMs: number) {
-  if (process.env.OCTO_NO_AUTORUN) return
+  if (env('NO_AUTORUN')) return
   if (kickTimer) clearTimeout(kickTimer)
   kickTimer = setTimeout(() => void processOps(), Math.max(50, delayMs + 50))
 }

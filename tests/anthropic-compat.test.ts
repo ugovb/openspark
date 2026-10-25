@@ -6,9 +6,9 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-anthropic-compat-'))
-process.env.OCTO_SECRETS = 'file'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-anthropic-compat-'))
+process.env.OPENMAIL_SECRETS = 'file'
+process.env.OPENMAIL_QUIET = '1'
 
 import { complete, hasAnthropicCompatKey, hasClaudeKey, setAnthropicCompatKey } from '../src/core/ai/provider'
 import { updateSettings } from '../src/core/settings'

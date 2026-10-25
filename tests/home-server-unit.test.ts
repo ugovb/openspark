@@ -7,15 +7,15 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-home-unit-'))
-process.env.OCTO_SECRETS = 'server'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-home-unit-'))
+process.env.OPENMAIL_SECRETS = 'server'
+process.env.OPENMAIL_QUIET = '1'
 
 import { engineRunning } from '../src/core/boot'
 import { getSecret, secretStoreName, setSecret } from '../src/core/secrets'
 import { setKV } from '../src/core/settings'
 
-const file = path.join(process.env.OCTO_HOME, 'secrets.json')
+const file = path.join(process.env.OPENMAIL_HOME, 'secrets.json')
 
 /** What another process (the CLI next to the service) does: rewrite the file. */
 function writeFromOtherProcess(change: (s: Record<string, string>) => void) {
@@ -64,14 +64,14 @@ describe('reverse proxy awareness', () => {
     ({ headers: { 'x-forwarded-for': xff, 'x-forwarded-proto': proto }, socket: { remoteAddress: '::ffff:172.17.0.1' } }) as never
   it('ignores X-Forwarded-For unless OCTO_TRUST_PROXY=1', async () => {
     const { clientIp, secureFlag } = await import('../src/server/server')
-    delete process.env.OCTO_TRUST_PROXY
+    delete process.env.OPENMAIL_TRUST_PROXY
     assert.equal(clientIp(req('203.0.113.9, 10.0.0.1')), '172.17.0.1')
     assert.equal(secureFlag(req('203.0.113.9', 'https')), '')
-    process.env.OCTO_TRUST_PROXY = '1'
+    process.env.OPENMAIL_TRUST_PROXY = '1'
     assert.equal(clientIp(req('203.0.113.9, 10.0.0.1')), '203.0.113.9')
     assert.equal(clientIp(req(undefined)), '172.17.0.1')
     assert.equal(secureFlag(req('203.0.113.9', 'https')), '; Secure')
-    delete process.env.OCTO_TRUST_PROXY
+    delete process.env.OPENMAIL_TRUST_PROXY
   })
 })
 

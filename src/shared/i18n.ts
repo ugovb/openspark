@@ -10,6 +10,7 @@
 import es from './locales/es'
 import fr from './locales/fr'
 import pl from './locales/pl'
+import { env } from './env'
 
 export type Lang = 'en' | 'pl' | 'fr' | 'es'
 export type LangSetting = 'auto' | Lang
@@ -59,11 +60,11 @@ function cleanLocale(locale: string): string | null {
   }
 }
 
-/** Pick the UI language from the setting, the OCTO_LANG override and the system locale. */
+/** Pick the UI language from the setting, the OPENMAIL_LANG override and the system locale. */
 export function initLang(setting: LangSetting | undefined, locale: string | undefined | null): Lang {
   if (locale) systemLocale = cleanLocale(locale) || systemLocale
-  const env = typeof process !== 'undefined' ? process.env?.OCTO_LANG : undefined
-  const forced = isLang(env) ? env : null
+  const override = env('LANG')
+  const forced = isLang(override) ? override : null
   lang = forced ?? (isLang(setting) ? setting : detectLang(locale))
   return lang
 }

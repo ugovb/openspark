@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { env } from '../shared/env'
 
 function ensure(dir: string): string {
   fs.mkdirSync(dir, { recursive: true })
@@ -16,7 +17,8 @@ function platformConfigDir(): string {
 
 /** Root data directory shared by the desktop app, the CLI and the MCP server. */
 export function dataDir(): string {
-  if (process.env.OCTO_HOME) return ensure(process.env.OCTO_HOME)
+  const home = env('HOME')
+  if (home) return ensure(home)
   // folder keeps its legacy name so existing profiles keep working
   return ensure(path.join(platformConfigDir(), 'Octopus Mail'))
 }

@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events'
 import type { CoreEvent } from '../shared/types'
+import { env } from '../shared/env'
 
 class Bus extends EventEmitter {
   emitEvent(ev: CoreEvent): void {
@@ -15,7 +16,7 @@ export const bus = new Bus()
 bus.setMaxListeners(50)
 
 export function log(scope: string, ...args: unknown[]): void {
-  if (process.env.OCTO_QUIET) return
+  if (env('QUIET')) return
   const ts = new Date().toISOString().slice(11, 19)
   console.log(`[${ts}] [${scope}]`, ...args)
 }

@@ -7,6 +7,7 @@ import type { AddressInfo } from 'node:net'
 import { t } from '../shared/i18n'
 import { getKV } from './settings'
 import { getSecret, oauthSecretKey, setSecret } from './secrets'
+import { env } from '../shared/env'
 
 export type OAuthProvider = 'google' | 'microsoft'
 
@@ -53,11 +54,11 @@ const ENDPOINTS = {
 export function getOAuthClient(provider: OAuthProvider): OAuthClient | null {
   const cfg = getKV<OAuthClient | null>(`oauth.${provider}`, null)
   if (cfg?.clientId) return cfg
-  const envId = provider === 'google' ? process.env.OCTO_GOOGLE_CLIENT_ID : process.env.OCTO_MS_CLIENT_ID
+  const envId = provider === 'google' ? env('GOOGLE_CLIENT_ID') : env('MS_CLIENT_ID')
   if (envId) {
     return {
       clientId: envId,
-      clientSecret: provider === 'google' ? process.env.OCTO_GOOGLE_CLIENT_SECRET : undefined,
+      clientSecret: provider === 'google' ? env('GOOGLE_CLIENT_SECRET') : undefined,
     }
   }
   return null

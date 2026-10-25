@@ -7,11 +7,11 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-test-'))
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
-process.env.OCTO_INSECURE_TLS = '1'
-process.env.OCTO_NO_AUTORUN = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-test-'))
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
+process.env.OPENMAIL_INSECURE_TLS = '1'
+process.env.OPENMAIL_NO_AUTORUN = '1'
 
 import { ImapFlow } from 'imapflow'
 import nodemailer from 'nodemailer'

@@ -9,6 +9,7 @@ import path from 'node:path'
 import { Entry } from '@napi-rs/keyring'
 import { t } from '../shared/i18n'
 import { dataDir } from './paths'
+import { env } from '../shared/env'
 
 const SERVICE = 'Octopus Mail' // legacy keychain service name, kept so stored passwords keep working
 const memory = new Map<string, string>()
@@ -16,7 +17,7 @@ let fileFallback = false
 /** mtime of the secrets file when it was last read (-1 = never): other processes (CLI, server) may change it */
 let loadedMtime = -1
 
-const mode = () => process.env.OCTO_SECRETS
+const mode = () => env('SECRETS')
 const usesFile = () => mode() === 'file' || mode() === 'server' || fileFallback
 const filePath = () => path.join(dataDir(), mode() === 'file' ? 'secrets.dev.json' : 'secrets.json')
 

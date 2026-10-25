@@ -5,9 +5,9 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-users-race-test-'))
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-users-race-test-'))
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
 
 import { initCore } from '../src/core/boot'
 import { setLang } from '../src/shared/i18n'

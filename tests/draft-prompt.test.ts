@@ -8,9 +8,9 @@ import assert from 'node:assert/strict'
 import type { AddressInfo } from 'node:net'
 import { after, before, describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-draft-prompt-'))
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-draft-prompt-'))
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
 
 import { insert } from '../src/core/db'
 import { DEFAULT_DRAFT_PROMPT, draftReply } from '../src/core/ai/features'

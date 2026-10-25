@@ -11,6 +11,7 @@ import { startOAuth, type OAuthClient, type OAuthProvider } from '../core/oauth'
 import { dataDir } from '../core/paths'
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
+import { env } from '../shared/env'
 
 const PROTOCOL = 'openmail'
 let win: BrowserWindow | null = null
@@ -19,8 +20,8 @@ let quitting = false
 
 // Test/demo profiles (OCTO_HOME) get their own Chromium profile and single-instance lock,
 // so they never collide with — or wake up — the installed app running on the real profile.
-const isolatedProfile = !!process.env.OCTO_HOME
-if (isolatedProfile) app.setPath('userData', path.join(process.env.OCTO_HOME!, 'electron-profile'))
+const isolatedProfile = !!env('HOME')
+if (isolatedProfile) app.setPath('userData', path.join(env('HOME')!, 'electron-profile'))
 
 // Data lives either in the local engine or on a paired home server (Settings → Home server).
 const remoteConfig = loadRemoteConfig()
@@ -133,7 +134,7 @@ function createWindow(show = true): void {
       win?.hide()
     }
   })
-  if (process.env.OCTO_SCREENSHOT) scheduleScreenshots(win)
+  if (env('SCREENSHOT')) scheduleScreenshots(win)
   loadRenderer(win)
 }
 
@@ -172,11 +173,10 @@ async function printHtml(html: string): Promise<void> {
  * evaluated in the renderer before each capture. The app quits afterwards.
  */
 function scheduleScreenshots(w: BrowserWindow): void {
-  const dir = process.env.OCTO_SCREENSHOT!
+  const dir = env('SCREENSHOT')!
   fs.mkdirSync(dir, { recursive: true })
-  const steps: { js?: string; wait?: number; name: string }[] = process.env.OCTO_SCREENSHOT_STEPS
-    ? JSON.parse(process.env.OCTO_SCREENSHOT_STEPS)
-    : [{ name: 'main', wait: 4000 }]
+  const stepsJson = env('SCREENSHOT_STEPS')
+  const steps: { js?: string; wait?: number; name: string }[] = stepsJson ? JSON.parse(stepsJson) : [{ name: 'main', wait: 4000 }]
   w.webContents.once('did-finish-load', async () => {
     for (const step of steps) {
       try {

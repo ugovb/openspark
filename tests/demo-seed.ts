@@ -106,7 +106,7 @@ const EN: typeof PL = {
   scheduled: { subject: 'Launch plan', body: 'Sebastian, on Monday we pick the release date.' },
   calendar: { name: 'My calendar', sync: 'Weekly sync with PixelForge', fest: 'Steam Next Fest — demo prep', birthday: "Kate's birthday" },
 }
-const L = process.env.OCTO_DEMO_LANG === 'en' ? EN : PL
+const L = process.env.OPENMAIL_DEMO_LANG === 'en' ? EN : PL
 
 async function main() {
   const c = new ImapFlow({ host: HOST, port: 3143, secure: false, auth: { user: 'alice', pass: 'pass' }, logger: false } as never)
@@ -190,7 +190,7 @@ async function main() {
 
   await sync.stopAll()
   smtp.close()
-  console.log('demo profile ready:', process.env.OCTO_HOME)
+  console.log('demo profile ready:', process.env.OPENMAIL_HOME)
 }
 
 main().then(

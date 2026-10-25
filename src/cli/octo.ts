@@ -14,6 +14,7 @@ import { drainOps } from '../core/ops'
 import { createService } from '../core/service'
 import { sync } from '../core/sync'
 import { addr, addrs, fmtTime, table, trunc } from './format'
+import { env } from '../shared/env'
 
 const VERSION = APP_VERSION
 const BOOL_FLAGS = new Set([
@@ -271,7 +272,7 @@ async function main(): Promise<void> {
       const port = Number(one(a, 'port') || 8787)
       const host = one(a, 'host') || '0.0.0.0'
       const webRoot = one(a, 'web') || path.join(__dirname, '..', 'renderer')
-      process.env.OCTO_QUIET = a.b.has('quiet') ? '1' : ''
+      process.env.OPENMAIL_QUIET = a.b.has('quiet') ? '1' : ''
       await runServer({ port, host, webRoot })
       const urls = host === '0.0.0.0' ? lanAddresses(port) : [`http://${host}:${port}`]
       const users = await import('../server/users')
@@ -358,7 +359,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
     }
     case 'daemon': {
       if (engineRunning()) throw new CliError(t('Sync is already running (the app or another daemon).'))
-      process.env.OCTO_QUIET = a.b.has('quiet') ? '1' : ''
+      process.env.OPENMAIL_QUIET = a.b.has('quiet') ? '1' : ''
       await startEngine('daemon')
       console.log(t('OpenMail daemon is running (Ctrl+C to stop).'))
       await new Promise(() => undefined)
@@ -798,7 +799,7 @@ main()
   })
   .catch(async (e: Error) => {
     process.stderr.write(t('Error: {message}', { message: e.message }) + '\n')
-    if (process.env.OCTO_DEBUG) process.stderr.write(`${e.stack}\n`)
+    if (env('DEBUG')) process.stderr.write(`${e.stack}\n`)
     await sync.stopAll().catch(() => undefined)
     process.exit(e instanceof CliError ? 2 : 1)
   })

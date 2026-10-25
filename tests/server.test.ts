@@ -5,10 +5,10 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
 
-process.env.OCTO_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-server-test-'))
-process.env.OCTO_SECRETS = 'memory'
-process.env.OCTO_QUIET = '1'
-process.env.OCTO_INSECURE_TLS = '1'
+process.env.OPENMAIL_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-server-test-'))
+process.env.OPENMAIL_SECRETS = 'memory'
+process.env.OPENMAIL_QUIET = '1'
+process.env.OPENMAIL_INSECURE_TLS = '1'
 
 import type http from 'node:http'
 import type { AddressInfo } from 'node:net'

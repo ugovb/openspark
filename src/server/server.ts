@@ -22,6 +22,7 @@ import {
   hasOwner, isLocked, passwordProblem, regenerateRecoveryCodes, type User,
 } from './users'
 import { APP_VERSION } from '../shared/version'
+import { env } from '../shared/env'
 
 export const SERVER_VERSION = APP_VERSION
 
@@ -44,7 +45,7 @@ const MIME: Record<string, string> = {
  * OCTO_TRUST_PROXY=1 the left-most X-Forwarded-For entry is used; otherwise only the socket address is trusted.
  */
 export function clientIp(req: http.IncomingMessage): string {
-  if (process.env.OCTO_TRUST_PROXY === '1') {
+  if (env('TRUST_PROXY') === '1') {
     const xff = req.headers['x-forwarded-for']
     const first = (Array.isArray(xff) ? xff[0] : xff)?.split(',')[0]?.trim()
     if (first) return first.replace(/^::ffff:/, '')
@@ -54,7 +55,7 @@ export function clientIp(req: http.IncomingMessage): string {
 
 /** "; Secure" when the browser reached us over HTTPS through a trusted proxy. */
 export function secureFlag(req: http.IncomingMessage): string {
-  return process.env.OCTO_TRUST_PROXY === '1' && req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''
+  return env('TRUST_PROXY') === '1' && req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''
 }
 
 function cookie(req: http.IncomingMessage, name: string): string | null {

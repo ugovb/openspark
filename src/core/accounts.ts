@@ -7,6 +7,7 @@ import { bus } from './events'
 import { getAccessToken, type OAuthTokens, saveTokens } from './oauth'
 import { discover, PRESETS } from './providers'
 import { accountSecretKey, deleteSecret, getSecret, oauthSecretKey, setSecret } from './secrets'
+import { env } from '../shared/env'
 
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
 
@@ -88,7 +89,7 @@ export async function smtpTransportOptions(acc: Account): Promise<Record<string,
     secure: acc.smtp_secure,
     auth: await smtpAuth(acc),
     connectionTimeout: 30_000,
-    tls: { rejectUnauthorized: process.env.OCTO_INSECURE_TLS !== '1' },
+    tls: { rejectUnauthorized: env('INSECURE_TLS') !== '1' },
   }
 }
 
@@ -107,7 +108,7 @@ export function imapOptions(
     connectionTimeout: 30_000,
     greetingTimeout: 20_000,
     socketTimeout: 5 * 60_000,
-    tls: { rejectUnauthorized: process.env.OCTO_INSECURE_TLS !== '1' },
+    tls: { rejectUnauthorized: env('INSECURE_TLS') !== '1' },
   }
 }
 
@@ -154,7 +155,7 @@ export async function testConnection(cfg: {
         ? { type: 'OAuth2', user: cfg.username, accessToken: cfg.accessToken }
         : { user: cfg.username, pass: cfg.password || '' },
       connectionTimeout: 20_000,
-      tls: { rejectUnauthorized: process.env.OCTO_INSECURE_TLS !== '1' },
+      tls: { rejectUnauthorized: env('INSECURE_TLS') !== '1' },
     } as nodemailer.TransportOptions)
     await transport.verify()
     result.smtp = 'ok'
