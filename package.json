@@ -1,20 +1,20 @@
 {
-  "name": "octopus-mail",
-  "productName": "Octopus Mail",
+  "name": "openmail",
+  "productName": "OpenMail",
   "version": "0.3.1",
   "description": "Free, local-first desktop mail client with Smart Inbox, AI, calendar and an agent CLI",
   "author": {
-    "name": "Krabi",
-    "url": "https://github.com/CFGPeter"
+    "name": "ugovb",
+    "url": "https://github.com/ugovb"
   },
   "license": "MIT",
-  "homepage": "https://github.com/CFGPeter/octopus-mail",
+  "homepage": "https://github.com/ugovb/openspark",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CFGPeter/octopus-mail.git"
+    "url": "git+https://github.com/ugovb/openspark.git"
   },
   "bugs": {
-    "url": "https://github.com/CFGPeter/octopus-mail/issues"
+    "url": "https://github.com/ugovb/openspark/issues"
   },
   "private": true,
   "main": "out/main/index.js",
@@ -80,8 +80,8 @@
     "zustand": "^5.0.15"
   },
   "build": {
-    "appId": "pl.madoctopus.octopusmail",
-    "productName": "Octopus Mail",
+    "appId": "app.openmail.desktop",
+    "productName": "OpenMail",
     "directories": {
       "output": "dist",
       "buildResources": "resources"
@@ -156,10 +156,10 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Octopus Mail",
+      "shortcutName": "OpenMail",
       "installerSidebar": "resources/installerSidebar.bmp",
       "uninstallerSidebar": "resources/installerSidebar.bmp",
-      "artifactName": "Octopus-Mail-Setup-${version}.${ext}",
+      "artifactName": "OpenMail-Setup-${version}.${ext}",
       "multiLanguageInstaller": true,
       "installerLanguages": [
         "en_US",
@@ -168,9 +168,9 @@
     },
     "protocols": [
       {
-        "name": "Octopus Mail",
+        "name": "OpenMail",
         "schemes": [
-          "octopus-mail"
+          "openmail"
         ]
       }
     ],
@@ -179,13 +179,13 @@
         "AppImage",
         "deb"
       ],
-      "executableName": "octopus-mail",
+      "executableName": "openmail",
       "icon": "resources/icon.png",
       "category": "Network;Email",
       "synopsis": "Free, local-first mail client with Smart Inbox, AI and calendar",
-      "description": "Octopus Mail: IMAP/SMTP mail client with Smart Inbox, Gatekeeper, snooze, send later, AI (Ollama/Claude), CalDAV calendar, a home server and a CLI/MCP server for AI agents.",
+      "description": "OpenMail: IMAP/SMTP mail client with Smart Inbox, Gatekeeper, snooze, send later, AI (Ollama/Claude), CalDAV calendar, a home server and a CLI/MCP server for AI agents.",
       "mimeTypes": [
-        "x-scheme-handler/octopus-mail"
+        "x-scheme-handler/openmail"
       ],
       "extraFiles": [
         {
@@ -193,13 +193,13 @@
           "to": "octo"
         }
       ],
-      "artifactName": "Octopus-Mail-${version}-${arch}.${ext}"
+      "artifactName": "OpenMail-${version}-${arch}.${ext}"
     },
     "deb": {
       "afterInstall": "resources/linux/after-install.tpl",
       "afterRemove": "resources/linux/after-remove.tpl"
     },
-    "copyright": "Copyright © 2026 Krabi",
+    "copyright": "Copyright © 2026 ugovb",
     "mac": {
       "target": [
         {
@@ -220,13 +220,13 @@
       "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "artifactName": "Octopus-Mail-${version}-${arch}.${ext}",
+      "artifactName": "OpenMail-${version}-${arch}.${ext}",
       "extendInfo": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLName": "Octopus Mail",
+            "CFBundleURLName": "OpenMail",
             "CFBundleURLSchemes": [
-              "octopus-mail"
+              "openmail"
             ]
           }
         ]
@@ -239,7 +239,7 @@
       ]
     },
     "dmg": {
-      "title": "Octopus Mail ${version}"
+      "title": "OpenMail ${version}"
     }
   }
 }

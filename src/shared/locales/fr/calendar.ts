@@ -176,8 +176,8 @@ const dict: Dictionary = {
     'Couldn’t sync: {list}': 'Synchronisation impossible : {list}',
     'Calendars synced': 'Calendriers synchronisés',
     'Remove calendar?': 'Supprimer le calendrier ?',
-    '“{name}” will be removed from Octopus Mail together with its locally saved events.':
-      '« {name} » sera supprimé d’Octopus Mail avec ses événements enregistrés localement.',
+    '“{name}” will be removed from OpenMail together with its locally saved events.':
+      '« {name} » sera supprimé d’OpenMail avec ses événements enregistrés localement.',
     'The local calendar’s events will be lost.': 'Les événements du calendrier local seront perdus.',
     'Data on the server stays unchanged.': 'Les données sur le serveur restent inchangées.',
     Remove: 'Supprimer',

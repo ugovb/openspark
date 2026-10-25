@@ -1593,7 +1593,7 @@ export default function CalendarView() {
   const removeSource = (s: Source) =>
     setAsk({
       title: t('Remove calendar?'),
-      message: `${t('“{name}” will be removed from Octopus Mail together with its locally saved events.', { name: s.name })} ${
+      message: `${t('“{name}” will be removed from OpenMail together with its locally saved events.', { name: s.name })} ${
         s.kind === 'local' ? t('The local calendar’s events will be lost.') : t('Data on the server stays unchanged.')
       }`,
       actions: [

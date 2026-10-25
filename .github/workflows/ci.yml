@@ -82,8 +82,8 @@ jobs:
       - name: sudo bash install.sh (czysty system)
         run: |
           mkdir -p "$RUNNER_TEMP/srv"
-          tar -xzf dist/octopus-mail-server-*.tar.gz -C "$RUNNER_TEMP/srv"
-          cd "$RUNNER_TEMP/srv/octopus-mail-server"
+          tar -xzf dist/openmail-server-*.tar.gz -C "$RUNNER_TEMP/srv"
+          cd "$RUNNER_TEMP/srv/openmail-server"
           sudo OCTO_USER="$USER" bash install.sh | tee install.log
           grep -E '[A-Z0-9]{4}-[A-Z0-9]{4}' install.log
 
@@ -92,18 +92,18 @@ jobs:
           curl -fsS http://127.0.0.1:8787/api/info
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8787/api/call)" = 401
           octo server devices
-          sudo systemctl kill -s KILL octopus-mail
+          sudo systemctl kill -s KILL openmail
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8787/api/info && break; sleep 1; done
           curl -fsS http://127.0.0.1:8787/api/info
 
       - name: Aktualizacja i odinstalowanie
         run: |
-          cd "$RUNNER_TEMP/srv/octopus-mail-server"
+          cd "$RUNNER_TEMP/srv/openmail-server"
           sudo OCTO_USER="$USER" bash install.sh > /dev/null
           curl -fsS http://127.0.0.1:8787/api/info
           sudo bash install.sh --uninstall
-          ! systemctl is-active --quiet octopus-mail
+          ! systemctl is-active --quiet openmail
 
       - name: Log serwera
         if: failure()
-        run: sudo journalctl -u octopus-mail -n 100 --no-pager
+        run: sudo journalctl -u openmail -n 100 --no-pager

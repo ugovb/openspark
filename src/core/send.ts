@@ -102,8 +102,8 @@ export async function buildMime(
   const messageId = opts.messageId || d.msgid || newMessageId(fromEmail)
   const autoBcc = getKV<string>(`autoBcc:${acc.id}`, '')
 
-  const headers: Record<string, string> = { 'X-Mailer': 'Octopus Mail' }
-  if (opts.asDraft) headers['X-Octopus-Draft'] = String(draftId)
+  const headers: Record<string, string> = { 'X-Mailer': 'OpenMail' }
+  if (opts.asDraft) headers['X-OpenMail-Draft'] = String(draftId)
   const composer = new MailComposer({
     from: { name: fromName, address: fromEmail },
     to: to.map((a) => ({ name: a.name || '', address: a.email })),

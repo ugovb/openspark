@@ -12,7 +12,7 @@ import { dataDir } from '../core/paths'
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
 
-const PROTOCOL = 'octopus-mail'
+const PROTOCOL = 'openmail'
 let win: BrowserWindow | null = null
 let tray: Tray | null = null
 let quitting = false
@@ -26,7 +26,7 @@ if (isolatedProfile) app.setPath('userData', path.join(process.env.OCTO_HOME!, '
 const remoteConfig = loadRemoteConfig()
 const backend: Backend = remoteConfig ? new RemoteBackend(remoteConfig) : new LocalBackend()
 
-// one instance only; a second launch (e.g. an octopus-mail:// link) is forwarded to the first
+// one instance only; a second launch (e.g. an openmail:// link) is forwarded to the first
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
@@ -37,9 +37,9 @@ if (!app.requestSingleInstanceLock()) {
   })
 }
 
-if (process.platform === 'win32') app.setAppUserModelId('pl.madoctopus.octopusmail')
+if (process.platform === 'win32') app.setAppUserModelId('app.openmail.desktop')
 if (isolatedProfile) {
-  // never take over octopus-mail:// links from the installed app
+  // never take over openmail:// links from the installed app
 } else if (process.defaultApp) {
   if (process.argv.length >= 2) app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [path.resolve(process.argv[1])])
 } else {
@@ -56,7 +56,7 @@ function trayIcon(unread: boolean): string {
 
 protocol.registerSchemesAsPrivileged([{ scheme: 'octo-cid', privileges: { standard: true, secure: true, supportFetchAPI: true, bypassCSP: false } }])
 
-const demoTitle = () => t('Octopus Mail — DEMO (test profile)')
+const demoTitle = () => t('OpenMail — DEMO (test profile)')
 
 function iconPath(filename = 'icon.png'): string {
   const candidates = [
@@ -72,7 +72,7 @@ function appWindow(opts: { width: number; height: number; minWidth: number; minH
   const w = new BrowserWindow({
     ...opts,
     show: false,
-    title: 'Octopus Mail',
+    title: 'OpenMail',
     icon: icon || undefined,
     backgroundColor: '#f7f7f9',
     autoHideMenuBar: true,
@@ -207,7 +207,7 @@ function send(channel: string, payload: unknown): void {
 }
 
 function openDeepLink(link: string): void {
-  const m = link.match(/^octopus-mail:\/\/(draft|thread|message)\/(\d+)/)
+  const m = link.match(/^openmail:\/\/(draft|thread|message)\/(\d+)/)
   if (m) send('deep-link', { kind: m[1], id: Number(m[2]) })
 }
 
@@ -247,7 +247,7 @@ function forwardEvent(ev: CoreEvent): void {
     return
   }
   if (ev.type === 'new-mail') void onNewMail(ev)
-  if (ev.type === 'server-connection') tray?.setToolTip(ev.online ? t('Octopus Mail — home server connected') : t('Octopus Mail — no connection to the home server'))
+  if (ev.type === 'server-connection') tray?.setToolTip(ev.online ? t('OpenMail — home server connected') : t('OpenMail — no connection to the home server'))
   if (ev.type === 'reminder') notify(t('⏰ Reminder'), ev.subject || t('(no subject)'), () => send('deep-link', { kind: 'thread', id: ev.threadId }))
   if (ev.type === 'toast' && ev.message.startsWith('📅') && (!win || !win.isVisible() || !win.isFocused())) notify(t('Calendar'), ev.message)
   send('core-event', ev)
@@ -258,7 +258,7 @@ async function updateBadge(): Promise<void> {
     const n = await backend.unreadCount()
     const icon = trayIcon(n > 0)
     if (icon) tray?.setImage(icon)
-    tray?.setToolTip(n ? t('Octopus Mail — {n} unread', { n }) : 'Octopus Mail')
+    tray?.setToolTip(n ? t('OpenMail — {n} unread', { n }) : 'OpenMail')
     send('badge-request', n)
   } catch {
     /* db busy */
@@ -438,7 +438,7 @@ function setLaunchAtLogin(on: boolean): void {
     return
   }
   const dir = path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'), 'autostart')
-  const file = path.join(dir, 'octopus-mail.desktop')
+  const file = path.join(dir, 'openmail.desktop')
   if (!on) {
     fs.rmSync(file, { force: true })
     return
@@ -448,7 +448,7 @@ function setLaunchAtLogin(on: boolean): void {
   fs.mkdirSync(dir, { recursive: true })
   fs.writeFileSync(
     file,
-    ['[Desktop Entry]', 'Type=Application', 'Name=Octopus Mail', `Exec="${exe}" --hidden`, 'Icon=octopus-mail', 'X-GNOME-Autostart-enabled=true', ''].join('\n'),
+    ['[Desktop Entry]', 'Type=Application', 'Name=OpenMail', `Exec="${exe}" --hidden`, 'Icon=openmail', 'X-GNOME-Autostart-enabled=true', ''].join('\n'),
   )
 }
 
@@ -483,7 +483,7 @@ function createTray(): void {
   if (process.platform === 'darwin') image.setTemplateImage(true)
   tray = new Tray(image)
   if (process.platform === 'darwin') tray.setIgnoreDoubleClickEvents(true)
-  tray.setToolTip('Octopus Mail')
+  tray.setToolTip('OpenMail')
   buildTrayMenu()
   tray.on('click', showWindow)
 }
@@ -491,7 +491,7 @@ function createTray(): void {
 function buildTrayMenu(): void {
   tray?.setContextMenu(
     Menu.buildFromTemplate([
-      { label: t('Open Octopus Mail'), click: showWindow },
+      { label: t('Open OpenMail'), click: showWindow },
       { label: t('New message'), click: () => (showWindow(), send('command', 'compose')) },
       { label: t('Sync now'), click: () => void backend.call('syncNow', []).catch(() => undefined) },
       { type: 'separator' },

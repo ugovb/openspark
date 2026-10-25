@@ -1,4 +1,4 @@
-# Octopus Mail — serwer domowy w kontenerze (Synology/QNAP/Unraid, Raspberry Pi z Dockerem, VPS w sieci VPN).
+# OpenMail — serwer domowy w kontenerze (Synology/QNAP/Unraid, Raspberry Pi z Dockerem, VPS w sieci VPN).
 #   docker compose -f deploy/docker-compose.yml up -d --build
 #   docker compose -f deploy/docker-compose.yml exec octopus octo server pair
 # Kontekst budowania: katalog główny repozytorium.

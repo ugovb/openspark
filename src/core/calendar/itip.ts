@@ -59,7 +59,7 @@ export async function buildItipMime(m: ItipMail): Promise<{ raw: Buffer; envelop
     text: m.text,
     icalEvent: { method: m.method, content: m.ics, filename: 'invite.ics' },
     messageId: `<octo.cal.${Date.now().toString(36)}.${crypto.randomBytes(6).toString('hex')}@${domain}>`,
-    headers: { 'X-Mailer': 'Octopus Mail' },
+    headers: { 'X-Mailer': 'OpenMail' },
     date: new Date(),
   })
   const raw = await new Promise<Buffer>((resolve, reject) => composer.compile().build((err, msg) => (err ? reject(err) : resolve(msg))))

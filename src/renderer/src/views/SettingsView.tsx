@@ -232,7 +232,7 @@ function EditAccount({ account, status, signatures, signatureId, onSignature, on
     <Modal open onClose={onClose} title={t('Account {email}', { email: account.email })} width={600} footer={
       <>
         <Button variant="danger" className="mr-auto" onClick={async () => {
-          if (!window.confirm(t('Remove the account {email} from Octopus Mail? Your mail on the server stays untouched.', { email: account.email }))) return
+          if (!window.confirm(t('Remove the account {email} from OpenMail? Your mail on the server stays untouched.', { email: account.email }))) return
           await api.removeAccount(account.id)
           onClose()
         }}><Trash2 size={14} /> {t('Remove account')}</Button>
@@ -708,7 +708,7 @@ function AgentsTab() {
     void api.history(40).then((h) => setHist(h.filter((x) => x.actor === 'cli' || x.actor === 'mcp')))
   }, [])
   const octo = cli ? (cli.packaged ? `"${cli.script}"` : `node "${cli.script}"`) : 'octo'
-  const mcpCmd = cli ? `claude mcp add octopus-mail --scope user -- ${octo} mcp` : ''
+  const mcpCmd = cli ? `claude mcp add openmail --scope user -- ${octo} mcp` : ''
   const copy = (text: string) =>
     void copyText(text).then(
       () => toast({ level: 'success', message: t('Copied') }),
@@ -901,7 +901,7 @@ function ServerTab() {
       : ticket ? totp.trim().length >= 6 : email.includes('@') && password.length > 0
     return (
       <>
-        <Section title={t('Home server')} hint={t('An always-on computer (Raspberry Pi, NAS, old laptop) running Octopus Mail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.')}>
+        <Section title={t('Home server')} hint={t('An always-on computer (Raspberry Pi, NAS, old laptop) running OpenMail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.')}>
           <div className="py-2 text-[13px] leading-relaxed">
             <div className="mb-1 font-medium">{t('1. On the server, run:')}</div>
             <code className="selectable block rounded-lg bg-surface-2 px-3 py-2 text-[12.5px]">octo serve</code>
@@ -1014,7 +1014,7 @@ function ServerTab() {
       </Section>
       <Section title={t('Claude Code with a home server')}>
         <div className="py-2 text-[12.5px] leading-relaxed text-muted">
-          {rich(t('The agent connects to the server over SSH, e.g.: {cmd}'), { cmd: <code className="selectable">claude mcp add octopus-mail --scope user -- ssh pi@{host} octo mcp</code> })}
+          {rich(t('The agent connects to the server over SSH, e.g.: {cmd}'), { cmd: <code className="selectable">claude mcp add openmail --scope user -- ssh pi@{host} octo mcp</code> })}
         </div>
       </Section>
     </>
@@ -1033,13 +1033,13 @@ function AboutTab() {
   const [dir, setDir] = useState('')
   useEffect(() => void window.octo.dataDir().then(setDir), [])
   return (
-    <Section title={`Octopus Mail ${APP_VERSION}`}>
+    <Section title={`OpenMail ${APP_VERSION}`}>
       <div className="py-1 text-[13px]">{t('A free email client with Smart Inbox, Gatekeeper, AI, a calendar and access for AI agents.')}</div>
       <div className="py-1 text-[12.5px] text-muted">
         {t('Open source (MIT license):')}{' '}
-        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/CFGPeter/octopus-mail')}>github.com/CFGPeter/octopus-mail</button>
+        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/ugovb/openspark')}>github.com/ugovb/openspark</button>
         {' · '}
-        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/CFGPeter/octopus-mail/issues')}>{t('report a bug')}</button>
+        <button className="text-accent hover:underline" onClick={() => void window.octo.openExternal('https://github.com/ugovb/openspark/issues')}>{t('report a bug')}</button>
       </div>
       <div className="py-1 text-[12.5px] text-muted">{t('App data:')} <button className="text-accent hover:underline" onClick={() => void window.octo.showItem(dir)}>{dir}</button></div>
     </Section>

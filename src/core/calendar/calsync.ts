@@ -12,7 +12,7 @@ import { type CalRow, calendarsOf, DEFAULT_COLOR, deleteEventRow, ensureDefaultC
 export const WINDOW_BACK_MS = 60 * 86400_000
 export const WINDOW_AHEAD_MS = 365 * 86400_000
 const FULL_RESYNC_MS = 24 * 3600_000
-const USER_AGENT = 'OctopusMail/0.1 (+calendar)'
+const USER_AGENT = 'OpenMail/0.1 (+calendar)'
 
 export function syncWindow(at = now()): { from: number; to: number } {
   return { from: at - WINDOW_BACK_MS, to: at + WINDOW_AHEAD_MS }

@@ -10,7 +10,7 @@ export type IcalComponent = ICAL.Component
 type IcalTime = ICAL.Time
 type IcalProperty = ICAL.Property
 
-export const PRODID = '-//Octopus Mail//Kalendarz 1.0//PL'
+export const PRODID = '-//OpenMail//Kalendarz 1.0//PL'
 const DAY = 86400_000
 
 export interface Attendee extends Address {
@@ -557,7 +557,7 @@ function addAttendee(ev: IcalComponent, a: Address, role: string, partstat: stri
  * Replace ORGANIZER/ATTENDEE. The organizer is listed as an accepted CHAIR attendee too
  * (like Google/Thunderbird). Existing PARTSTATs are kept for attendees who stay.
  * SCHEDULE-AGENT=CLIENT tells RFC 6638 servers (iCloud, Fastmail) not to e-mail invitations
- * themselves — Octopus sends the iTIP messages, so attendees don't get duplicates.
+ * themselves — OpenMail sends the iTIP messages, so attendees don't get duplicates.
  */
 export function setParticipants(ev: IcalComponent, organizer: Address | null, attendees: Attendee[], scheduleAgentClient = true): void {
   const previous = new Map(attendeesOf(ev).map((a) => [a.email, a]))

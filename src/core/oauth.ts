@@ -1,6 +1,6 @@
 // OAuth 2.0 (installed-app loopback flow with PKCE) for Google and Microsoft accounts.
 // Client IDs are supplied by the user in Settings → Accounts → OAuth, because
-// Google/Microsoft tie them to a developer project that Octopus Mail does not own.
+// Google/Microsoft tie them to a developer project that OpenMail does not own.
 import crypto from 'node:crypto'
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
@@ -134,7 +134,7 @@ export async function startOAuth(
       const finish = (ok: boolean, msg: string) => {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
         res.end(
-          `<html><body style="font-family:system-ui;padding:40px;text-align:center"><h2>${ok ? '✅' : '❌'} Octopus Mail</h2><p>${msg}</p><p>${t('You can close this window.')}</p></body></html>`,
+          `<html><body style="font-family:system-ui;padding:40px;text-align:center"><h2>${ok ? '✅' : '❌'} OpenMail</h2><p>${msg}</p><p>${t('You can close this window.')}</p></body></html>`,
         )
         clearTimeout(timer)
         server.close()

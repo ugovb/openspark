@@ -380,7 +380,7 @@ export class RemoteBackend implements Backend {
       throw new Error(t("Can't connect to {url}: {error}", { url: u, error: (e as Error).message }))
     }
     const j = (await r.json().catch(() => ({}))) as { name?: string; hostname: string; version: string; account?: boolean; pairing?: boolean }
-    if (j.name !== 'octopus-mail-server') throw new Error(t('{url} is not an Octopus Mail server', { url: u }))
+    if (j.name !== 'openmail-server') throw new Error(t('{url} is not an OpenMail server', { url: u }))
     return j
   }
 

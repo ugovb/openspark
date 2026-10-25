@@ -18,7 +18,7 @@ import { assignThread, pruneEmptyThreads } from './threading'
 
 const HEADER_FIELDS = [
   'references', 'list-unsubscribe', 'list-unsubscribe-post', 'list-id', 'precedence', 'auto-submitted',
-  'x-mailer', 'x-campaign', 'x-mailgun-tag', 'x-sg-eid', 'x-mc-user', 'feedback-id', 'x-octopus-draft',
+  'x-mailer', 'x-campaign', 'x-mailgun-tag', 'x-sg-eid', 'x-mc-user', 'feedback-id', 'x-octopus-draft', 'x-openmail-draft',
 ]
 const BATCH = 200
 const CORE_ROLES: FolderRole[] = ['inbox', 'sent', 'drafts']
@@ -537,7 +537,8 @@ export class AccountSync {
     const hints = ['x-mailer', 'x-campaign', 'x-mailgun-tag', 'x-sg-eid', 'x-mc-user', 'feedback-id']
       .map((h) => (headerValue(headers, h) ? `${h}:${headerValue(headers, h)}` : ''))
       .join(' ')
-    const octoDraft = headerValue(headers, 'x-octopus-draft')
+    // drafts saved by older builds carry the legacy X-Octopus-Draft header
+    const octoDraft = headerValue(headers, 'x-openmail-draft') || headerValue(headers, 'x-octopus-draft')
 
     const over = from ? contactOverride(from.email) : { category: null, status: 'unknown' }
     const category = over.category || categorize({

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping! Octopus Mail is a hobby project, so small, focused pull requests work best.
+Thanks for helping! OpenMail is a hobby project, so small, focused pull requests work best.
 
 ## Getting started
 
@@ -22,5 +22,5 @@ temporary folder and `OCTO_SECRETS=memory|file`. Please keep it that way in new 
   translation to the matching file in `src/shared/locales/pl/`. `npm run i18n:check` lists anything missing.
 - Colours come only from the theme tokens in `src/renderer/src/index.css` (light and dark).
 - Engine changes need a test in `tests/` (GreenMail covers IMAP/SMTP).
-- Octopus Mail is an independent project. Do not contribute code, images or text taken from
+- OpenMail is an independent project. Do not contribute code, images or text taken from
   Spark or any other proprietary app.

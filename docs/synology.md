@@ -72,11 +72,11 @@ It then opens full screen like an app. Each device gets its own key; list or rev
 
 ## 5. Mac (Apple Silicon)
 
-Download the DMG from the repository's *Releases* (or the `octopus-mail-macos-arm64` artifact of the *Release* workflow),
+Download the DMG from the repository's *Releases* (or the `openmail-macos-arm64` artifact of the *Release* workflow),
 drag the app to *Applications*, then once:
 
 ```bash
-xattr -dr com.apple.quarantine "/Applications/Octopus Mail.app"
+xattr -dr com.apple.quarantine "/Applications/OpenMail.app"
 ```
 
 (The app is ad-hoc signed, not notarized: no paid Apple developer account.)

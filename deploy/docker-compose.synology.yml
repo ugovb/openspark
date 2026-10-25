@@ -1,4 +1,4 @@
-# Octopus Mail on a Synology NAS (DS224+ = Intel, linux/amd64) with the prebuilt image.
+# OpenMail on a Synology NAS (DS224+ = Intel, linux/amd64) with the prebuilt image.
 # Container Manager → Project → Create → paste this file, or over SSH:
 #   sudo mkdir -p /volume1/docker/openspark && sudo chown 1000:1000 /volume1/docker/openspark
 #   sudo docker compose -f docker-compose.synology.yml up -d

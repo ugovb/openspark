@@ -132,7 +132,7 @@ export default function AccountWizard({ welcome, onDone }: { welcome?: boolean; 
             <div className="mb-3 flex justify-center"><Welcome /></div>
             <h1 className="flex items-center justify-center gap-2 text-[22px] font-semibold">
               <img src={logo} alt="" className="h-8 w-8" draggable={false} />
-              {t('Welcome to Octopus Mail')}
+              {t('Welcome to OpenMail')}
             </h1>
             <p className="mt-1 text-[13px] text-muted">
               {t('Free email with Smart Inbox, AI and a calendar. Everything stays on this computer, and passwords are kept {secretStore}.', { secretStore })}

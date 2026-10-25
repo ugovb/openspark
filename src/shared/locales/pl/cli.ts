@@ -6,8 +6,8 @@ const dict: Dictionary = {
     // the same in Polish
     'newsl.': 'newsl.',
     // ── help (octo help) ──
-    'octo {version} — Octopus Mail from the command line (local times with UTC offset)':
-      'octo {version} — Octopus Mail z wiersza poleceń (czasy lokalne z przesunięciem UTC)',
+    'octo {version} — OpenMail from the command line (local times with UTC offset)':
+      'octo {version} — OpenMail z wiersza poleceń (czasy lokalne z przesunięciem UTC)',
     [`Reading:
   octo accounts                              accounts, agent access levels
   octo folders [account]                     folders with counts
@@ -183,10 +183,10 @@ Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
     file: 'plik',
     'Status: draft (the ID will not change)': 'Status: wersja robocza (ID się nie zmieni)',
     'Attachments: {list}': 'Załączniki: {list}',
-    'Send: octo send {id}  ·  Open: octopus-mail://draft/{id}': 'Wysyłka: octo send {id}  ·  Otwórz: octopus-mail://draft/{id}',
+    'Send: octo send {id}  ·  Open: openmail://draft/{id}': 'Wysyłka: octo send {id}  ·  Otwórz: openmail://draft/{id}',
     'Give a draft ID': 'Podaj ID wersji roboczej',
-    'Warning: the app is not running — the message will go out only when you start Octopus Mail or `octo daemon`.':
-      'Uwaga: aplikacja nie działa — wiadomość wyjdzie dopiero, gdy uruchomisz Octopus Mail albo `octo daemon`.',
+    'Warning: the app is not running — the message will go out only when you start OpenMail or `octo daemon`.':
+      'Uwaga: aplikacja nie działa — wiadomość wyjdzie dopiero, gdy uruchomisz OpenMail albo `octo daemon`.',
     'Scheduled: {subject}\nSend at: {time}\nCancel: octo unschedule {id}': 'Zaplanowano: {subject}\nWysyłka: {time}\nAnulowanie: octo unschedule {id}',
     'Sent: {subject} ({time})': 'Wysłano: {subject} ({time})',
     'Not sent (status: {status}): {error}': 'Nie wysłano (status: {status}): {error}',
@@ -229,7 +229,7 @@ Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
     'Syncing {email}…': 'Synchronizuję {email}…',
     'Done.': 'Gotowe.',
     'Sync is already running (the app or another daemon).': 'Synchronizacja już działa (aplikacja albo inny daemon).',
-    'Octopus Mail daemon is running (Ctrl+C to stop).': 'Octopus Mail daemon działa (Ctrl+C kończy).',
+    'OpenMail daemon is running (Ctrl+C to stop).': 'OpenMail daemon działa (Ctrl+C kończy).',
     WHEN: 'KIEDY',
     WHO: 'KTO',
     ACTION: 'AKCJA',
@@ -240,24 +240,24 @@ Globalne: --json (dane maszynowe), --no-sync (bez dociągania poczty)`,
     // ── home server (octo serve / octo server) ──
     'A sync engine is already running on this computer (the app or a daemon). Close it before starting the server.':
       'Na tym komputerze działa już silnik synchronizacji (aplikacja albo daemon). Zamknij go przed uruchomieniem serwera.',
-    [`Octopus Mail — home server is running.
+    [`OpenMail — home server is running.
 
 Address:  {addresses}
 
 Sign in with your email and password (and your authenticator code).
-Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `Octopus Mail — serwer domowy działa.
+Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `OpenMail — serwer domowy działa.
 
 Adres:  {addresses}
 
 Zaloguj się e-mailem i hasłem (oraz kodem z aplikacji uwierzytelniającej).
 Zapomniane hasło? octo server reset-password · Konto: octo server account · Ctrl+C, aby zatrzymać.`,
-    [`Octopus Mail — home server is running.
+    [`OpenMail — home server is running.
 
 Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
 Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `Octopus Mail — serwer domowy działa.
+The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `OpenMail — serwer domowy działa.
 
 Adres:  {addresses}
 Kod parowania (ważny 15 min): {code}

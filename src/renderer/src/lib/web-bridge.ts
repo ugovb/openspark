@@ -163,7 +163,7 @@ export function installWebBridge(): void {
     dataDir: async () => t('(home server)'),
     cliPath: async () => ({ script: '', node: '', packaged: false }),
     setBadge: async (_dataUrl: string | null, count: number) => {
-      document.title = count ? `(${count}) Octopus Mail` : 'Octopus Mail'
+      document.title = count ? `(${count}) OpenMail` : 'OpenMail'
     },
     setLoginItem: async () => undefined,
     windowCmd: async () => undefined,

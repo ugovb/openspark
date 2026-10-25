@@ -1,5 +1,5 @@
 #!/bin/sh
-# Octopus Mail CLI / MCP server (macOS app): runs the bundled CLI with Electron's built-in Node.
+# OpenMail CLI / MCP server (macOS app): runs the bundled CLI with Electron's built-in Node.
 # Lives in Contents/Resources (a script in Contents/MacOS breaks code signing).
 # macOS has no `readlink -f`: resolve symlinks (e.g. /usr/local/bin/octo) by hand.
 SELF="$0"
@@ -8,4 +8,4 @@ while [ -L "$SELF" ]; do
   case "$LINK" in /*) SELF="$LINK" ;; *) SELF="$(dirname "$SELF")/$LINK" ;; esac
 done
 DIR="$(cd "$(dirname "$SELF")" && pwd -P)"
-ELECTRON_RUN_AS_NODE=1 exec "$DIR/../MacOS/Octopus Mail" "$DIR/app.asar/out/cli/octo.js" "$@"
+ELECTRON_RUN_AS_NODE=1 exec "$DIR/../MacOS/OpenMail" "$DIR/app.asar/out/cli/octo.js" "$@"
