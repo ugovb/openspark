@@ -256,7 +256,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         const problem = withLang(lang, () =>
           emailProblem(fields.email || '') || (fields.password !== (fields.password2 ?? fields.password) ? t('The passwords do not match.') : passwordProblem(fields.password || '', fields.email)))
         if (problem) return fail(400, problem)
-        const deviceName = browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip)
+        const deviceName = json && fields.name ? fields.name : browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip)
         // the setup code (log line or OPENMAIL_SETUP_CODE) or, as before, a pairing code
         const viaSetup = redeemSetupCode(fields.code || '')
         let paired = viaSetup ? null : redeemPairingCode(fields.code || '', deviceName, ip)

@@ -112,6 +112,8 @@ const dict: Dictionary = {
     'Sign in with a code': 'Zaloguj się kodem',
     'On a device where you are signed in to OpenMail, open Settings → Home server → Approve a device and enter this code.': 'Na urządzeniu, na którym jesteś zalogowany w OpenMail, otwórz Ustawienia → Serwer domowy → Zatwierdź urządzenie i wpisz ten kod.',
     'Create the account first.': 'Najpierw utwórz konto.',
+    'Could not create the account (HTTP {status})': 'Nie udało się utworzyć konta (HTTP {status})',
+    'Could not start the sign-in (HTTP {status})': 'Nie udało się rozpocząć logowania (HTTP {status})',
   },
   plurals: {
     '{n} new message': ['{n} nowa wiadomość', '{n} nowe wiadomości', '{n} nowych wiadomości'],

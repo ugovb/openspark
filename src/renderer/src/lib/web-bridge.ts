@@ -202,6 +202,15 @@ export function installWebBridge(): void {
     serverLogin2fa: async () => {
       throw new Error(t('Not available in the browser'))
     },
+    serverCreateAccount: async () => {
+      throw new Error(t('Not available in the browser'))
+    },
+    serverCodeStart: async () => {
+      throw new Error(t('Not available in the browser'))
+    },
+    serverCodePoll: async () => {
+      throw new Error(t('Not available in the browser'))
+    },
     async serverAccount(apiPath: string, body?: Record<string, unknown>) {
       const res = await fetch(apiPath, { method: body === undefined ? 'GET' : 'POST', headers: H, body: body === undefined ? undefined : encodeWire(body) })
       const j = decodeWire<Record<string, unknown> & { error?: string }>(await res.text())

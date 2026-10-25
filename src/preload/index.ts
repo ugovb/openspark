@@ -44,6 +44,11 @@ const api = {
   serverConnect: (url: string, code: string, deviceName: string) => ipcRenderer.invoke('server-connect', url, code, deviceName),
   serverLogin: (url: string, email: string, password: string, deviceName: string) => ipcRenderer.invoke('server-login', url, email, password, deviceName),
   serverLogin2fa: (url: string, ticket: string, code: string) => ipcRenderer.invoke('server-login-2fa', url, ticket, code),
+  /** first account of a fresh server: setup code, email, password; this device is signed in */
+  serverCreateAccount: (url: string, email: string, password: string, setupCode: string, deviceName: string) => ipcRenderer.invoke('server-create-account', url, email, password, setupCode, deviceName),
+  /** sign in with a code: show `userCode`, poll until another device approves it */
+  serverCodeStart: (url: string, deviceName: string) => ipcRenderer.invoke('server-code-start', url, deviceName),
+  serverCodePoll: (url: string, deviceCode: string) => ipcRenderer.invoke('server-code-poll', url, deviceCode),
   /** the home server's owner account; apiPath is /api/account…, a body makes it a POST */
   serverAccount: (apiPath: string, body?: Record<string, unknown>) => ipcRenderer.invoke('server-account', apiPath, body),
   serverDisconnect: () => ipcRenderer.invoke('server-disconnect'),

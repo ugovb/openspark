@@ -12,6 +12,8 @@ import { get } from '../core/db'
 import { bus } from '../core/events'
 import { inboxUnreadCount } from '../core/queries'
 import { createService } from '../core/service'
+import { type ProbeInfo, type RemoteConfig, normalizeServerUrl, probeServer } from './server-client'
+export { type RemoteConfig, normalizeServerUrl }
 import { DEFAULT_SETTINGS, getSettings } from '../core/settings'
 
 type Fn = (...a: unknown[]) => unknown
@@ -121,14 +123,6 @@ export class LocalBackend implements Backend {
 }
 
 // ---------------------------------------------------------------- remote
-
-export interface RemoteConfig {
-  url: string
-  token: string
-  deviceId: string
-  deviceName: string
-  serverName?: string
-}
 
 export function remoteConfigPath(): string {
   return path.join(app.getPath('userData'), 'server.json')
@@ -371,17 +365,8 @@ export class RemoteBackend implements Backend {
 
   // ---- pairing helpers (used before a config exists) ----
 
-  static async probe(url: string): Promise<{ hostname: string; version: string }> {
-    const u = normalizeServerUrl(url)
-    let r: Response
-    try {
-      r = await fetch(`${u}/api/info`, { signal: AbortSignal.timeout(6000) })
-    } catch (e) {
-      throw new Error(t("Can't connect to {url}: {error}", { url: u, error: (e as Error).message }))
-    }
-    const j = (await r.json().catch(() => ({}))) as { name?: string; hostname: string; version: string; account?: boolean; pairing?: boolean }
-    if (j.name !== 'openmail-server') throw new Error(t('{url} is not an OpenMail server', { url: u }))
-    return j
+  static probe(url: string): Promise<ProbeInfo> {
+    return probeServer(url)
   }
 
   /** Sign in with email + password. Resolves to the config, or to a ticket when a second-factor code is needed. */
@@ -415,10 +400,3 @@ export class RemoteBackend implements Backend {
   }
 }
 
-export function normalizeServerUrl(input: string): string {
-  let u = input.trim().replace(/\/+$/, '')
-  if (!/^https?:\/\//i.test(u)) u = `http://${u}`
-  const parsed = new URL(u)
-  if (!parsed.port && parsed.protocol === 'http:') parsed.port = '8787'
-  return parsed.toString().replace(/\/+$/, '')
-}

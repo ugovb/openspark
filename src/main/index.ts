@@ -9,6 +9,7 @@ import type { CoreEvent } from '../shared/types'
 import { log } from '../core/events'
 import { startOAuth, type OAuthClient, type OAuthProvider } from '../core/oauth'
 import { dataDir } from '../core/paths'
+import { createServerAccount, pollCodeLogin, startCodeLogin } from './server-client'
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
 import { env } from '../shared/env'
@@ -326,6 +327,18 @@ function registerIpc(): void {
   ipcMain.handle('server-login-2fa', async (_e, url: string, ticket: string, code: string) => {
     saveRemote(await RemoteBackend.login2fa(url, ticket, code))
     return { ok: true }
+  })
+  // first account of a fresh server (setup code + email + password), and sign-in with a code shown here
+  ipcMain.handle('server-create-account', async (_e, url: string, email: string, password: string, setupCode: string, deviceName: string) => {
+    saveRemote(await createServerAccount(url, email, password, setupCode, deviceName || os.hostname()))
+    return { ok: true }
+  })
+  ipcMain.handle('server-code-start', (_e, url: string, deviceName: string) => startCodeLogin(url, deviceName || os.hostname()))
+  ipcMain.handle('server-code-poll', async (_e, url: string, deviceCode: string) => {
+    const r = await pollCodeLogin(url, deviceCode)
+    if (r.status !== 'approved') return { status: r.status }
+    saveRemote(r.cfg)
+    return { status: 'approved' as const }
   })
   // the account of the home server: only /api/account* paths, with this device's token
   ipcMain.handle('server-account', async (_e, apiPath: string, body?: Record<string, unknown>) => {
