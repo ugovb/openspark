@@ -16,6 +16,7 @@ import {
   authenticate, closeTicket, createPairingCode, createTicket, issueDevice, linkLegacyDevices, listDevices, noteFailure, pairingAllowed, redeemPairingCode,
   revokeAllDevices, revokeDevice, setPairingAllowed, tooManyFailures, useTicket,
 } from './auth'
+import { approveDeviceLogin, denyDeviceLogin, lookupDeviceLogin, pollDeviceLogin, startDeviceLogin } from './device-login'
 import { redeemSetupCode } from './setup'
 import { type AuthView, authMessage, authPage, browserDeviceName, langFromAcceptLanguage, loginPage, withLang } from './login'
 import {
@@ -220,6 +221,22 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         log('server', `signed in (2FA) "${d.device.name}" from ${ip}`)
         return json ? send(res, 200, d) : signedIn(req, res, d.token)
       }
+      // sign in with a code: the new device shows it, a signed-in device approves it (see device-login.ts)
+      if (url.pathname === '/api/auth/device/start' && req.method === 'POST') {
+        if (!hasOwner()) return send(res, 409, { error: withLang(lang, () => t('Create the account first.')) })
+        if (tooManyFailures(ip)) return send(res, 429, { error: authMessage('too-many') })
+        const { fields } = parseFields((await readBody(req, 4096)).toString('utf8') || '{}')
+        const name = fields.name ? String(fields.name) : browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip)
+        return send(res, 200, startDeviceLogin(name, ip))
+      }
+      if (url.pathname === '/api/auth/device/poll' && req.method === 'POST') {
+        if (tooManyFailures(ip)) return send(res, 429, { error: authMessage('too-many') })
+        const { fields } = parseFields((await readBody(req, 4096)).toString('utf8') || '{}')
+        const r = pollDeviceLogin(fields.deviceCode || '', ip)
+        if (r.status === 'expired') noteFailure(ip)
+        if (r.status === 'approved') log('server', `signed in with a code "${r.device.name}" from ${ip}`)
+        return send(res, 200, r)
+      }
       if (url.pathname === '/api/auth/setup' && req.method === 'POST') {
         // first account of the server: needs a pairing code (proof of access to the NAS); afterwards sign-up is closed
         const { fields, json } = parseFields((await readBody(req, 8192)).toString('utf8'))
@@ -374,6 +391,28 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
               if (bad) return refuse(bad)
               setPairingAllowed(body.allow === 'true')
               return send(res, 200, info())
+            }
+            case '/api/account/device/lookup': {
+              if (tooManyFailures(ip)) return refuse(t('Too many failed attempts — wait 10 minutes'))
+              const r = lookupDeviceLogin(body.userCode || '')
+              if (!r) {
+                noteFailure(ip)
+                return send(res, 404, { error: t('Invalid or expired code.') })
+              }
+              return send(res, 200, r)
+            }
+            case '/api/account/device/approve': {
+              const bad = await confirm(true)
+              if (bad) return refuse(bad)
+              if (!approveDeviceLogin(body.userCode || '', owner.id)) {
+                noteFailure(ip)
+                return send(res, 404, { error: t('Invalid or expired code.') })
+              }
+              log('server', `device sign-in approved by ${owner.email} from ${ip}`)
+              return send(res, 200, { ok: true })
+            }
+            case '/api/account/device/deny': {
+              return send(res, 200, { ok: denyDeviceLogin(body.userCode || '', owner.id) })
             }
             case '/api/account/revoke-all': {
               const bad = await confirm(true)
