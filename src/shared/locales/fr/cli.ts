@@ -255,16 +255,16 @@ Mot de passe oublié ? openmail server reset-password · Compte : openmail serve
     [`OpenMail — home server is running.
 
 Address:  {addresses}
-Pairing code (valid for 15 min): {code}
+Setup code: {code}
 
-Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — le serveur domestique est actif.
+Open the address in a browser (or in the OpenMail app) and create your account with this code: email + password, then turn on two-step verification in Settings → Home server.
+Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — le serveur domestique est actif.
 
 Adresse :  {addresses}
-Code de jumelage (valable 15 min) : {code}
+Code d’installation : {code}
 
-Ouvrez l’adresse dans un navigateur et créez votre compte avec ce code (e-mail + mot de passe, puis activez la vérification en deux étapes dans Paramètres → Serveur domestique).
-L’application de bureau peut aussi s’y jumeler. Nouveau code : openmail server pair · Liste des appareils : openmail server devices · Ctrl+C pour arrêter.`,
+Ouvrez l’adresse dans un navigateur (ou dans l’application OpenMail) et créez votre compte avec ce code : e-mail + mot de passe, puis activez la vérification en deux étapes dans Paramètres → Serveur domestique.
+Vous pouvez choisir le code vous-même avec OPENMAIL_SETUP_CODE. Liste des appareils : openmail server devices · Ctrl+C pour arrêter.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Code de jumelage : {code}\nValable jusqu’à : {time} (usage unique)',
     DEVICE: 'APPAREIL',
     PAIRED: 'JUMELÉ',

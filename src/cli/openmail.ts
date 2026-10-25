@@ -272,7 +272,6 @@ async function main(): Promise<void> {
       // home server: engine 24/7 + API for paired desktop apps and the web UI (phones, browsers)
       if (engineRunning()) throw new CliError(t('A sync engine is already running on this computer (the app or a daemon). Close it before starting the server.'))
       const { runServer, lanAddresses } = await import('../server/server')
-      const { createPairingCode } = await import('../server/auth')
       const port = Number(one(a, 'port') || 8787)
       const host = one(a, 'host') || '0.0.0.0'
       const webRoot = one(a, 'web') || path.join(__dirname, '..', 'renderer')
@@ -288,14 +287,15 @@ Address:  {addresses}
 Sign in with your email and password (and your authenticator code).
 Forgot it? openmail server reset-password · Account: openmail server account · Ctrl+C to stop.`, { addresses: urls.join('  ') }))
       } else {
-        const { code } = createPairingCode()
+        const { getSetupCode } = await import('../server/setup')
+        const code = getSetupCode() ?? ''
         console.log(t(`OpenMail — home server is running.
 
 Address:  {addresses}
-Pairing code (valid for 15 min): {code}
+Setup code: {code}
 
-Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
+Open the address in a browser (or in the OpenMail app) and create your account with this code: email + password, then turn on two-step verification in Settings → Home server.
+Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
       }
       await new Promise(() => undefined)
       return

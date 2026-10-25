@@ -254,16 +254,16 @@ Zapomniane hasło? openmail server reset-password · Konto: openmail server acco
     [`OpenMail — home server is running.
 
 Address:  {addresses}
-Pairing code (valid for 15 min): {code}
+Setup code: {code}
 
-Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — serwer domowy działa.
+Open the address in a browser (or in the OpenMail app) and create your account with this code: email + password, then turn on two-step verification in Settings → Home server.
+Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — serwer domowy działa.
 
 Adres:  {addresses}
-Kod parowania (ważny 15 min): {code}
+Kod konfiguracji: {code}
 
-Otwórz adres w przeglądarce i utwórz konto za pomocą tego kodu (e-mail + hasło, potem włącz weryfikację dwuetapową w Ustawienia → Serwer domowy).
-Aplikacja na komputer również może się sparować. Nowy kod: openmail server pair · Lista urządzeń: openmail server devices · Ctrl+C, aby zatrzymać.`,
+Otwórz adres w przeglądarce (albo w aplikacji OpenMail) i utwórz konto za pomocą tego kodu: e-mail + hasło, potem włącz weryfikację dwuetapową w Ustawienia → Serwer domowy.
+Kod możesz wybrać sam przez OPENMAIL_SETUP_CODE. Lista urządzeń: openmail server devices · Ctrl+C, aby zatrzymać.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Kod parowania: {code}\nWażny do: {time} (jednorazowy)',
     DEVICE: 'URZĄDZENIE',
     PAIRED: 'SPAROWANE',

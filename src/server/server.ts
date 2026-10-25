@@ -16,6 +16,7 @@ import {
   authenticate, closeTicket, createPairingCode, createTicket, issueDevice, linkLegacyDevices, listDevices, noteFailure, pairingAllowed, redeemPairingCode,
   revokeAllDevices, revokeDevice, setPairingAllowed, tooManyFailures, useTicket,
 } from './auth'
+import { redeemSetupCode } from './setup'
 import { type AuthView, authMessage, authPage, browserDeviceName, langFromAcceptLanguage, loginPage, withLang } from './login'
 import {
   AuthError, beginTotp, changePassword, checkCredentials, checkSecondFactor, clearFailures, confirmTotp, createOwner, disableTotp, emailProblem, getUser,
@@ -140,8 +141,8 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
     try {
       // ---------- public endpoints ----------
       if (url.pathname === '/api/info') {
-        const info: Omit<ServerInfo, 'accounts' | 'engine'> & { pairing: boolean; account: boolean } = {
-          name: 'openmail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: pairingAllowed(), account: hasOwner(),
+        const info: Omit<ServerInfo, 'accounts' | 'engine'> & { pairing: boolean; account: boolean; setup: boolean } = {
+          name: 'openmail-server', version: SERVER_VERSION, hostname: os.hostname(), pairing: pairingAllowed(), account: hasOwner(), setup: !hasOwner(),
         }
         return send(res, 200, info)
       }
@@ -234,8 +235,11 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         const problem = withLang(lang, () =>
           emailProblem(fields.email || '') || (fields.password !== (fields.password2 ?? fields.password) ? t('The passwords do not match.') : passwordProblem(fields.password || '', fields.email)))
         if (problem) return fail(400, problem)
-        const paired = redeemPairingCode(fields.code || '', browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip), ip)
-        if (!paired) {
+        const deviceName = browserDeviceName(lang, String(req.headers['user-agent'] || ''), ip)
+        // the setup code (log line or OPENMAIL_SETUP_CODE) or, as before, a pairing code
+        const viaSetup = redeemSetupCode(fields.code || '')
+        let paired = viaSetup ? null : redeemPairingCode(fields.code || '', deviceName, ip)
+        if (!viaSetup && !paired) {
           noteFailure(ip)
           return fail(403, authMessage('bad-code'))
         }
@@ -245,6 +249,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         } catch (e) {
           return fail(400, e instanceof AuthError ? e.message : String((e as Error).message))
         }
+        paired ??= issueDevice(deviceName, ip, user.id, 'password')
         linkLegacyDevices(user.id)
         setPairingAllowed(false)
         log('server', `owner account created (${user.email}) from ${ip}`)

@@ -254,16 +254,16 @@ Inicia sesión con tu correo y tu contraseña (y el código de tu aplicación de
     [`OpenMail — home server is running.
 
 Address:  {addresses}
-Pairing code (valid for 15 min): {code}
+Setup code: {code}
 
-Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
+Open the address in a browser (or in the OpenMail app) and create your account with this code: email + password, then turn on two-step verification in Settings → Home server.
+Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
 
 Dirección:  {addresses}
-Código de emparejamiento (válido 15 min): {code}
+Código de configuración: {code}
 
-Abre la dirección en un navegador y crea tu cuenta con este código (correo + contraseña; después activa la verificación en dos pasos en Ajustes → Servidor doméstico).
-La aplicación de escritorio también puede emparejarse. Código nuevo: openmail server pair · Lista de dispositivos: openmail server devices · Ctrl+C para detener.`,
+Abre la dirección en un navegador (o en la app OpenMail) y crea tu cuenta con este código: correo + contraseña; después activa la verificación en dos pasos en Ajustes → Servidor doméstico.
+Puedes elegir el código tú mismo con OPENMAIL_SETUP_CODE. Lista de dispositivos: openmail server devices · Ctrl+C para detener.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Código de emparejamiento: {code}\nVálido hasta: {time} (un solo uso)',
     DEVICE: 'DISPOSITIVO',
     PAIRED: 'EMPAREJADO',

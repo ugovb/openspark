@@ -49,6 +49,29 @@ describe('home-server account', () => {
     assert.deepEqual([info.account, info.pairing], [false, true])
   })
 
+  it('creates the account with the setup code, and the code is useless afterwards', async () => {
+    const { getSetupCode } = await import('../src/server/setup')
+    const code = getSetupCode()!
+    const info = (await (await get('/api/info')).json()) as { setup: boolean }
+    assert.equal(info.setup, true)
+    // wrong code and weak password do not create anything or burn the code
+    assert.equal((await json('/api/auth/setup', { code: 'AAAA-BBBB', email: 'me@example.com', password: PASSWORD })).status, 403)
+    assert.equal((await json('/api/auth/setup', { code, email: 'me@example.com', password: 'short' })).status, 400)
+    const ok = await json('/api/auth/setup', { code: code.toLowerCase(), email: 'setup@example.com', password: PASSWORD })
+    assert.equal(ok.status, 200)
+    const body = (await ok.json()) as { token: string; user: { email: string } }
+    assert.equal(body.user.email, 'setup@example.com')
+    assert.equal((await get('/api/me', body.token)).status, 200)
+    assert.equal(getSetupCode(), null)
+    assert.equal(((await (await get('/api/info')).json()) as { setup: boolean }).setup, false)
+    // reuse after success
+    assert.equal((await json('/api/auth/setup', { code, email: 'again@example.com', password: PASSWORD })).status, 403)
+    const { deleteOwner } = await import('../src/server/users')
+    const { revokeAllDevices } = await import('../src/server/auth')
+    deleteOwner()
+    revokeAllDevices()
+  })
+
   it('creates the account only with a valid pairing code and a sound password', async () => {
     const code = createPairingCode().code
     assert.equal((await json('/api/auth/setup', { code: 'WRNG-CODE', email: 'me@example.com', password: PASSWORD })).status, 403)
