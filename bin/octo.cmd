@@ -1,3 +1,3 @@
 @echo off
-rem OpenMail CLI (development checkout). In the installed app use octo.cmd from the install folder.
+rem Deprecated name of the CLI: same program, with a notice on stderr.
 node "%~dp0..\out\cli\octo.js" %*

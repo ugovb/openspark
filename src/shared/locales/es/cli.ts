@@ -5,82 +5,82 @@ const dict: Dictionary = {
   strings: {
     // the same in Spanish
     'newsl.': 'newsl.',
-    // ── help (octo help) ──
-    'octo {version} — OpenMail from the command line (local times with UTC offset)':
-      'octo {version} — OpenMail desde la línea de comandos (horas locales con desfase UTC)',
+    // ── help (openmail help) ──
+    'openmail {version} — OpenMail from the command line (local times with UTC offset)':
+      'openmail {version} — OpenMail desde la línea de comandos (horas locales con desfase UTC)',
     [`Reading:
-  octo accounts                              accounts, agent access levels
-  octo folders [account]                     folders with counts
-  octo emails [mailbox] [--filter q] [--page N] [--page-size N] [--unread]
+  openmail accounts                              accounts, agent access levels
+  openmail folders [account]                     folders with counts
+  openmail emails [mailbox] [--filter q] [--page N] [--page-size N] [--unread]
        mailbox: Inbox|Sent|Archive|Trash|Spam|pinned|snoozed|aside|reminders|newsenders|
                 people|notifications|newsletters|account@x.com|account@x.com:Folder|<smart folder>
-  octo search ["topic"] [--filter q] [--in account|account:Folder] [--page N]   (all folders)
-  octo thread <ID|tID> [--html]              whole thread with bodies and attachments
-  octo attachment <ID> [--save file] [--stream]
-  octo contacts [query]  ·  octo templates  ·  octo template <ID|name>`]: `Lectura:
-  octo accounts                              cuentas, niveles de acceso de agentes
-  octo folders [cuenta]                      carpetas con contadores
-  octo emails [buzón] [--filter q] [--page N] [--page-size N] [--unread]
+  openmail search ["topic"] [--filter q] [--in account|account:Folder] [--page N]   (all folders)
+  openmail thread <ID|tID> [--html]              whole thread with bodies and attachments
+  openmail attachment <ID> [--save file] [--stream]
+  openmail contacts [query]  ·  openmail templates  ·  openmail template <ID|name>`]: `Lectura:
+  openmail accounts                              cuentas, niveles de acceso de agentes
+  openmail folders [cuenta]                      carpetas con contadores
+  openmail emails [buzón] [--filter q] [--page N] [--page-size N] [--unread]
        buzón: Inbox|Sent|Archive|Trash|Spam|pinned|snoozed|aside|reminders|newsenders|
               people|notifications|newsletters|cuenta@x.com|cuenta@x.com:Carpeta|<carpeta inteligente>
-  octo search ["tema"] [--filter q] [--in cuenta|cuenta:Carpeta] [--page N]   (todas las carpetas)
-  octo thread <ID|tID> [--html]              hilo completo con contenido y adjuntos
-  octo attachment <ID> [--save archivo] [--stream]
-  octo contacts [texto]  ·  octo templates  ·  octo template <ID|nombre>`,
+  openmail search ["tema"] [--filter q] [--in cuenta|cuenta:Carpeta] [--page N]   (todas las carpetas)
+  openmail thread <ID|tID> [--html]              hilo completo con contenido y adjuntos
+  openmail attachment <ID> [--save archivo] [--stream]
+  openmail contacts [texto]  ·  openmail templates  ·  openmail template <ID|nombre>`,
     [`Writing and sending (draft IDs never change):
-  octo draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
+  openmail draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
              [--reply-to ID [--reply-all]] [--forward ID] [--account account] [--attach file]
              [--template name --placeholder "Field=value"] [--no-signature] [--edit ID]
-  octo draft --delete ID
-  octo drafts  ·  octo scheduled
-  octo send <ID> [--at "tomorrow 9:00"] [--remind "in 3 days"]   sends and waits for SMTP confirmation
-  octo unschedule <ID>                       cancels a scheduled send (back to drafts)`]: `Redacción y envío (los ID de borradores no cambian):
-  octo draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
+  openmail draft --delete ID
+  openmail drafts  ·  openmail scheduled
+  openmail send <ID> [--at "tomorrow 9:00"] [--remind "in 3 days"]   sends and waits for SMTP confirmation
+  openmail unschedule <ID>                       cancels a scheduled send (back to drafts)`]: `Redacción y envío (los ID de borradores no cambian):
+  openmail draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
              [--reply-to ID [--reply-all]] [--forward ID] [--account cuenta] [--attach archivo]
              [--template nombre --placeholder "Campo=valor"] [--no-signature] [--edit ID]
-  octo draft --delete ID
-  octo drafts  ·  octo scheduled
-  octo send <ID> [--at "mañana 9:00"] [--remind "en 3 días"]   envía y espera la confirmación SMTP
-  octo unschedule <ID>                       cancela un envío programado (vuelve a borradores)`,
+  openmail draft --delete ID
+  openmail drafts  ·  openmail scheduled
+  openmail send <ID> [--at "mañana 9:00"] [--remind "en 3 días"]   envía y espera la confirmación SMTP
+  openmail unschedule <ID>                       cancela un envío programado (vuelve a borradores)`,
     [`Organizing (message ID or t<thread ID>, several allowed):
-  octo action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
+  openmail action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
               mute|unmute|aside|unaside|priority|unpriority|unsubscribe <ID...>
-  octo action snooze <ID...> --until "mon 8:00"   ·  octo action unsnooze <ID...>
-  octo action remind <ID...> --at "in 3 days" [--if-no-reply]  ·  octo action unremind <ID...>
-  octo action move <ID...> --folder "account@x.com:Folder"  ·  octo action label|unlabel <ID...> --label X
-  octo sender accept|block|unblock|vip|unvip <email|@domain...>
-  octo sender category <email...> people|notification|newsletter`]: `Organización (ID de mensaje o t<ID de hilo>, se admiten varios):
-  octo action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
+  openmail action snooze <ID...> --until "mon 8:00"   ·  openmail action unsnooze <ID...>
+  openmail action remind <ID...> --at "in 3 days" [--if-no-reply]  ·  openmail action unremind <ID...>
+  openmail action move <ID...> --folder "account@x.com:Folder"  ·  openmail action label|unlabel <ID...> --label X
+  openmail sender accept|block|unblock|vip|unvip <email|@domain...>
+  openmail sender category <email...> people|notification|newsletter`]: `Organización (ID de mensaje o t<ID de hilo>, se admiten varios):
+  openmail action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
               mute|unmute|aside|unaside|priority|unpriority|unsubscribe <ID...>
-  octo action snooze <ID...> --until "lun 8:00"   ·  octo action unsnooze <ID...>
-  octo action remind <ID...> --at "en 3 días" [--if-no-reply]  ·  octo action unremind <ID...>
-  octo action move <ID...> --folder "cuenta@x.com:Carpeta"  ·  octo action label|unlabel <ID...> --label X
-  octo sender accept|block|unblock|vip|unvip <email|@dominio...>
-  octo sender category <email...> people|notification|newsletter`,
+  openmail action snooze <ID...> --until "lun 8:00"   ·  openmail action unsnooze <ID...>
+  openmail action remind <ID...> --at "en 3 días" [--if-no-reply]  ·  openmail action unremind <ID...>
+  openmail action move <ID...> --folder "cuenta@x.com:Carpeta"  ·  openmail action label|unlabel <ID...> --label X
+  openmail sender accept|block|unblock|vip|unvip <email|@dominio...>
+  openmail sender category <email...> people|notification|newsletter`,
     [`Calendar:
-  octo events [--from "today"] [--to "in 7 days"]  ·  octo availability [--days 5] [--duration 30]
-  octo event create --title "…" --start "tomorrow 10:00" [--end "tomorrow 11:00"] [--attendee a@b.com] [--location …]
-  octo event delete <ID>  ·  octo invite <message ID>  ·  octo rsvp <message ID> accept|maybe|decline`]: `Calendario:
-  octo events [--from "hoy"] [--to "en 7 días"]  ·  octo availability [--days 5] [--duration 30]
-  octo event create --title "…" --start "mañana 10:00" [--end "mañana 11:00"] [--attendee a@b.com] [--location …]
-  octo event delete <ID>  ·  octo invite <ID de mensaje>  ·  octo rsvp <ID de mensaje> accept|maybe|decline`,
+  openmail events [--from "today"] [--to "in 7 days"]  ·  openmail availability [--days 5] [--duration 30]
+  openmail event create --title "…" --start "tomorrow 10:00" [--end "tomorrow 11:00"] [--attendee a@b.com] [--location …]
+  openmail event delete <ID>  ·  openmail invite <message ID>  ·  openmail rsvp <message ID> accept|maybe|decline`]: `Calendario:
+  openmail events [--from "hoy"] [--to "en 7 días"]  ·  openmail availability [--days 5] [--duration 30]
+  openmail event create --title "…" --start "mañana 10:00" [--end "mañana 11:00"] [--attendee a@b.com] [--location …]
+  openmail event delete <ID>  ·  openmail invite <ID de mensaje>  ·  openmail rsvp <ID de mensaje> accept|maybe|decline`,
     [`AI (Ollama or Claude, per settings):
-  octo ai summarize <ID|tID>  ·  octo ai reply <ID|tID> [--instructions "…"]  ·  octo ai ask "question"`]: `IA (Ollama o Claude, según los ajustes):
-  octo ai summarize <ID|tID>  ·  octo ai reply <ID|tID> [--instructions "…"]  ·  octo ai ask "pregunta"`,
+  openmail ai summarize <ID|tID>  ·  openmail ai reply <ID|tID> [--instructions "…"]  ·  openmail ai ask "question"`]: `IA (Ollama o Claude, según los ajustes):
+  openmail ai summarize <ID|tID>  ·  openmail ai reply <ID|tID> [--instructions "…"]  ·  openmail ai ask "pregunta"`,
     [`Other:
-  octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
-  octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
-  octo server pair | devices | revoke <ID>    pairing codes and paired devices
-  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
+  openmail status · openmail sync [account] · openmail history [--limit N] · openmail daemon (sync without a window)
+  openmail serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
+  openmail server pair | devices | revoke <ID>    pairing codes and paired devices
+  openmail server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               the account of the home server (recovery on the NAS)
-  octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
+  openmail mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`]: `Otros:
-  octo status · octo sync [cuenta] · octo history [--limit N] · octo daemon (sincronización sin ventana)
-  octo serve [--port 8787]   servidor doméstico (p. ej. Raspberry Pi): motor 24/7 + API + interfaz web
-  octo server pair | devices | revoke <ID>    códigos de emparejamiento y dispositivos emparejados
-  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
+  openmail status · openmail sync [cuenta] · openmail history [--limit N] · openmail daemon (sincronización sin ventana)
+  openmail serve [--port 8787]   servidor doméstico (p. ej. Raspberry Pi): motor 24/7 + API + interfaz web
+  openmail server pair | devices | revoke <ID>    códigos de emparejamiento y dispositivos emparejados
+  openmail server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               la cuenta del servidor doméstico (recuperación en el NAS)
-  octo mcp   (servidor MCP por stdio para Claude Code / Claude Desktop)
+  openmail mcp   (servidor MCP por stdio para Claude Code / Claude Desktop)
 Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes el correo nuevo)`,
 
     // ── errors and messages ──
@@ -90,12 +90,12 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     'Invalid ID: {id}': 'ID no válido: {id}',
     'Give a message ID or a thread ID (t<ID>)': 'Indica un ID de mensaje o de hilo (t<ID>)',
     'No account {email}': 'No existe la cuenta {email}',
-    'Account {email} has no folder "{folder}" (see: octo folders {email})': 'La cuenta {email} no tiene la carpeta «{folder}» (consulta: octo folders {email})',
+    'Account {email} has no folder "{folder}" (see: openmail folders {email})': 'La cuenta {email} no tiene la carpeta «{folder}» (consulta: openmail folders {email})',
     'Unknown mailbox "{name}". Use: Inbox, Sent, Archive, Trash, Spam, pinned, snoozed, aside, reminders, newsenders, account@x.com or account@x.com:Folder':
       'Buzón desconocido «{name}». Usa: Inbox, Sent, Archive, Trash, Spam, pinned, snoozed, aside, reminders, newsenders, cuenta@x.com o cuenta@x.com:Carpeta',
     'The app is not running — fetching new mail…': 'La aplicación no está en ejecución — descargando correo nuevo…',
     'Error: {message}': 'Error: {message}',
-    'Unknown command "{cmd}". See: octo help': 'Comando desconocido «{cmd}». Consulta: octo help',
+    'Unknown command "{cmd}". See: openmail help': 'Comando desconocido «{cmd}». Consulta: openmail help',
 
     // ── thread list (emails, search) ──
     Me: 'Yo',
@@ -108,7 +108,7 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     'CAT.': 'CAT.',
     FLAGS: 'MARCAS',
     ACCOUNT: 'CUENTA',
-    'New senders awaiting a decision: {n} (octo emails newsenders)': 'Remitentes nuevos pendientes de decisión: {n} (octo emails newsenders)',
+    'New senders awaiting a decision: {n} (openmail emails newsenders)': 'Remitentes nuevos pendientes de decisión: {n} (openmail emails newsenders)',
     'Page {page}. Flags: U unread, P pinned, ! priority, A attachment, S snoozed, R reminder, N new sender, D draft, M muted, B set aside':
       'Página {page}. Marcas: U no leído, P fijado, ! prioridad, A adjunto, S pospuesto, R recordatorio, N remitente nuevo, D borrador, M silenciado, B apartado',
     'Give a topic or --filter': 'Indica un tema o --filter',
@@ -133,10 +133,10 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     'Cc: {cc}': 'Cc: {cc}',
     'Bcc: {bcc}': 'Cco: {bcc}',
     'Subject: {subject}': 'Asunto: {subject}',
-    '📅 Contains an invitation (octo invite {id})': '📅 Contiene una invitación (octo invite {id})',
+    '📅 Contains an invitation (openmail invite {id})': '📅 Contiene una invitación (openmail invite {id})',
     '(no content)': '(sin contenido)',
     'Attachments:': 'Adjuntos:',
-    '(not downloaded — octo attachment {id})': '(no descargado — octo attachment {id})',
+    '(not downloaded — openmail attachment {id})': '(no descargado — openmail attachment {id})',
     NAME: 'NOMBRE',
     SIZE: 'TAMAÑO',
     TYPE: 'TIPO',
@@ -145,7 +145,7 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     'send at {time}': 'envío {time}',
 
     // ── attachment ──
-    'Give an attachment ID (the ID column in octo thread)': 'Indica un ID de adjunto (la columna ID de octo thread)',
+    'Give an attachment ID (the ID column in openmail thread)': 'Indica un ID de adjunto (la columna ID de openmail thread)',
     'ID: {id}\nName: {name}\nSize: {size}\nType: {type}\nPath: {path}\nMessage: {message}':
       'ID: {id}\nNombre: {name}\nTamaño: {size}\nTipo: {type}\nRuta: {path}\nMensaje: {message}',
 
@@ -176,25 +176,25 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     TO: 'PARA',
     UPDATED: 'ACTUALIZADO',
     'SEND AT': 'ENVÍO',
-    'Cancel: octo unschedule <ID>': 'Cancelar: octo unschedule <ID>',
+    'Cancel: openmail unschedule <ID>': 'Cancelar: openmail unschedule <ID>',
     'Draft {id} deleted.': 'Borrador {id} eliminado.',
     'File not found: {path}': 'No se encontró el archivo: {path}',
     'File {path} is larger than 25 MB': 'El archivo {path} pesa más de 25 MB',
     file: 'archivo',
     'Status: draft (the ID will not change)': 'Estado: borrador (el ID no cambiará)',
     'Attachments: {list}': 'Adjuntos: {list}',
-    'Send: octo send {id}  ·  Open: openmail://draft/{id}': 'Enviar: octo send {id}  ·  Abrir: openmail://draft/{id}',
+    'Send: openmail send {id}  ·  Open: openmail://draft/{id}': 'Enviar: openmail send {id}  ·  Abrir: openmail://draft/{id}',
     'Give a draft ID': 'Indica un ID de borrador',
-    'Warning: the app is not running — the message will go out only when you start OpenMail or `octo daemon`.':
-      'Aviso: la aplicación no está en ejecución — el mensaje saldrá solo cuando inicies OpenMail o `octo daemon`.',
-    'Scheduled: {subject}\nSend at: {time}\nCancel: octo unschedule {id}': 'Programado: {subject}\nEnvío: {time}\nCancelar: octo unschedule {id}',
+    'Warning: the app is not running — the message will go out only when you start OpenMail or `openmail daemon`.':
+      'Aviso: la aplicación no está en ejecución — el mensaje saldrá solo cuando inicies OpenMail o `openmail daemon`.',
+    'Scheduled: {subject}\nSend at: {time}\nCancel: openmail unschedule {id}': 'Programado: {subject}\nEnvío: {time}\nCancelar: openmail unschedule {id}',
     'Sent: {subject} ({time})': 'Enviado: {subject} ({time})',
     'Not sent (status: {status}): {error}': 'No enviado (estado: {status}): {error}',
     'Not sent (status: {status})': 'No enviado (estado: {status})',
     'Send cancelled. "{subject}" is a draft again (ID {id}).': 'Envío cancelado. «{subject}» vuelve a ser un borrador (ID {id}).',
 
     // ── actions, senders ──
-    'Give an action (octo help)': 'Indica una acción (octo help)',
+    'Give an action (openmail help)': 'Indica una acción (openmail help)',
     '--folder must point to an account folder, e.g. account@x.com:Projects': '--folder debe apuntar a una carpeta de la cuenta, p. ej. cuenta@x.com:Proyectos',
     'Give --label': 'Indica --label',
     'Unknown action "{action}"': 'Acción desconocida «{action}»',
@@ -216,13 +216,13 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     'Created event {id}: {title} · {time}': 'Evento creado {id}: {title} · {time}',
     'Event deleted.': 'Evento eliminado.',
     'This message does not contain an invitation.': 'Este mensaje no contiene ninguna invitación.',
-    'octo rsvp <message ID> accept|maybe|decline': 'octo rsvp <ID de mensaje> accept|maybe|decline',
+    'openmail rsvp <message ID> accept|maybe|decline': 'openmail rsvp <ID de mensaje> accept|maybe|decline',
     'Invitation response sent.': 'Respuesta a la invitación enviada.',
     'Sources: {list}': 'Fuentes: {list}',
 
     // ── status, sync, daemon, history ──
     'Sync engine: running ({owner}, pid {pid})': 'Motor de sincronización: en ejecución ({owner}, pid {pid})',
-    'Sync engine: NOT running — start the app or `octo daemon`': 'Motor de sincronización: NO está en ejecución — inicia la aplicación o `octo daemon`',
+    'Sync engine: NOT running — start the app or `openmail daemon`': 'Motor de sincronización: NO está en ejecución — inicia la aplicación o `openmail daemon`',
     '{email}: last sync {time} — ERROR: {error}': '{email}: última sincronización {time} — ERROR: {error}',
     '{email}: last sync {time}': '{email}: última sincronización {time}',
     'Queued operations: {n}': 'Operaciones en cola: {n}',
@@ -237,7 +237,7 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
     RESULT: 'RESULTADO',
     DETAILS: 'DETALLES',
 
-    // ── home server (octo serve / octo server) ──
+    // ── home server (openmail serve / openmail server) ──
     'A sync engine is already running on this computer (the app or a daemon). Close it before starting the server.':
       'Ya hay un motor de sincronización en ejecución en este equipo (la aplicación o un daemon). Ciérralo antes de iniciar el servidor.',
     [`OpenMail — home server is running.
@@ -245,30 +245,30 @@ Globales: --json (datos legibles por máquina), --no-sync (sin descargar antes e
 Address:  {addresses}
 
 Sign in with your email and password (and your authenticator code).
-Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
+Forgot it? openmail server reset-password · Account: openmail server account · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
 
 Dirección:  {addresses}
 
 Inicia sesión con tu correo y tu contraseña (y el código de tu aplicación de autenticación).
-¿La olvidaste? octo server reset-password · Cuenta: octo server account · Ctrl+C para detener.`,
+¿La olvidaste? openmail server reset-password · Cuenta: openmail server account · Ctrl+C para detener.`,
     [`OpenMail — home server is running.
 
 Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
 Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
+The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`]: `OpenMail — el servidor doméstico está en ejecución.
 
 Dirección:  {addresses}
 Código de emparejamiento (válido 15 min): {code}
 
 Abre la dirección en un navegador y crea tu cuenta con este código (correo + contraseña; después activa la verificación en dos pasos en Ajustes → Servidor doméstico).
-La aplicación de escritorio también puede emparejarse. Código nuevo: octo server pair · Lista de dispositivos: octo server devices · Ctrl+C para detener.`,
+La aplicación de escritorio también puede emparejarse. Código nuevo: openmail server pair · Lista de dispositivos: openmail server devices · Ctrl+C para detener.`,
     'Pairing code: {code}\nValid until: {time} (single use)': 'Código de emparejamiento: {code}\nVálido hasta: {time} (un solo uso)',
     DEVICE: 'DISPOSITIVO',
     PAIRED: 'EMPAREJADO',
     'LAST SEEN': 'ÚLTIMA VEZ',
-    'Give a device ID (octo server devices)': 'Indica un ID de dispositivo (octo server devices)',
+    'Give a device ID (openmail server devices)': 'Indica un ID de dispositivo (openmail server devices)',
     'Access revoked.': 'Acceso revocado.',
     'No such device.': 'No existe ese dispositivo.',
     'Account: {email}\nTwo-step verification: {state}\nRecovery codes left: {n}\nPairing codes: {pairing}': 'Cuenta: {email}\nVerificación en dos pasos: {state}\nCódigos de recuperación restantes: {n}\nCódigos de emparejamiento: {pairing}',
@@ -276,7 +276,7 @@ La aplicación de escritorio también puede emparejarse. Código nuevo: octo ser
     'off': 'desactivada',
     'on': 'activada',
     'switched off': 'desactivados',
-    'No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).': 'Aún no hay cuenta. Abre la dirección del servidor en un navegador y créala con un código de emparejamiento (octo server pair).',
+    'No account yet. Open the server address in a browser and create it with a pairing code (openmail server pair).': 'Aún no hay cuenta. Abre la dirección del servidor en un navegador y créala con un código de emparejamiento (openmail server pair).',
     'Pairing codes are allowed.': 'Los códigos de emparejamiento están permitidos.',
     'Pairing codes are switched off.': 'Los códigos de emparejamiento están desactivados.',
     'Two-step verification is off. Turn it on again in Settings → Home server.': 'La verificación en dos pasos está desactivada. Vuelve a activarla en Ajustes → Servidor doméstico.',

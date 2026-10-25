@@ -8,7 +8,7 @@ import path from 'node:path'
 
 const root = path.resolve(import.meta.dirname, '..')
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-for (const f of ['out/cli/octo.js', 'out/renderer/index.html']) {
+for (const f of ['out/cli/openmail.js', 'out/renderer/index.html']) {
   if (!fs.existsSync(path.join(root, f))) throw new Error(`Brak ${f} — najpierw npm run build`)
 }
 

@@ -1,4 +1,4 @@
-// One API surface for the desktop UI (IPC), the `octo` CLI and the MCP server.
+// One API surface for the desktop UI (IPC), the `openmail` CLI and the MCP server.
 // Agent actors (cli/mcp) are checked against each account's access level, like Spark's
 // Settings → AI Agents: read < triage (drafts, actions) < send (sending, calendar writes).
 import fs from 'node:fs'

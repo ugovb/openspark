@@ -1,5 +1,5 @@
 // Browser version of the Electron preload bridge: when the UI is served by the home server
-// (`octo serve`) there is no preload, so `window.octo` talks to the server's HTTP API instead.
+// (`openmail serve`) there is no preload, so `window.octo` talks to the server's HTTP API instead.
 import { t } from '../../../shared/i18n'
 import type { CoreEvent, DraftAttachment } from '../../../shared/types'
 import { decodeWire, encodeWire } from '../../../shared/wire'

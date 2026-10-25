@@ -247,8 +247,8 @@ const dict: Dictionary = {
     'Copied': 'Skopiowano',
     'Could not copy': 'Nie udało się skopiować',
     'AI agent access level': 'Poziom dostępu agentów AI',
-    'Applies to the `octo` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.':
-      'Dotyczy CLI `octo` i serwera MCP (Claude Code, Claude Desktop). Zmienić go można tylko tutaj — agent nie podniesie sobie uprawnień.',
+    'Applies to the `openmail` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.':
+      'Dotyczy CLI `openmail` i serwera MCP (Claude Code, Claude Desktop). Zmienić go można tylko tutaj — agent nie podniesie sobie uprawnień.',
     'Connect to Claude Code': 'Podłącz do Claude Code',
     'Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.':
       'Jednorazowo, w terminalu. Potem Claude może czytać, porządkować i (jeśli pozwolisz) wysyłać pocztę oraz zarządzać kalendarzem.',

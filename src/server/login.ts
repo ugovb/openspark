@@ -113,7 +113,7 @@ export function authPage(lang: Lang, v: AuthView): string {
     } else if (v.view === 'setup') {
       action = '/api/auth/setup'
       title = t('Create your account')
-      body = `<p>${t('Choose the email and password you will use to sign in on every device.')}<br>${t('Pairing code from the server:')} <code>octo server pair</code></p>
+      body = `<p>${t('Choose the email and password you will use to sign in on every device.')}<br>${t('Pairing code from the server:')} <code>openmail server pair</code></p>
 <label for="c">${t('Pairing code')}</label><input class="code" id="c" name="code" placeholder="XXXX-XXXX" autocomplete="one-time-code" required autofocus maxlength="9">
 <label for="e">${t('Email')}</label><input id="e" name="email" type="email" autocomplete="username" required value="${esc(v.email || '')}">
 <label for="p">${t('Password')}</label><input id="p" name="password" type="password" autocomplete="new-password" required minlength="10">
@@ -121,7 +121,7 @@ export function authPage(lang: Lang, v: AuthView): string {
 <button type="submit">${t('Create account')}</button>`
     } else {
       title = 'OpenMail'
-      body = `<p>${t('Enter the pairing code from your home server.')}<br>${t('New code:')} <code>octo server pair</code><br>${t('or ask from a paired device')}</p>
+      body = `<p>${t('Enter the pairing code from your home server.')}<br>${t('New code:')} <code>openmail server pair</code><br>${t('or ask from a paired device')}</p>
 <input class="code" name="code" placeholder="XXXX-XXXX" autocomplete="one-time-code" autofocus required maxlength="9">
 <button type="submit">${t('Connect')}</button>`
       if (v.hasOwner) alt = `<a class="alt" href="/">${t('Back to sign in')}</a>`

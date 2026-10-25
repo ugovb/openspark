@@ -20,6 +20,7 @@
   "main": "out/main/index.js",
   "type": "commonjs",
   "bin": {
+    "openmail": "out/cli/openmail.js",
     "octo": "out/cli/octo.js"
   },
   "scripts": {
@@ -146,6 +147,10 @@
       "icon": "resources/icon.ico",
       "extraFiles": [
         {
+          "from": "resources/openmail.cmd",
+          "to": "openmail.cmd"
+        },
+        {
           "from": "resources/octo.cmd",
           "to": "octo.cmd"
         }
@@ -188,6 +193,10 @@
         "x-scheme-handler/openmail"
       ],
       "extraFiles": [
+        {
+          "from": "resources/linux/openmail",
+          "to": "openmail"
+        },
         {
           "from": "resources/linux/octo",
           "to": "octo"
@@ -232,6 +241,10 @@
         ]
       },
       "extraResources": [
+        {
+          "from": "resources/mac/openmail",
+          "to": "openmail"
+        },
         {
           "from": "resources/mac/octo",
           "to": "octo"

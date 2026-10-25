@@ -707,8 +707,8 @@ function AgentsTab() {
     void window.octo.cliPath().then(setCli)
     void api.history(40).then((h) => setHist(h.filter((x) => x.actor === 'cli' || x.actor === 'mcp')))
   }, [])
-  const octo = cli ? (cli.packaged ? `"${cli.script}"` : `node "${cli.script}"`) : 'octo'
-  const mcpCmd = cli ? `claude mcp add openmail --scope user -- ${octo} mcp` : ''
+  const openmailCmd = cli ? (cli.packaged ? `"${cli.script}"` : `node "${cli.script}"`) : 'openmail'
+  const mcpCmd = cli ? `claude mcp add openmail --scope user -- ${openmailCmd} mcp` : ''
   const copy = (text: string) =>
     void copyText(text).then(
       () => toast({ level: 'success', message: t('Copied') }),
@@ -716,7 +716,7 @@ function AgentsTab() {
     )
   return (
     <>
-      <Section title={t('AI agent access level')} hint={t('Applies to the `octo` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.')}>
+      <Section title={t('AI agent access level')} hint={t('Applies to the `openmail` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.')}>
         {accounts.map((a) => (
           <SettingRow key={a.id} select icon={<Avatar addr={{ email: a.email, name: a.name }} size={28} />} title={a.email} hint={a.name}>
             <Select value={a.agent_access} onChange={async (v) => (await api.setAgentAccess(a.id, v), void refreshMeta())} options={ACCESS} />
@@ -729,7 +729,7 @@ function AgentsTab() {
           <IconButton title={t('Copy')} onClick={() => copy(mcpCmd)}><Copy size={14} /></IconButton>
         </div>
         <div className="py-1 text-[12.5px] text-muted">
-          {rich(t('Command line: {cmd}. The CLI also works when the app is closed and prints times in local time with the UTC offset.'), { cmd: <code className="selectable">{octo} help</code> })}
+          {rich(t('Command line: {cmd}. The CLI also works when the app is closed and prints times in local time with the UTC offset.'), { cmd: <code className="selectable">{openmailCmd} help</code> })}
         </div>
       </Section>
       <Section title={t('Recent agent activity')}>
@@ -904,7 +904,7 @@ function ServerTab() {
         <Section title={t('Home server')} hint={t('An always-on computer (Raspberry Pi, NAS, old laptop) running OpenMail. It sends scheduled messages and brings back snoozed messages and reminders even when your computers are off, and all your computers and your phone’s browser see the same accounts.')}>
           <div className="py-2 text-[13px] leading-relaxed">
             <div className="mb-1 font-medium">{t('1. On the server, run:')}</div>
-            <code className="selectable block rounded-lg bg-surface-2 px-3 py-2 text-[12.5px]">octo serve</code>
+            <code className="selectable block rounded-lg bg-surface-2 px-3 py-2 text-[12.5px]">openmail serve</code>
             <div className="mt-1 text-[12px] text-muted">
               {rich(t('It prints the address (e.g. {example}) and a pairing code. Installing on a Raspberry Pi: README, section “Home server”.'), { example: <code>http://192.168.1.50:8787</code> })}
             </div>
@@ -1014,7 +1014,7 @@ function ServerTab() {
       </Section>
       <Section title={t('Claude Code with a home server')}>
         <div className="py-2 text-[12.5px] leading-relaxed text-muted">
-          {rich(t('The agent connects to the server over SSH, e.g.: {cmd}'), { cmd: <code className="selectable">claude mcp add openmail --scope user -- ssh pi@{host} octo mcp</code> })}
+          {rich(t('The agent connects to the server over SSH, e.g.: {cmd}'), { cmd: <code className="selectable">claude mcp add openmail --scope user -- ssh pi@{host} openmail mcp</code> })}
         </div>
       </Section>
     </>

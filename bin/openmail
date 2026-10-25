@@ -1,0 +1,4 @@
+#!/bin/sh
+# OpenMail CLI (development checkout, Linux/macOS). Installed packages ship their own `openmail`.
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
+exec node "$DIR/out/cli/openmail.js" "$@"

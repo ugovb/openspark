@@ -1,0 +1,4 @@
+#!/bin/sh
+# OpenMail CLI / MCP server (installed Linux app): runs the bundled CLI with Electron's built-in Node.
+DIR="$(dirname "$(readlink -f "$0")")"
+ELECTRON_RUN_AS_NODE=1 exec "$DIR/openmail" "$DIR/resources/app.asar/out/cli/openmail.js" "$@"

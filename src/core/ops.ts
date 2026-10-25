@@ -1,5 +1,5 @@
 // Durable operation queue. UI, CLI, MCP and rules enqueue IMAP work here; whichever process is
-// alive (desktop app or `octo`) claims and executes it. Local state is updated optimistically
+// alive (desktop app or `openmail`) claims and executes it. Local state is updated optimistically
 // when the op is enqueued, so the UI reacts instantly and Undo can simply cancel a pending op.
 import crypto from 'node:crypto'
 import { t } from '../shared/i18n'

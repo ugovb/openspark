@@ -1,7 +1,8 @@
-// `octo` — command-line access to OpenMail for people and AI agents.
+// `openmail` — command-line access to OpenMail for people and AI agents.
 // Works whether or not the desktop app is running: it reads the shared SQLite database
 // directly and executes queued IMAP/SMTP work itself. All times are local (with offset).
 import './quiet'
+import { deprecatedAlias } from './alias'
 import fs from 'node:fs'
 import path from 'node:path'
 import type { Category, MailboxRef, ThreadSummary } from '../shared/types'
@@ -116,7 +117,7 @@ function resolveMailbox(spec: string | undefined): { ref: MailboxRef; accountId?
       'SELECT id FROM folders WHERE account_id = ? AND (path = ? COLLATE NOCASE OR name = ? COLLATE NOCASE)',
       acc.id, folderName, folderName,
     )
-    if (!f) throw new CliError(t('Account {email} has no folder "{folder}" (see: octo folders {email})', { email: acc.email, folder: folderName }))
+    if (!f) throw new CliError(t('Account {email} has no folder "{folder}" (see: openmail folders {email})', { email: acc.email, folder: folderName }))
     return { ref: { kind: 'folder', folderId: f.id } }
   }
   const sf = get<{ id: number }>('SELECT id FROM smart_folders WHERE name = ? COLLATE NOCASE', s)
@@ -169,46 +170,46 @@ async function ensureFresh(a: Args): Promise<void> {
 
 function help(): string {
   return [
-    t('octo {version} — OpenMail from the command line (local times with UTC offset)', { version: VERSION }),
+    t('openmail {version} — OpenMail from the command line (local times with UTC offset)', { version: VERSION }),
     t(`Reading:
-  octo accounts                              accounts, agent access levels
-  octo folders [account]                     folders with counts
-  octo emails [mailbox] [--filter q] [--page N] [--page-size N] [--unread]
+  openmail accounts                              accounts, agent access levels
+  openmail folders [account]                     folders with counts
+  openmail emails [mailbox] [--filter q] [--page N] [--page-size N] [--unread]
        mailbox: Inbox|Sent|Archive|Trash|Spam|pinned|snoozed|aside|reminders|newsenders|
                 people|notifications|newsletters|account@x.com|account@x.com:Folder|<smart folder>
-  octo search ["topic"] [--filter q] [--in account|account:Folder] [--page N]   (all folders)
-  octo thread <ID|tID> [--html]              whole thread with bodies and attachments
-  octo attachment <ID> [--save file] [--stream]
-  octo contacts [query]  ·  octo templates  ·  octo template <ID|name>`),
+  openmail search ["topic"] [--filter q] [--in account|account:Folder] [--page N]   (all folders)
+  openmail thread <ID|tID> [--html]              whole thread with bodies and attachments
+  openmail attachment <ID> [--save file] [--stream]
+  openmail contacts [query]  ·  openmail templates  ·  openmail template <ID|name>`),
     t(`Writing and sending (draft IDs never change):
-  octo draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
+  openmail draft --to a@b.com [--cc ..] [--bcc ..] --subject "…" --body "markdown…"
              [--reply-to ID [--reply-all]] [--forward ID] [--account account] [--attach file]
              [--template name --placeholder "Field=value"] [--no-signature] [--edit ID]
-  octo draft --delete ID
-  octo drafts  ·  octo scheduled
-  octo send <ID> [--at "tomorrow 9:00"] [--remind "in 3 days"]   sends and waits for SMTP confirmation
-  octo unschedule <ID>                       cancels a scheduled send (back to drafts)`),
+  openmail draft --delete ID
+  openmail drafts  ·  openmail scheduled
+  openmail send <ID> [--at "tomorrow 9:00"] [--remind "in 3 days"]   sends and waits for SMTP confirmation
+  openmail unschedule <ID>                       cancels a scheduled send (back to drafts)`),
     t(`Organizing (message ID or t<thread ID>, several allowed):
-  octo action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
+  openmail action archive|inbox|trash|delete-forever|spam|not-spam|read|unread|pin|unpin|
               mute|unmute|aside|unaside|priority|unpriority|unsubscribe <ID...>
-  octo action snooze <ID...> --until "mon 8:00"   ·  octo action unsnooze <ID...>
-  octo action remind <ID...> --at "in 3 days" [--if-no-reply]  ·  octo action unremind <ID...>
-  octo action move <ID...> --folder "account@x.com:Folder"  ·  octo action label|unlabel <ID...> --label X
-  octo sender accept|block|unblock|vip|unvip <email|@domain...>
-  octo sender category <email...> people|notification|newsletter`),
+  openmail action snooze <ID...> --until "mon 8:00"   ·  openmail action unsnooze <ID...>
+  openmail action remind <ID...> --at "in 3 days" [--if-no-reply]  ·  openmail action unremind <ID...>
+  openmail action move <ID...> --folder "account@x.com:Folder"  ·  openmail action label|unlabel <ID...> --label X
+  openmail sender accept|block|unblock|vip|unvip <email|@domain...>
+  openmail sender category <email...> people|notification|newsletter`),
     t(`Calendar:
-  octo events [--from "today"] [--to "in 7 days"]  ·  octo availability [--days 5] [--duration 30]
-  octo event create --title "…" --start "tomorrow 10:00" [--end "tomorrow 11:00"] [--attendee a@b.com] [--location …]
-  octo event delete <ID>  ·  octo invite <message ID>  ·  octo rsvp <message ID> accept|maybe|decline`),
+  openmail events [--from "today"] [--to "in 7 days"]  ·  openmail availability [--days 5] [--duration 30]
+  openmail event create --title "…" --start "tomorrow 10:00" [--end "tomorrow 11:00"] [--attendee a@b.com] [--location …]
+  openmail event delete <ID>  ·  openmail invite <message ID>  ·  openmail rsvp <message ID> accept|maybe|decline`),
     t(`AI (Ollama or Claude, per settings):
-  octo ai summarize <ID|tID>  ·  octo ai reply <ID|tID> [--instructions "…"]  ·  octo ai ask "question"`),
+  openmail ai summarize <ID|tID>  ·  openmail ai reply <ID|tID> [--instructions "…"]  ·  openmail ai ask "question"`),
     t(`Other:
-  octo status · octo sync [account] · octo history [--limit N] · octo daemon (sync without a window)
-  octo serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
-  octo server pair | devices | revoke <ID>    pairing codes and paired devices
-  octo server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
+  openmail status · openmail sync [account] · openmail history [--limit N] · openmail daemon (sync without a window)
+  openmail serve [--port 8787]   home server (e.g. Raspberry Pi): 24/7 engine + API + web interface
+  openmail server pair | devices | revoke <ID>    pairing codes and paired devices
+  openmail server account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off
                                               the account of the home server (recovery on the NAS)
-  octo mcp   (MCP server on stdio for Claude Code / Claude Desktop)
+  openmail mcp   (MCP server on stdio for Claude Code / Claude Desktop)
 Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`),
   ].join('\n\n')
 }
@@ -216,6 +217,9 @@ Global: --json (machine-readable data), --no-sync (don't fetch new mail first)`)
 async function main(): Promise<void> {
   // language for help and early errors; initCore() below switches to the language from the settings
   initLang(undefined, systemLocale())
+  // `octo mcp` stays silent: MCP clients read stderr as a log
+  const notice = process.argv[2] === 'mcp' ? null : deprecatedAlias(process.env.OPENMAIL_INVOKED_AS)
+  if (notice) console.error(notice)
   const a = parseArgs(process.argv.slice(2))
   const cmd = a._.shift()
   if (!cmd || cmd === 'help' || a.b.has('help')) {
@@ -282,7 +286,7 @@ async function main(): Promise<void> {
 Address:  {addresses}
 
 Sign in with your email and password (and your authenticator code).
-Forgot it? octo server reset-password · Account: octo server account · Ctrl+C to stop.`, { addresses: urls.join('  ') }))
+Forgot it? openmail server reset-password · Account: openmail server account · Ctrl+C to stop.`, { addresses: urls.join('  ') }))
       } else {
         const { code } = createPairingCode()
         console.log(t(`OpenMail — home server is running.
@@ -291,7 +295,7 @@ Address:  {addresses}
 Pairing code (valid for 15 min): {code}
 
 Open the address in a browser and create your account with this code (email + password, then turn on two-step verification in Settings → Home server).
-The desktop app can also pair with it. New code: octo server pair · Device list: octo server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
+The desktop app can also pair with it. New code: openmail server pair · Device list: openmail server devices · Ctrl+C to stop.`, { addresses: urls.join('  '), code }))
       }
       await new Promise(() => undefined)
       return
@@ -308,7 +312,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
           { key: 'id', label: 'ID' }, { key: 'name', label: t('DEVICE') }, { key: 'created', label: t('PAIRED') }, { key: 'seen', label: t('LAST SEEN') }, { key: 'ip', label: 'IP' },
         ]))
       } else if (sub === 'revoke') {
-        if (!a._[0]) throw new CliError(t('Give a device ID (octo server devices)'))
+        if (!a._[0]) throw new CliError(t('Give a device ID (openmail server devices)'))
         console.log(auth.revokeDevice(a._[0]) ? t('Access revoked.') : t('No such device.'))
       } else if (sub === 'account' || sub === 'reset-password' || sub === 'reset-account' || sub === '2fa-off' || sub === 'sign-out-all' || sub === 'pairing') {
         // recovery commands: being able to run them on the NAS (docker exec) is the proof of ownership
@@ -319,17 +323,17 @@ The desktop app can also pair with it. New code: octo server pair · Device list
             ? t('Account: {email}\nTwo-step verification: {state}\nRecovery codes left: {n}\nPairing codes: {pairing}', {
               email: owner.email, state: owner.totpEnabled ? t('on') : t('off'), n: owner.recoveryLeft, pairing: auth.pairingAllowed() ? t('allowed') : t('switched off'),
             })
-            : t('No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).')))
+            : t('No account yet. Open the server address in a browser and create it with a pairing code (openmail server pair).')))
           return
         }
         if (sub === 'pairing') {
           const v = a._[0]
-          if (v !== 'on' && v !== 'off') throw new CliError('octo server pairing on|off')
+          if (v !== 'on' && v !== 'off') throw new CliError('openmail server pairing on|off')
           auth.setPairingAllowed(v === 'on')
           console.log(v === 'on' ? t('Pairing codes are allowed.') : t('Pairing codes are switched off.'))
           return
         }
-        if (!owner) throw new CliError(t('No account yet. Open the server address in a browser and create it with a pairing code (octo server pair).'))
+        if (!owner) throw new CliError(t('No account yet. Open the server address in a browser and create it with a pairing code (openmail server pair).'))
         if (sub === 'reset-account') {
           // starts over: deletes the account, signs every device out and opens account creation again
           if (!a.b.has('yes')) throw new CliError(t('This deletes the account {email} and signs every device out. Mail accounts and messages are kept. Run again with --yes to confirm.', { email: owner.email }))
@@ -354,7 +358,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
           }
           console.log(t('Password changed for {email}. The account is unlocked.', { email: owner.email }))
         }
-      } else throw new CliError('octo server pair [--name …] | devices | revoke <ID> | account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off')
+      } else throw new CliError('openmail server pair [--name …] | devices | revoke <ID> | account | reset-password | reset-account --yes | 2fa-off | sign-out-all | pairing on|off')
       return
     }
     case 'daemon': {
@@ -371,7 +375,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       const pending = all("SELECT kind, status, error FROM ops WHERE status IN ('pending','running','error') ORDER BY id DESC LIMIT 20")
       print(a, { engine: eng, accounts: accs.map((x) => ({ email: x.email, last_sync: x.last_sync, error: x.last_error })), pending }, () =>
         [
-          eng ? t('Sync engine: running ({owner}, pid {pid})', { owner: eng.owner, pid: eng.pid }) : t('Sync engine: NOT running — start the app or `octo daemon`'),
+          eng ? t('Sync engine: running ({owner}, pid {pid})', { owner: eng.owner, pid: eng.pid }) : t('Sync engine: NOT running — start the app or `openmail daemon`'),
           ...accs.map((x) => '  ' + (x.last_error
             ? t('{email}: last sync {time} — ERROR: {error}', { email: x.email, time: fmtTime(x.last_sync), error: x.last_error })
             : t('{email}: last sync {time}', { email: x.email, time: fmtTime(x.last_sync) }))),
@@ -427,7 +431,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       }
       const counts = svc.counts()
       print(a, list, () => {
-        const hdr = ref.kind === 'smart' && counts.newsenders ? t('New senders awaiting a decision: {n} (octo emails newsenders)', { n: counts.newsenders }) + '\n' : ''
+        const hdr = ref.kind === 'smart' && counts.newsenders ? t('New senders awaiting a decision: {n} (openmail emails newsenders)', { n: counts.newsenders }) + '\n' : ''
         return hdr + table(threadRows(list), threadCols()) + '\n' + t('Page {page}. Flags: U unread, P pinned, ! priority, A attachment, S snoozed, R reminder, N new sender, D draft, M muted, B set aside', { page })
       })
       return
@@ -484,7 +488,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
         const head = `${t('Thread t{id}: {subject}', { id: th.thread_id, subject: th.subject })}\n${info}`
         const msgs = thr!.messages.map((m) => {
           const atts = m.attachments.filter((x) => !x.inline)
-          const attText = atts.length ? `\n${t('Attachments:')}\n${table(atts.map((x) => ({ id: x.id, name: x.filename, size: `${Math.round(x.size / 1024)} KB`, mime: x.mime, path: x.path || t('(not downloaded — octo attachment {id})', { id: x.id }) })), [{ key: 'id', label: 'ID' }, { key: 'name', label: t('NAME'), width: 40 }, { key: 'size', label: t('SIZE') }, { key: 'mime', label: t('TYPE') }, { key: 'path', label: t('PATH'), width: 60 }])}` : ''
+          const attText = atts.length ? `\n${t('Attachments:')}\n${table(atts.map((x) => ({ id: x.id, name: x.filename, size: `${Math.round(x.size / 1024)} KB`, mime: x.mime, path: x.path || t('(not downloaded — openmail attachment {id})', { id: x.id }) })), [{ key: 'id', label: 'ID' }, { key: 'name', label: t('NAME'), width: 40 }, { key: 'size', label: t('SIZE') }, { key: 'mime', label: t('TYPE') }, { key: 'path', label: t('PATH'), width: 60 }])}` : ''
           const body = a.b.has('html') ? m.html || m.text : m.text || m.snippet
           return [
             `── ID: ${m.id} · ${fmtTime(m.date)} · ${m.folder_role || ''}${m.seen ? '' : ` · ${t('UNREAD')}`}`,
@@ -493,7 +497,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
             ...(m.cc.length ? [t('Cc: {cc}', { cc: addrs(m.cc) })] : []),
             ...(m.bcc.length ? [t('Bcc: {bcc}', { bcc: addrs(m.bcc) })] : []),
             t('Subject: {subject}', { subject: m.subject }),
-            ...(m.calendar_part ? [t('📅 Contains an invitation (octo invite {id})', { id: m.id })] : []),
+            ...(m.calendar_part ? [t('📅 Contains an invitation (openmail invite {id})', { id: m.id })] : []),
           ].join('\n') + `\n\n${body || t('(no content)')}${attText}`
         })
         const ds = thr!.drafts.map((d) => [
@@ -507,7 +511,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
     }
     case 'attachment': {
       const id = Number(a._[0])
-      if (!id) throw new CliError(t('Give an attachment ID (the ID column in octo thread)'))
+      if (!id) throw new CliError(t('Give an attachment ID (the ID column in openmail thread)'))
       const file = await svc.downloadAttachment(id)
       const att = get('SELECT * FROM attachments WHERE id = ?', id)!
       if (a.b.has('stream')) {
@@ -555,7 +559,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       print(a, list, () => table(list.map((d) => ({ id: d.id, status: d.status, at: fmtTime(d.send_at), to: addrs(d.to), subject: d.subject, error: d.error || '' })), [
         { key: 'id', label: 'ID' }, { key: 'status', label: 'STATUS' }, { key: 'at', label: t('SEND AT') }, { key: 'to', label: t('TO'), width: 40 },
         { key: 'subject', label: t('SUBJECT'), width: 50 }, { key: 'error', label: t('ERROR'), width: 40 },
-      ]) + (list.length ? '\n' + t('Cancel: octo unschedule <ID>') : ''))
+      ]) + (list.length ? '\n' + t('Cancel: openmail unschedule <ID>') : ''))
       return
     }
     case 'draft': {
@@ -617,7 +621,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
         ...(d.cc.length ? [t('Cc: {cc}', { cc: addrs(d.cc) })] : []),
         t('Subject: {subject}', { subject: d.subject }),
         t('Attachments: {list}', { list: d.attachments.map((x) => x.filename).join(', ') || '-' }),
-        t('Send: octo send {id}  ·  Open: openmail://draft/{id}', { id: d.id }),
+        t('Send: openmail send {id}  ·  Open: openmail://draft/{id}', { id: d.id }),
       ].join('\n'))
       return
     }
@@ -628,8 +632,8 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       const remindAt = when(one(a, 'remind'), '--remind')
       const d = svc.sendDraft(id, { sendAt, remindAt })
       if (sendAt) {
-        const warn = engineRunning() ? '' : '\n' + t('Warning: the app is not running — the message will go out only when you start OpenMail or `octo daemon`.')
-        print(a, d, () => t('Scheduled: {subject}\nSend at: {time}\nCancel: octo unschedule {id}', { subject: d.subject, time: fmtTime(d.send_at), id: d.id }) + warn)
+        const warn = engineRunning() ? '' : '\n' + t('Warning: the app is not running — the message will go out only when you start OpenMail or `openmail daemon`.')
+        print(a, d, () => t('Scheduled: {subject}\nSend at: {time}\nCancel: openmail unschedule {id}', { subject: d.subject, time: fmtTime(d.send_at), id: d.id }) + warn)
         return
       }
       process.stderr.write(`Queued: ${d.subject} → ${addrs(d.to)}\n`)
@@ -646,7 +650,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
     }
     case 'action': {
       const act = a._.shift()
-      if (!act) throw new CliError(t('Give an action (octo help)'))
+      if (!act) throw new CliError(t('Give an action (openmail help)'))
       const ids = resolveThreads(a._)
       let r: { affected: number; message?: string } | undefined
       switch (act) {
@@ -704,7 +708,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
         let r
         if (fn) r = fn(a._)
         else if (act === 'vip' || act === 'unvip') r = svc.prioritySender(a._, act === 'vip')
-        else throw new CliError('octo sender accept|block|unblock|vip|unvip|category …')
+        else throw new CliError('openmail sender accept|block|unblock|vip|unvip|category …')
         await drainOps(60_000)
         print(a, r, () => `OK: ${r.message}`)
       }
@@ -739,7 +743,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       } else if (sub === 'delete') {
         await svc.deleteEvent(Number(a._[0]))
         console.log(t('Event deleted.'))
-      } else throw new CliError('octo event create|delete …')
+      } else throw new CliError('openmail event create|delete …')
       return
     }
     case 'invite': {
@@ -751,7 +755,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       // accepted answers (English plus Polish aliases) — parsing data, not UI text
       const map: Record<string, 'ACCEPTED' | 'TENTATIVE' | 'DECLINED'> = { accept: 'ACCEPTED', yes: 'ACCEPTED', tak: 'ACCEPTED', maybe: 'TENTATIVE', może: 'TENTATIVE', decline: 'DECLINED', no: 'DECLINED', nie: 'DECLINED' }
       const resp = map[(a._[1] || '').toLowerCase()]
-      if (!resp) throw new CliError(t('octo rsvp <message ID> accept|maybe|decline'))
+      if (!resp) throw new CliError(t('openmail rsvp <message ID> accept|maybe|decline'))
       await svc.rsvpInvite(Number(a._[0]), resp, one(a, 'comment'))
       console.log(t('Invitation response sent.'))
       return
@@ -774,7 +778,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
         const r = await svc.aiAsk(a._.join(' '), a.b.has('json') ? undefined : stream)
         if (a.b.has('json')) print(a, r, () => '')
         else console.log('\n\n' + t('Sources: {list}', { list: r.sources.join(', ') || '-' }))
-      } else throw new CliError('octo ai summarize|reply|ask …')
+      } else throw new CliError('openmail ai summarize|reply|ask …')
       return
     }
     case 'history': {
@@ -786,7 +790,7 @@ The desktop app can also pair with it. New code: octo server pair · Device list
       return
     }
     default:
-      throw new CliError(t('Unknown command "{cmd}". See: octo help', { cmd }))
+      throw new CliError(t('Unknown command "{cmd}". See: openmail help', { cmd }))
   }
 }
 

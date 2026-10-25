@@ -72,7 +72,7 @@ function processAlive(pid: number): boolean {
   }
 }
 
-/** Is a sync engine (desktop app or `octo daemon`) alive right now? */
+/** Is a sync engine (desktop app or `openmail daemon`) alive right now? */
 export function engineRunning(): { owner: string; pid: number } | null {
   initCore()
   const e = getKV<{ owner: string; pid: number; host?: string; at: number } | null>('engine', null)

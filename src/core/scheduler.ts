@@ -1,5 +1,5 @@
 // Local replacement for Spark's cloud timers: snooze wake-ups, follow-up reminders,
-// scheduled sends and the operation queue. Runs inside the desktop app (tray) or `octo daemon`.
+// scheduled sends and the operation queue. Runs inside the desktop app (tray) or `openmail daemon`.
 import { t } from '../shared/i18n'
 import { all, get, now, run } from './db'
 import { bus, log } from './events'

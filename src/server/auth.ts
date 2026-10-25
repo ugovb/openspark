@@ -1,4 +1,4 @@
-// Device pairing for the home server: a short one-time code (shown by `octo server pair`)
+// Device pairing for the home server: a short one-time code (shown by `openmail server pair`)
 // is exchanged for a long per-device token. Only SHA-256 hashes are stored.
 import crypto from 'node:crypto'
 import { now } from '../core/db'

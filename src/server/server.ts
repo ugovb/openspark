@@ -1,4 +1,4 @@
-// OpenMail home server (`octo serve`): runs the whole engine 24/7 (sync, Send Later, snooze,
+// OpenMail home server (`openmail serve`): runs the whole engine 24/7 (sync, Send Later, snooze,
 // reminders, rules) and exposes the service API to paired desktop apps and browsers.
 import fs from 'node:fs'
 import http from 'node:http'

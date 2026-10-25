@@ -254,8 +254,8 @@ const dict: Dictionary = {
     'Copied': 'Copiado',
     'Could not copy': 'No se pudo copiar',
     'AI agent access level': 'Nivel de acceso de los agentes de IA',
-    'Applies to the `octo` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.':
-      'Se aplica a la CLI `octo` y al servidor MCP (Claude Code, Claude Desktop). Solo se puede cambiar aquí — un agente no puede ampliar sus propios permisos.',
+    'Applies to the `openmail` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.':
+      'Se aplica a la CLI `openmail` y al servidor MCP (Claude Code, Claude Desktop). Solo se puede cambiar aquí — un agente no puede ampliar sus propios permisos.',
     'Connect to Claude Code': 'Conectar con Claude Code',
     'Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.':
       'Una sola vez, en una terminal. Después Claude puede leer y organizar tu correo y (si lo permites) enviar correo y gestionar tu calendario.',
