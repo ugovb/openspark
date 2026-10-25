@@ -54,7 +54,7 @@ function OAuthSetup({ provider, onSaved }: { provider: 'google' | 'microsoft'; o
   )
 }
 
-export default function AccountWizard({ welcome, onDone }: { welcome?: boolean; onDone?: () => void }) {
+export default function AccountWizard({ welcome, remote, onDone }: { welcome?: boolean; remote?: boolean; onDone?: () => void }) {
   const { toast, refreshMeta, secretStore } = useStore()
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -135,7 +135,9 @@ export default function AccountWizard({ welcome, onDone }: { welcome?: boolean; 
               {t('Welcome to OpenMail')}
             </h1>
             <p className="mt-1 text-[13px] text-muted">
-              {t('Free email with Smart Inbox, AI and a calendar. Everything stays on this computer, and passwords are kept {secretStore}.', { secretStore })}
+              {remote
+                ? t('You are signed in. Add your first mailbox: it is kept on your home server and shows up on all your devices.')
+                : t('Free email with Smart Inbox, AI and a calendar. Everything stays on this computer, and passwords are kept {secretStore}.', { secretStore })}
             </p>
           </div>
         )}

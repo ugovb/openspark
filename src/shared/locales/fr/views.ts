@@ -153,6 +153,15 @@ const dict: Dictionary = {
     'Select a contact': 'Sélectionnez un contact',
     "You'll see contact details, mail statistics and recent messages here.":
       'Vous verrez ici les coordonnées du contact, les statistiques d’échanges et les messages récents.',
+    'Sign in to OpenMail': 'Se connecter à OpenMail',
+    'Create your OpenMail account': 'Créer votre compte OpenMail',
+    'One account for all your mailboxes, on your own server, on every device.': 'Un seul compte pour toutes vos boîtes mail, sur votre propre serveur, sur tous vos appareils.',
+    'This server has no account yet. Choose the email and password you will use on every device.': 'Ce serveur n’a pas encore de compte. Choisissez l’e-mail et le mot de passe que vous utiliserez sur chaque appareil.',
+    'Continue': 'Continuer',
+    'Server: {name}': 'Serveur : {name}',
+    'Use another server': 'Utiliser un autre serveur',
+    'Use only on this computer': 'Utiliser seulement sur cet ordinateur',
+    'You are signed in. Add your first mailbox: it is kept on your home server and shows up on all your devices.': 'Vous êtes connecté. Ajoutez votre première boîte mail : elle est conservée sur votre serveur domestique et apparaît sur tous vos appareils.',
   },
   plurals: {
     'Synced {n} address from Google Contacts': [

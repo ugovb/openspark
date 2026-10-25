@@ -1,5 +1,5 @@
 import { PenSquare } from 'lucide-react'
-import { lazy, Suspense, useEffect, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import AskPanel from './components/AskPanel'
 import AskPill from './components/AskPill'
 import CommandPalette from './components/CommandPalette'
@@ -16,6 +16,7 @@ import { useNarrow } from './lib/narrow'
 import { useOnePane, useStore } from './lib/store'
 import { t } from '../../shared/i18n'
 import AccountWizard from './views/AccountWizard'
+import { SignInScreen } from './views/SignInScreen'
 import AskView from './views/AskView'
 
 const SettingsView = lazy(() => import('./views/SettingsView'))
@@ -164,6 +165,12 @@ export default function App() {
   const one = useOnePane()
   useShortcuts()
   usePhoneHistory(one)
+  // local app or signed in to a home server: decides what a fresh app (no mailbox yet) shows first
+  const [mode, setMode] = useState<'local' | 'remote' | null>(null)
+  const [stayLocal, setStayLocal] = useState(false)
+  useEffect(() => {
+    void window.octo.serverStatus().then((s: { mode: 'local' | 'remote' }) => setMode(s.mode)).catch(() => setMode('local'))
+  }, [])
   // picking a place in the drawer closes it
   useEffect(() => useStore.setState({ drawer: false }), [mailbox, view, composer?.key])
 
@@ -193,9 +200,18 @@ export default function App() {
   }, [standalone, ready, selected])
 
   if (!ready) return <div className="flex h-full items-center justify-center text-muted"><Spinner /></div>
+  if (!accounts.length && mode === null) return <div className="flex h-full items-center justify-center text-muted"><Spinner /></div>
+  // a fresh app starts at "Sign in to OpenMail"; a signed-in app with no mailbox yet goes straight to adding one
+  if (!accounts.length && mode === 'local' && !stayLocal) return (
+    <>
+      <SignInScreen onLocal={() => setStayLocal(true)} />
+      <Toasts />
+      <PromptHost />
+    </>
+  )
   if (!accounts.length) return (
     <>
-      <AccountWizard welcome onDone={() => void useStore.getState().refreshMeta().then(() => useStore.getState().refreshList())} />
+      <AccountWizard welcome remote={mode === 'remote'} onDone={() => void useStore.getState().refreshMeta().then(() => useStore.getState().refreshList())} />
       <Toasts />
       <PromptHost />
     </>
