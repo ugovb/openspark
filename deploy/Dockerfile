@@ -1,6 +1,6 @@
 # OpenMail — serwer domowy w kontenerze (Synology/QNAP/Unraid, Raspberry Pi z Dockerem, VPS w sieci VPN).
 #   docker compose -f deploy/docker-compose.yml up -d --build
-#   docker compose -f deploy/docker-compose.yml exec octopus octo server pair
+#   docker compose -f deploy/docker-compose.yml exec openmail openmail server pair
 # Kontekst budowania: katalog główny repozytorium.
 
 FROM node:24-bookworm-slim AS build
@@ -14,15 +14,17 @@ RUN npx electron-vite build && node scripts/build-cli.mjs
 
 FROM node:24-bookworm-slim
 WORKDIR /app
-ENV NODE_ENV=production OCTO_HOME=/data OCTO_SECRETS=server
+ENV NODE_ENV=production OPENMAIL_HOME=/data OPENMAIL_SECRETS=server
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund && npm cache clean --force
 COPY --from=build /src/out/cli ./out/cli
 COPY --from=build /src/out/renderer ./out/renderer
-RUN printf '#!/bin/sh\nexec node /app/out/cli/octo.js "$@"\n' > /usr/local/bin/octo && chmod 755 /usr/local/bin/octo \
+RUN printf '#!/bin/sh\nexec node /app/out/cli/openmail.js "$@"\n' > /usr/local/bin/openmail \
+  && printf '#!/bin/sh\nexec node /app/out/cli/octo.js "$@"\n' > /usr/local/bin/octo \
+  && chmod 755 /usr/local/bin/openmail /usr/local/bin/octo \
   && mkdir -p /data && chown node:node /data
 USER node
 VOLUME /data
 EXPOSE 8787
 HEALTHCHECK --interval=60s --timeout=5s CMD node -e "fetch('http://127.0.0.1:8787/api/info').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
-CMD ["node", "/app/out/cli/octo.js", "serve", "--port", "8787"]
+CMD ["node", "/app/out/cli/openmail.js", "serve", "--port", "8787"]

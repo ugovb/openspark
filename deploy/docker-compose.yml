@@ -1,8 +1,8 @@
 # OpenMail — serwer domowy (Docker). Uruchom z katalogu głównego repozytorium:
 #   docker compose -f deploy/docker-compose.yml up -d --build
-#   docker compose -f deploy/docker-compose.yml exec octopus octo server pair    ← kod parowania
+#   docker compose -f deploy/docker-compose.yml exec openmail openmail server pair    ← kod parowania
 services:
-  octopus:
+  openmail:
     build:
       context: ..
       dockerfile: deploy/Dockerfile

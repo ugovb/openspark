@@ -30,7 +30,7 @@ jobs:
         run: |
           APP="dist/mac-arm64/OpenMail.app"
           codesign --verify --deep --strict "$APP" || codesign -dv "$APP"
-          OCTO_HOME="$RUNNER_TEMP/octo" OCTO_SECRETS=memory "$APP/Contents/Resources/octo" help | head -5
+          OPENMAIL_HOME="$RUNNER_TEMP/openmail" OPENMAIL_SECRETS=memory "$APP/Contents/Resources/openmail" help | head -5
       - uses: actions/upload-artifact@v4
         with:
           name: openmail-macos-arm64

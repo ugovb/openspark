@@ -67,14 +67,14 @@ Spark's public feature set was only the to-do list.
 - Address book built from your mail plus Google contacts.
 
 **Home server (instead of a vendor cloud)**
-- `octo serve` on an always-on box (Raspberry Pi, NAS, old laptop) sends scheduled mail and wakes
+- `openmail serve` on an always-on box (Raspberry Pi, NAS, old laptop) sends scheduled mail and wakes
   snoozed mail and reminders while your computers are off.
 - Every computer sees the same accounts, snoozes and drafts. Phones and browsers get a web UI with a
   phone layout that you can add to the home screen.
 - One owner account on the server (email + password + optional TOTP two-step verification); each device gets its own revocable key. Pairing codes remain for first setup.
 
 **AI agents: CLI and MCP**
-- `octo`: a CLI and an **MCP server** for Claude Code / Claude Desktop with per-account access levels
+- `openmail`: a CLI and an **MCP server** for Claude Code / Claude Desktop with per-account access levels
   (read / triage / send). It works **while the app is closed**, uses local time with offsets, keeps
   stable draft IDs, can **cancel a scheduled send** and keeps an action history.
 
@@ -108,7 +108,7 @@ sudo bash install.sh
 ```
 
 The installer puts a private Node.js 24 in `/opt/openmail`, installs the `openmail` systemd
-service (starts on boot, restarts after a crash) and the `octo` command, then prints the server address
+service (starts on boot, restarts after a crash) and the `openmail` command, then prints the server address
 and a pairing code. Run it again with a newer archive to update; `sudo bash install.sh --uninstall`
 removes it and keeps your data.
 
@@ -116,7 +116,7 @@ removes it and keeps your data.
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml exec octopus octo server pair
+docker compose -f deploy/docker-compose.yml exec octopus openmail server pair
 ```
 
 **Connecting devices:** in the app open *Settings → Home server* and enter the address and code. On a phone, open the server address in the browser and type the code.
@@ -141,16 +141,16 @@ the system secret store (Windows Credential Manager, GNOME Keyring / KWallet), n
 ## AI agents: CLI and MCP
 
 ```bash
-octo emails                                   # Smart Inbox
-octo search --filter "from:anna newer_than:7d"
-octo draft --reply-to 123 --body "Thanks, Friday works for me."
-octo send 45 --at "tomorrow 9:00"             # send later ("mon 14:30", "in 3 days", "2026-10-20 9:00")
-octo unschedule 45
+openmail emails                                   # Smart Inbox
+openmail search --filter "from:anna newer_than:7d"
+openmail draft --reply-to 123 --body "Thanks, Friday works for me."
+openmail send 45 --at "tomorrow 9:00"             # send later ("mon 14:30", "in 3 days", "2026-10-20 9:00")
+openmail unschedule 45
 ```
 
 To connect Claude Code, copy the ready-made `claude mcp add …` command from the app
 (*Settings → AI agents & CLI*). With a home server, the agent can talk to it over SSH:
-`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local octo mcp`.
+`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local openmail mcp`.
 
 Each account starts with **read-only** agent access. Only you can raise it, in the app.
 

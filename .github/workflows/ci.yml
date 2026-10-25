@@ -56,12 +56,12 @@ jobs:
       - name: CLI na czystym profilu
         shell: bash
         env:
-          OCTO_HOME: ${{ runner.temp }}/octo-ci
-          OCTO_SECRETS: memory
+          OPENMAIL_HOME: ${{ runner.temp }}/openmail-ci
+          OPENMAIL_SECRETS: memory
         run: |
-          node out/cli/octo.js help > /dev/null
-          node out/cli/octo.js accounts --no-sync
-          node out/cli/octo.js status
+          node out/cli/openmail.js help > /dev/null
+          node out/cli/openmail.js accounts --no-sync
+          node out/cli/openmail.js status
 
   home-server:
     name: Instalator serwera domowego (Linux + systemd)
@@ -84,14 +84,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/srv"
           tar -xzf dist/openmail-server-*.tar.gz -C "$RUNNER_TEMP/srv"
           cd "$RUNNER_TEMP/srv/openmail-server"
-          sudo OCTO_USER="$USER" bash install.sh | tee install.log
+          sudo OPENMAIL_USER="$USER" bash install.sh | tee install.log
           grep -E '[A-Z0-9]{4}-[A-Z0-9]{4}' install.log
 
       - name: Serwer odpowiada i przeżywa restart
         run: |
           curl -fsS http://127.0.0.1:8787/api/info
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8787/api/call)" = 401
-          octo server devices
+          openmail server devices
           sudo systemctl kill -s KILL openmail
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8787/api/info && break; sleep 1; done
           curl -fsS http://127.0.0.1:8787/api/info
@@ -99,7 +99,7 @@ jobs:
       - name: Aktualizacja i odinstalowanie
         run: |
           cd "$RUNNER_TEMP/srv/openmail-server"
-          sudo OCTO_USER="$USER" bash install.sh > /dev/null
+          sudo OPENMAIL_USER="$USER" bash install.sh > /dev/null
           curl -fsS http://127.0.0.1:8787/api/info
           sudo bash install.sh --uninstall
           ! systemctl is-active --quiet openmail

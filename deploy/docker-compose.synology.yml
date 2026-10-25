@@ -2,7 +2,7 @@
 # Container Manager → Project → Create → paste this file, or over SSH:
 #   sudo mkdir -p /volume1/docker/openspark && sudo chown 1000:1000 /volume1/docker/openspark
 #   sudo docker compose -f docker-compose.synology.yml up -d
-#   sudo docker exec openspark-mail octo server pair        ← pairing code (15 min)
+#   sudo docker exec openspark-mail openmail server pair        ← pairing code (15 min)
 # Put it behind the DSM reverse proxy (HTTPS 443 → localhost:8787): see docs/synology.md.
 services:
   octopus:
@@ -17,5 +17,5 @@ services:
     environment:
       TZ: Europe/Paris
       # trust X-Forwarded-For / X-Forwarded-Proto from the DSM reverse proxy
-      OCTO_TRUST_PROXY: "1"
+      OPENMAIL_TRUST_PROXY: "1"
     mem_limit: 512m

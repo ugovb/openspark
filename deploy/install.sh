@@ -3,10 +3,10 @@
 # Raspberry Pi OS (64-bit), Debian, Ubuntu i inne Linuksy z systemd; procesor arm64 albo x86_64.
 #
 #   sudo ./install.sh                 instaluje albo aktualizuje (konta i poczta zostają)
-#   sudo OCTO_PORT=9000 ./install.sh  inny port niż 8787
+#   sudo OPENMAIL_PORT=9000 ./install.sh  inny port niż 8787
 #   sudo ./install.sh --uninstall     usuwa program i usługę (dane zostają w ~/.config/Octopus Mail)
 #
-# Serwer działa jako zwykły użytkownik, który uruchomił sudo (np. "pi"), więc polecenie `octo`
+# Serwer działa jako zwykły użytkownik, który uruchomił sudo (np. "pi"), więc polecenie `openmail`
 # w jego sesji SSH widzi te same konta. Node.js 24 trafia do /opt/openmail/node — systemowy
 # Node (jeśli jest) zostaje nietknięty.
 set -euo pipefail
@@ -14,7 +14,7 @@ set -euo pipefail
 APP=/opt/openmail
 UNIT=/etc/systemd/system/openmail.service
 NODE_MAJOR=24
-PORT="${OCTO_PORT:-8787}"
+PORT="${OPENMAIL_PORT:-8787}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
 say() { printf '\033[1;35m»\033[0m %s\n' "$*"; }
@@ -25,15 +25,15 @@ command -v systemctl >/dev/null || die "ten instalator wymaga systemd (dla Docke
 
 if [ "${1:-}" = "--uninstall" ]; then
   systemctl disable --now openmail 2>/dev/null || true
-  rm -f "$UNIT" /usr/local/bin/octo
+  rm -f "$UNIT" /usr/local/bin/openmail /usr/local/bin/octo
   systemctl daemon-reload
   rm -rf "$APP"
   say "Usunięto program. Dane (konta, poczta) zostały w katalogu ~/.config/Octopus Mail użytkownika serwera."
   exit 0
 fi
 
-RUN_USER="${OCTO_USER:-${SUDO_USER:-}}"
-[ -n "$RUN_USER" ] && [ "$RUN_USER" != "root" ] || die "nie wiem, jako kto uruchomić serwer. Podaj użytkownika:  sudo OCTO_USER=pi ./install.sh"
+RUN_USER="${OPENMAIL_USER:-${SUDO_USER:-}}"
+[ -n "$RUN_USER" ] && [ "$RUN_USER" != "root" ] || die "nie wiem, jako kto uruchomić serwer. Podaj użytkownika:  sudo OPENMAIL_USER=pi ./install.sh"
 id "$RUN_USER" >/dev/null 2>&1 || die "nie ma użytkownika $RUN_USER"
 RUN_HOME="$(getent passwd "$RUN_USER" | cut -d: -f6)"
 
@@ -44,7 +44,7 @@ case "$(uname -m)" in
   *) die "nieobsługiwany procesor: $(uname -m)" ;;
 esac
 
-[ -f "$SRC/out/cli/octo.js" ] || die "brak plików programu obok instalatora (out/cli/octo.js). Rozpakuj całe archiwum openmail-server-*.tar.gz."
+[ -f "$SRC/out/cli/openmail.js" ] || die "brak plików programu obok instalatora (out/cli/openmail.js). Rozpakuj całe archiwum openmail-server-*.tar.gz."
 
 missing=""
 for pair in curl:curl xz:xz-utils sha256sum:coreutils tar:tar; do
@@ -90,10 +90,17 @@ cp -r "$SRC/out" "$SRC/package.json" "$SRC/package-lock.json" "$APP/app.new/"
 rm -rf "$APP/app"
 mv "$APP/app.new" "$APP/app"
 
-cat >/usr/local/bin/octo <<SH
+cat >/usr/local/bin/openmail <<SH
 #!/bin/sh
 # OpenMail CLI (serwer domowy). Te same konta co usługa openmail.
-export OCTO_SECRETS=server
+export OPENMAIL_SECRETS=server
+exec "$NODE" "$APP/app/out/cli/openmail.js" "\$@"
+SH
+chmod 755 /usr/local/bin/openmail
+# stara nazwa polecenia: ten sam program, z krótką uwagą na stderr
+cat >/usr/local/bin/octo <<SH
+#!/bin/sh
+export OPENMAIL_SECRETS=server
 exec "$NODE" "$APP/app/out/cli/octo.js" "\$@"
 SH
 chmod 755 /usr/local/bin/octo
@@ -113,20 +120,20 @@ curl -fsS "http://127.0.0.1:$PORT/api/info" >/dev/null 2>&1 || die "serwer nie o
 
 host="$(hostname)"
 ips="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+\.' | head -n3 | sed "s|.*|http://&:$PORT|" | tr '\n' ' ')"
-code="$(runuser -u "$RUN_USER" -- env HOME="$RUN_HOME" /usr/local/bin/octo server pair --name "Pierwsze urządzenie" 2>/dev/null | grep -oE '[A-Z0-9]{4}-[A-Z0-9]{4}' | head -n1 || true)"
+code="$(runuser -u "$RUN_USER" -- env HOME="$RUN_HOME" /usr/local/bin/openmail server pair --name "Pierwsze urządzenie" 2>/dev/null | grep -oE '[A-Z0-9]{4}-[A-Z0-9]{4}' | head -n1 || true)"
 
 cat <<TXT
 
   OpenMail — serwer domowy działa (uruchamia się sam po restarcie).
 
   Adres:  http://$host.local:$PORT  ${ips}
-  Kod parowania (15 min):  ${code:-uruchom: octo server pair}
+  Kod parowania (15 min):  ${code:-uruchom: openmail server pair}
 
   Komputer:  OpenMail → Ustawienia → Serwer domowy → adres + kod
   Telefon:   otwórz adres w przeglądarce, wpisz kod, potem „Dodaj do ekranu głównego”
 
-  Kolejny kod:   octo server pair
-  Urządzenia:    octo server devices
+  Kolejny kod:   openmail server pair
+  Urządzenia:    openmail server devices
   Log:           journalctl -u openmail -f
   Aktualizacja:  rozpakuj nowe archiwum i uruchom ponownie sudo ./install.sh
 

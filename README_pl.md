@@ -64,16 +64,16 @@ i nazwa są własne; publiczna lista funkcji Sparka posłużyła tylko jako list
 - Książka adresowa budowana z korespondencji + kontakty Google.
 
 **Serwer domowy (zamiast chmury)**
-- `octo serve` na stale włączonym komputerze (Raspberry Pi, NAS, stary laptop) wysyła zaplanowane
+- `openmail serve` na stale włączonym komputerze (Raspberry Pi, NAS, stary laptop) wysyła zaplanowane
   wiadomości, budzi odłożone i przypomnienia, kiedy Twoje komputery są wyłączone.
 - Wszystkie komputery widzą te same konta, odłożone i wersje robocze. Telefon i przeglądarka dostają
   interfejs WWW z układem na telefon (można go dodać do ekranu głównego).
 - Urządzenia łączysz jednorazowym kodem; każde dostaje własny klucz, który możesz odebrać.
 
 **Agenci AI (CLI i MCP)**
-- `octo`: CLI i serwer **MCP** dla Claude Code / Claude Desktop z poziomami dostępu per konto (odczyt /
+- `openmail`: CLI i serwer **MCP** dla Claude Code / Claude Desktop z poziomami dostępu per konto (odczyt /
   porządkowanie / wysyłka). Działa **przy zamkniętej aplikacji**, podaje czas lokalny z przesunięciem,
-  ma stałe ID wersji roboczych, **anulowanie zaplanowanej wysyłki** (`octo unschedule`) i dziennik działań.
+  ma stałe ID wersji roboczych, **anulowanie zaplanowanej wysyłki** (`openmail unschedule`) i dziennik działań.
 
 <div align="center">
 <img src="docs/screenshots/pl/phone-inbox.png" alt="Telefon: skrzynka" width="260" />
@@ -100,7 +100,7 @@ sudo bash install.sh
 ```
 
 Instalator pobiera Node.js 24 do `/opt/openmail` (systemowego Node nie rusza), instaluje usługę
-systemd `openmail` (startuje z systemem, wstaje po awarii) i polecenie `octo`, a na końcu wypisuje
+systemd `openmail` (startuje z systemem, wstaje po awarii) i polecenie `openmail`, a na końcu wypisuje
 adres serwera i kod parowania. Aktualizacja: to samo z nowym archiwum. Odinstalowanie:
 `sudo bash install.sh --uninstall` (konta i poczta zostają).
 
@@ -108,14 +108,14 @@ adres serwera i kod parowania. Aktualizacja: to samo z nowym archiwum. Odinstalo
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml exec octopus octo server pair
+docker compose -f deploy/docker-compose.yml exec octopus openmail server pair
 ```
 
 **Podłączanie urządzeń**
 - Komputer: Ustawienia → **Serwer domowy** → adres serwera + kod. Aplikacja uruchamia się ponownie
   i korzysta z kont na serwerze.
 - Telefon / przeglądarka: otwórz adres serwera i wpisz kod.
-- Kolejny kod: `octo server pair` na serwerze albo Ustawienia → Serwer domowy → **Dodaj urządzenie**.
+- Kolejny kod: `openmail server pair` na serwerze albo Ustawienia → Serwer domowy → **Dodaj urządzenie**.
 - Serwer trzymaj w sieci domowej, a spoza domu łącz się przez VPN (np. Tailscale, WireGuard), nie przez
   przekierowanie portu w routerze. Szczegóły: [SECURITY.md](SECURITY.md).
 
@@ -141,17 +141,17 @@ certyfikatom systemu, więc działa z nimi tak jak Outlook.
 ## CLI i MCP
 
 ```bash
-octo emails                                   # Smart Inbox
-octo search --filter "from:anna newer_than:7d"
-octo draft --reply-to 123 --body "Dzięki, pasuje mi piątek."
-octo send 45 --at "jutro 9:00"                # wysyłka zaplanowana
-octo unschedule 45                            # anulowanie
-octo action snooze t12 --until "pon 8:00"
+openmail emails                                   # Smart Inbox
+openmail search --filter "from:anna newer_than:7d"
+openmail draft --reply-to 123 --body "Dzięki, pasuje mi piątek."
+openmail send 45 --at "jutro 9:00"                # wysyłka zaplanowana
+openmail unschedule 45                            # anulowanie
+openmail action snooze t12 --until "pon 8:00"
 ```
 
 Gotowe polecenie `claude mcp add …` do Claude Code jest w aplikacji: Ustawienia → Agenci AI i CLI.
 Przy serwerze domowym agent łączy się przez SSH:
-`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local octo mcp`.
+`claude mcp add openmail --scope user -- ssh pi@raspberrypi.local openmail mcp`.
 
 Domyślnie każde konto ma dla agentów poziom **Odczyt**. Zmienisz go tylko w aplikacji.
 

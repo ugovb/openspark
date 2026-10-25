@@ -9,7 +9,7 @@ Over SSH (or paste `deploy/docker-compose.synology.yml` into *Container Manager 
 ```bash
 sudo mkdir -p /volume1/docker/openspark && sudo chown 1000:1000 /volume1/docker/openspark
 sudo docker compose -f deploy/docker-compose.synology.yml up -d
-sudo docker exec openspark-mail octo server pair      # prints a one-time code, valid 15 minutes
+sudo docker exec openspark-mail openmail server pair      # prints a one-time code, valid 15 minutes
 ```
 
 The first time, that code is only used to create **your account** (step 3). Nobody else can create one: sign-up closes
@@ -28,7 +28,7 @@ If the package is private, make it public in GitHub (*Packages → Package setti
 3. Router: forward only TCP 443 to the NAS. **Never forward 8787** (the compose file binds it to localhost on purpose).
 4. DSM firewall: allow 443 from your country only; keep *Auto Block* on.
 
-`OCTO_TRUST_PROXY=1` (set in the compose file) makes the server read the real client address from the proxy,
+`OPENMAIL_TRUST_PROXY=1` (set in the compose file) makes the server read the real client address from the proxy,
 so the "10 failed codes → locked for 10 minutes" rule hits the attacker, not everybody.
 
 ## 3. Your account (email, password, two-step verification)
@@ -55,20 +55,20 @@ everywhere asks for the password (and a code) again.
 Being able to run a command on the NAS is the proof that the server is yours:
 
 ```bash
-sudo docker exec -it openspark-mail octo server account          # who is the owner, is 2FA on
-sudo docker exec -it openspark-mail octo server reset-password   # new password (also unlocks the account)
-sudo docker exec openspark-mail octo server 2fa-off              # lost phone and recovery codes
-sudo docker exec openspark-mail octo server reset-account --yes  # delete the account (wrong email?) and start over;
+sudo docker exec -it openspark-mail openmail server account          # who is the owner, is 2FA on
+sudo docker exec -it openspark-mail openmail server reset-password   # new password (also unlocks the account)
+sudo docker exec openspark-mail openmail server 2fa-off              # lost phone and recovery codes
+sudo docker exec openspark-mail openmail server reset-account --yes  # delete the account (wrong email?) and start over;
                                                                  # mail accounts and messages are kept
-sudo docker exec openspark-mail octo server sign-out-all         # sign every device out
-sudo docker exec openspark-mail octo server pairing on           # allow pairing codes again (off = default)
+sudo docker exec openspark-mail openmail server sign-out-all         # sign every device out
+sudo docker exec openspark-mail openmail server pairing on           # allow pairing codes again (off = default)
 ```
 
 ## 4. iPhone
 
 Safari → `https://mail.your-domain.tld` → email, password, code → Share → *Add to Home Screen*.
 It then opens full screen like an app. Each device gets its own key; list or revoke them in *My account*
-(or `octo server devices` / `octo server revoke <ID>`).
+(or `openmail server devices` / `openmail server revoke <ID>`).
 
 ## 5. Mac (Apple Silicon)
 
