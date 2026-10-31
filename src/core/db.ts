@@ -238,6 +238,10 @@ const MIGRATIONS: string[] = [
     password_changed_at INTEGER NOT NULL
   );
   `,
+  /* 4 — scheduled rules */ `
+  ALTER TABLE rules ADD COLUMN schedule TEXT;
+  ALTER TABLE rules ADD COLUMN last_run_at INTEGER;
+  `,
 ]
 
 let _db: DatabaseSync | null = null

@@ -296,6 +296,16 @@ const dict: Dictionary = {
     // misc
     'No account with id {id}': 'No existe una cuenta con id {id}',
     Reminder: 'Recordatorio',
+    'Condition groups can be nested at most {n} levels deep': 'Los grupos de condiciones pueden anidarse como máximo {n} niveles',
+    'A condition group cannot be empty': 'Un grupo de condiciones no puede estar vacío',
+    'A rule can have at most {n} conditions': 'Una regla puede tener como máximo {n} condiciones',
+    'Message age must be a whole number of days': "La antigüedad del mensaje debe ser un número entero de días",
+    "Schedule time must look like 09:00": "La hora del horario debe tener el formato 09:00",
+    "Schedule days must be 0 (Sunday) to 6 (Saturday)": "Los días del horario van de 0 (domingo) a 6 (sábado)",
+    "This action cannot be used in a scheduled rule": "Esta acción no se puede usar en una regla programada",
+    "Message age conditions use only “greater than” or “less than”": "Las condiciones de antigüedad solo usan «mayor que» o «menor que»",
+    "A condition group must be all, any or none": "Un grupo de condiciones debe ser all, any o none",
+    "A condition group needs a list of items": "Un grupo de condiciones necesita una lista de elementos",
   },
   plurals: {
     'Accepted {n} sender': ['Se aceptó {n} remitente', 'Se aceptaron {n} remitentes', 'Se aceptaron {n} remitentes'],

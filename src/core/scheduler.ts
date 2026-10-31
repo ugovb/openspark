@@ -5,6 +5,7 @@ import { all, get, now, run } from './db'
 import { bus, log } from './events'
 import { record } from './history'
 import { enqueue, processOps } from './ops'
+import { runDueScheduledRules } from './rules'
 import { recoverStuckSends } from './send'
 
 let timer: NodeJS.Timeout | null = null
@@ -35,6 +36,11 @@ export async function tick(): Promise<void> {
     fireReminders()
     rescueScheduledSends()
     recoverStuckSends()
+    try {
+      runDueScheduledRules()
+    } catch (e) {
+      log('scheduler', 'scheduled rules failed', (e as Error).message)
+    }
     await processOps()
     if (hooks.calendarTick) await hooks.calendarTick()
   } catch (e) {

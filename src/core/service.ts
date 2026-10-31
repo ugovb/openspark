@@ -65,6 +65,12 @@ export function createService(actor: ServiceActor) {
     }
   }
 
+  const strongest = (a: 'triage' | 'send', b: 'triage' | 'send') => (a === 'send' || b === 'send' ? 'send' : 'triage')
+  const storedRuleAccess = (id: number): 'triage' | 'send' => {
+    const stored = rules.listRules().find((x) => x.id === id)
+    return stored ? rules.requiredAccess(stored) : 'triage'
+  }
+
   /** Accounts an agent may read from (others are filtered out of results). */
   function readable(): Set<number> {
     return new Set(accounts.listAccounts().filter((a) => !agent || LEVEL[a.agent_access] >= 1).map((a) => a.id))
@@ -322,10 +328,21 @@ export function createService(actor: ServiceActor) {
 
     // ---------- rules & smart folders ----------
     listRules: () => rules.listRules(),
-    saveRule: (r: Parameters<typeof rules.saveRule>[0]) => (agent && need('triage', 'any'), rules.saveRule(r)),
-    deleteRule: (id: number) => (agent && need('triage', 'any'), rules.deleteRule(id)),
+    saveRule: (r: Parameters<typeof rules.saveRule>[0]) => {
+      if (agent) need(strongest(rules.requiredAccess(r), r.id ? storedRuleAccess(r.id) : 'triage'), 'any')
+      return rules.saveRule(r)
+    },
+    deleteRule: (id: number) => {
+      if (agent) need(storedRuleAccess(id), 'any')
+      return rules.deleteRule(id)
+    },
     testRule: (r: Pick<Rule, 'match' | 'conditions'>) => rules.testRule(r),
-    applyRule: (id: number) => (need('triage', 'any'), rules.applyRuleToExisting(id)),
+    previewRule: (r: Pick<Rule, 'match' | 'conditions' | 'actions'>) => rules.previewRule(r),
+    applyRule: (id: number) => {
+      const rule = rules.listRules().find((x) => x.id === id)
+      need(rule ? rules.requiredAccess(rule) : 'triage', 'any')
+      return rules.applyRuleToExisting(id)
+    },
     listSmartFolders: () => all('SELECT * FROM smart_folders ORDER BY sort, id') as SmartFolder[],
     /** Create or update a smart folder; returns its id. */
     saveSmartFolder(sf: { id?: number; name: string; query: string; icon?: string }): number {

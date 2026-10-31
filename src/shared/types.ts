@@ -261,16 +261,43 @@ export interface Signature {
 }
 
 export interface RuleCondition {
-  field: 'from' | 'to' | 'cc' | 'subject' | 'body' | 'account' | 'category' | 'has_attachment' | 'list_id' | 'any_recipient'
-  op: 'contains' | 'not_contains' | 'equals' | 'starts_with' | 'ends_with' | 'matches' | 'is'
+  field: 'from' | 'to' | 'cc' | 'subject' | 'body' | 'account' | 'category' | 'has_attachment' | 'list_id' | 'any_recipient' | 'age_days'
+  op: 'contains' | 'not_contains' | 'equals' | 'starts_with' | 'ends_with' | 'matches' | 'is' | 'greater_than' | 'less_than'
   value: string
 }
+
+export interface RuleGroup {
+  group: 'all' | 'any' | 'none'
+  items: RuleNode[]
+}
+
+export type RuleNode = RuleCondition | RuleGroup
 
 export interface RuleAction {
   type:
     | 'move' | 'archive' | 'trash' | 'mark_read' | 'pin' | 'mute' | 'categorize' | 'snooze'
-    | 'label' | 'block' | 'notify' | 'no_notify' | 'forward' | 'set_aside'
+    | 'label' | 'block' | 'no_notify' | 'set_aside' | 'priority'
   value?: string
+}
+
+export interface RulePreview {
+  scanned: number
+  truncated: boolean
+  matchedThreads: number
+  sample: { threadId: number; messageId: number; subject: string; from: string; date: number }[]
+}
+
+export interface RuleApplyResult {
+  matched: number
+  applied: number
+  truncated: boolean
+}
+
+export interface RuleSchedule {
+  /** Local time, "HH:MM". */
+  at: string
+  /** Days of the week, 0 = Sunday to 6 = Saturday. Empty = every day. */
+  days: number[]
 }
 
 export interface Rule {
@@ -278,11 +305,13 @@ export interface Rule {
   name: string
   enabled: boolean
   match: 'all' | 'any'
-  conditions: RuleCondition[]
+  conditions: RuleNode[]
   actions: RuleAction[]
   stop: boolean
   sort: number
   hits: number
+  schedule: RuleSchedule | null
+  lastRunAt: number | null
 }
 
 export interface SmartFolder {

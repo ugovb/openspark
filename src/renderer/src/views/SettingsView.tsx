@@ -1,13 +1,13 @@
 import {
   ArrowLeftRight, AtSign, Bell, BellRing, Bot, CalendarDays, ChevronLeft, ChevronRight, Columns2, Copy, Download, FileText, Image, Inbox, Info, Keyboard, Languages,
   MoveLeft, MoveRight, Newspaper, Palette, PanelLeft, PenLine, Plus, Power, RefreshCw, Rows3, Send, Server, ShieldCheck, ShieldOff, Smartphone, Sparkles, SunMoon,
-  Trash2, Undo2, Unplug, Volume2, Wand2, Workflow, X, Eye, Sunrise, Sunset, MonitorDown,
+  Trash2, Undo2, Unplug, Volume2, Workflow, X, Eye, Sunrise, Sunset, MonitorDown,
   type LucideIcon,
 } from 'lucide-react'
 import { Fragment, type ReactNode, useEffect, useState } from 'react'
-import type { Account, AgentAccess, AppSettings, Rule, RuleAction, RuleCondition, Signature, Template } from '../../../shared/types'
+import type { Account, AgentAccess, AppSettings, Signature, Template } from '../../../shared/types'
 import { DEFAULT_DRAFT_PROMPT, MAX_DRAFT_PROMPT } from '../../../shared/draft-prompt'
-import { getLang, LANGUAGES, t, tp } from '../../../shared/i18n'
+import { getLang, LANGUAGES, t } from '../../../shared/i18n'
 import { api, errorText } from '../lib/api'
 import { copyText, fullDate, initials } from '../lib/format'
 import { useNarrow } from '../lib/narrow'
@@ -16,6 +16,7 @@ import AccountWizard from './AccountWizard'
 import { Avatar, Button, cx, Field, IconButton, inputCls, Modal, Select, Spinner, Toggle } from '../components/ui'
 import { APP_VERSION } from '../../../shared/version'
 import AccountSection from './AccountSection'
+import RulesTab from './RulesTab'
 
 type Tab =
   | 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'swipes' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
@@ -498,100 +499,6 @@ function TemplatesTab() {
             <Field label={t('Name')}><input className={inputCls} value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>
             <Field label={t('Subject')}><input className={inputCls} value={edit.subject || ''} onChange={(e) => setEdit({ ...edit, subject: e.target.value })} /></Field>
             <Field label={t('Body')}><textarea className={cx(inputCls, 'h-56 py-2')} value={edit.body || ''} onChange={(e) => setEdit({ ...edit, body: e.target.value })} placeholder={t('Hi {{recipient first name}},\n\nhere is the quote for {{Project}}…')} /></Field>
-          </div>
-        )}
-      </Modal>
-    </Section>
-  )
-}
-
-const FIELDS: { value: RuleCondition['field']; label: string }[] = [
-  { value: 'from', label: t('Sender') }, { value: 'to', label: t('To') }, { value: 'any_recipient', label: t('To or Cc') }, { value: 'subject', label: t('Subject') },
-  { value: 'body', label: t('Body') }, { value: 'account', label: t('Account') }, { value: 'category', label: t('Category') }, { value: 'has_attachment', label: t('Attachment (yes/no)') }, { value: 'list_id', label: t('Mailing list') },
-]
-const OPS: { value: RuleCondition['op']; label: string }[] = [
-  { value: 'contains', label: t('contains') }, { value: 'not_contains', label: t('does not contain') }, { value: 'equals', label: t('is exactly') },
-  { value: 'starts_with', label: t('starts with') }, { value: 'ends_with', label: t('ends with') }, { value: 'matches', label: t('matches the regular expression') },
-]
-const ACTIONS: { value: RuleAction['type']; label: string; needs?: string }[] = [
-  { value: 'archive', label: t('Done (archive)') }, { value: 'mark_read', label: t('Mark as read') }, { value: 'pin', label: t('Pin') },
-  { value: 'move', label: t('Move to folder'), needs: t('folder path') }, { value: 'label', label: t('Add label (Gmail)'), needs: t('label') },
-  { value: 'categorize', label: t('Set category'), needs: 'people / notification / newsletter' }, { value: 'snooze', label: t('Snooze for N hours'), needs: t('number of hours') },
-  { value: 'mute', label: t('Mute conversation') }, { value: 'set_aside', label: t('Set aside') }, { value: 'no_notify', label: t('No notification') },
-  { value: 'trash', label: t('Move to Trash') }, { value: 'block', label: t('Block sender') },
-]
-
-function RulesTab() {
-  const [list, setList] = useState<Rule[]>([])
-  const [edit, setEdit] = useState<Partial<Rule> & { name: string; conditions: RuleCondition[]; actions: RuleAction[] } | null>(null)
-  const [testCount, setTestCount] = useState<number | null>(null)
-  const toast = useStore((s) => s.toast)
-  const load = async () => setList(await api.listRules())
-  useEffect(() => void load(), [])
-  return (
-    <Section hint={t('They run on new messages arriving in the Inbox (e.g. “from invoices@… → label Accounting and done”).')}>
-      {list.map((r) => (
-        <div key={r.id} className="flex items-center gap-3 border-b border-line py-2 last:border-0">
-          <Toggle checked={r.enabled} onChange={async (v) => (await api.saveRule({ ...r, enabled: v }), void load())} />
-          <div className="min-w-0 flex-1">
-            <div className="font-medium">{r.name}</div>
-            <div className="truncate text-[12px] text-muted">
-              {r.conditions.map((c) => t('{field} {op} “{value}”', { field: FIELDS.find((f) => f.value === c.field)?.label ?? '', op: OPS.find((o) => o.value === c.op)?.label ?? '', value: c.value })).join(r.match === 'all' ? ` ${t('and')} ` : ` ${t('or')} `)} → {r.actions.map((a) => ACTIONS.find((x) => x.value === a.type)?.label + (a.value ? ` (${a.value})` : '')).join(', ')} · {t('used {n}×', { n: r.hits })}
-            </div>
-          </div>
-          <Button size="sm" onClick={async () => {
-            const n = await api.applyRule(r.id)
-            toast({ level: 'success', message: tp(n, 'Applied to {n} existing conversation', 'Applied to {n} existing conversations') })
-          }}>{t('Apply now')}</Button>
-          <Button size="sm" onClick={() => (setEdit(r), setTestCount(null))}>{t('Edit')}</Button>
-          <IconButton onClick={async () => window.confirm(t('Delete this rule?')) && (await api.deleteRule(r.id), void load())}><Trash2 size={14} /></IconButton>
-        </div>
-      ))}
-      <div className="py-2"><Button size="sm" variant="ghost" onClick={() => (setEdit({ name: t('New rule'), match: 'all', conditions: [{ field: 'from', op: 'contains', value: '' }], actions: [{ type: 'archive' }] }), setTestCount(null))}><Plus size={14} /> {t('New rule')}</Button></div>
-      <Modal open={!!edit} onClose={() => setEdit(null)} title={t('Rule')} width={760} footer={
-        <>
-          {testCount !== null && <span className="mr-auto self-center text-[12.5px] text-muted">{t('Matches {n} of the recent messages in the Inbox', { n: testCount })}</span>}
-          <Button variant="ghost" onClick={async () => setTestCount((await api.testRule({ match: edit!.match || 'all', conditions: edit!.conditions })).length)}><Wand2 size={14} /> {t('Test')}</Button>
-          <Button variant="primary" onClick={async () => {
-            try {
-              await api.saveRule(edit!)
-              setEdit(null)
-              void load()
-            } catch (e) {
-              toast({ level: 'error', message: errorText(e) })
-            }
-          }}>{t('Save')}</Button>
-        </>
-      }>
-        {edit && (
-          <div className="p-5">
-            <Field label={t('Name')}><input className={inputCls} value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>
-            <div className="mt-2 flex items-center gap-2 text-[13px]">
-              {t('When')}
-              <Select className="w-48" value={edit.match || 'all'} onChange={(v) => setEdit({ ...edit, match: v })} options={[{ value: 'all', label: t('all of the conditions') }, { value: 'any', label: t('any of the conditions') }]} />
-              {t('are met:')}
-            </div>
-            {edit.conditions.map((c, i) => (
-              <div key={i} className="mt-2 flex gap-2">
-                <Select className="w-44" value={c.field} onChange={(v) => setEdit({ ...edit, conditions: edit.conditions.map((x, j) => (j === i ? { ...x, field: v } : x)) })} options={FIELDS} />
-                <Select className="w-48" value={c.op} onChange={(v) => setEdit({ ...edit, conditions: edit.conditions.map((x, j) => (j === i ? { ...x, op: v } : x)) })} options={OPS} />
-                <input className={inputCls} value={c.value} onChange={(e) => setEdit({ ...edit, conditions: edit.conditions.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)) })} />
-                <IconButton onClick={() => setEdit({ ...edit, conditions: edit.conditions.filter((_, j) => j !== i) })}><X size={14} /></IconButton>
-              </div>
-            ))}
-            <Button className="mt-2" size="sm" variant="ghost" onClick={() => setEdit({ ...edit, conditions: [...edit.conditions, { field: 'subject', op: 'contains', value: '' }] })}><Plus size={13} /> {t('Condition')}</Button>
-            <div className="mt-4 text-[13px]">{t('Then:')}</div>
-            {edit.actions.map((a, i) => (
-              <div key={i} className="mt-2 flex gap-2">
-                <Select className="w-64" value={a.type} onChange={(v) => setEdit({ ...edit, actions: edit.actions.map((x, j) => (j === i ? { ...x, type: v } : x)) })} options={ACTIONS} />
-                {ACTIONS.find((x) => x.value === a.type)?.needs && (
-                  <input className={inputCls} placeholder={ACTIONS.find((x) => x.value === a.type)?.needs} value={a.value || ''} onChange={(e) => setEdit({ ...edit, actions: edit.actions.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)) })} />
-                )}
-                <IconButton onClick={() => setEdit({ ...edit, actions: edit.actions.filter((_, j) => j !== i) })}><X size={14} /></IconButton>
-              </div>
-            ))}
-            <Button className="mt-2" size="sm" variant="ghost" onClick={() => setEdit({ ...edit, actions: [...edit.actions, { type: 'mark_read' }] })}><Plus size={13} /> {t('Action')}</Button>
-            <div className="mt-3"><Toggle checked={!!edit.stop} onChange={(v) => setEdit({ ...edit, stop: v })} label={t('Stop processing more rules')} /></div>
           </div>
         )}
       </Modal>
