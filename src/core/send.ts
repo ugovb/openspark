@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import nodemailer from 'nodemailer'
+import nodemailer, { type TransportOptions } from 'nodemailer'
 import MailComposer from 'nodemailer/lib/mail-composer'
 import { dateLocale, t } from '../shared/i18n'
 import type { Address, DraftAttachment } from '../shared/types'
@@ -141,7 +141,7 @@ export async function sendDraftNow(draftId: number): Promise<void> {
   try {
     const built = await buildMime(draftId)
     if (!built.envelope.to.length) throw new Error(t('No recipients'))
-    const transport = nodemailer.createTransport((await smtpTransportOptions(acc)) as nodemailer.TransportOptions)
+    const transport = nodemailer.createTransport((await smtpTransportOptions(acc)) as TransportOptions)
     await transport.sendMail({ envelope: built.envelope, raw: built.raw })
     run("UPDATE drafts SET status = 'sent', sent_at = ?, msgid = ?, error = NULL, updated_at = ? WHERE id = ?", now(), built.messageId, now(), draftId)
     record(claimed.source || 'ui', 'send', draftId, { to: built.envelope.to, subject: claimed.subject })

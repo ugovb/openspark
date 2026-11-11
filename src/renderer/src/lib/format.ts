@@ -76,13 +76,16 @@ export function stripSignatureHtml(html: string): string {
   return html.replace(/<div class="octo-signature">[\s\S]*<\/div>\s*$/i, '')
 }
 
+export function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 /** Minimal markdown (AI output) → HTML for display and for the composer. Anything that is not a string
  *  (a missing or malformed AI result) renders as nothing instead of throwing. */
 export function mdToHtml(input: string | null | undefined): string {
   const md = typeof input === 'string' ? input : typeof input === 'number' ? String(input) : ''
-  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const inline = (s: string) =>
-    esc(s)
+    escapeHtml(s)
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>')
       .replace(/\[#(\d+)\]/g, '<a href="#msg-$1" data-msg="$1">[#$1]</a>')
@@ -106,8 +109,7 @@ export function mdToHtml(input: string | null | undefined): string {
 }
 
 export function plainToHtml(text: string): string {
-  const esc = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  return esc
+  return escapeHtml(text)
     .split(/\n{2,}/)
     .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
     .join('')

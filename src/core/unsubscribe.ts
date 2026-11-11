@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer, { type TransportOptions } from 'nodemailer'
 import { t } from '../shared/i18n'
 import { getAccount, smtpTransportOptions } from './accounts'
 import { get } from './db'
@@ -26,7 +26,7 @@ export async function performUnsubscribe(accountId: number, p: OpPayload): Promi
   if (mailto) {
     const u = new URL(mailto)
     const acc = getAccount(accountId)
-    const transport = nodemailer.createTransport((await smtpTransportOptions(acc)) as nodemailer.TransportOptions)
+    const transport = nodemailer.createTransport((await smtpTransportOptions(acc)) as TransportOptions)
     await transport.sendMail({
       from: acc.email,
       to: decodeURIComponent(u.pathname),

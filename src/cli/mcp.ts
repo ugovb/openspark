@@ -210,7 +210,7 @@ export async function runMcp(): Promise<void> {
       forward: z.number().int().optional(),
       attachments: z.array(z.string()).optional().describe('absolute file paths (max 25 MB each)'),
       template: z.string().optional(),
-      placeholders: z.record(z.string()).optional(),
+      placeholders: z.record(z.string(), z.string()).optional(),
       no_signature: z.boolean().optional(),
     },
   }, wrap((a: { draft_id?: number; account?: string; to?: string[]; cc?: string[]; bcc?: string[]; subject?: string; body_markdown?: string; reply_to?: number; reply_all?: boolean; forward?: number; attachments?: string[]; template?: string; placeholders?: Record<string, string>; no_signature?: boolean }) => {

@@ -14,6 +14,7 @@ import { isNarrow, useNarrow } from '../lib/narrow'
 import { type ComposerRequest, openSettings, useStore } from '../lib/store'
 import { askText, Avatar, cx, IconButton, Menu, type MenuItem, Popover, Spinner, Tip, TipButton } from './ui'
 import { t } from '../../../shared/i18n'
+import { previewHtml } from '../lib/sanitize'
 
 function addrLabel(a: Address) {
   return a.name ? `${a.name} <${a.email}>` : a.email
@@ -233,7 +234,7 @@ function SignaturePicker({ anchor, onClose, signatures, current, enabled, accoun
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-medium">{s.name}</span>
               <span className="mt-1 block max-h-[58px] overflow-hidden rounded-md border border-line bg-surface-2 px-2 py-1.5">
-                <span className="pointer-events-none block origin-top-left text-[13px] text-fg" style={{ transform: 'scale(0.72)', width: `${100 / 0.72}%` }} dangerouslySetInnerHTML={{ __html: s.html }} />
+                <span className="pointer-events-none block origin-top-left text-[13px] text-fg" style={{ transform: 'scale(0.72)', width: `${100 / 0.72}%` }} dangerouslySetInnerHTML={{ __html: previewHtml(s.html) }} />
               </span>
             </span>
             {enabled && current === s.id && <Check size={15} className="mt-0.5 shrink-0 text-accent" />}
@@ -690,7 +691,7 @@ export default function Composer({ request }: { request: ComposerRequest }) {
         <ChevronsUpDown size={14} />
       </TipButton>
       {sigHtml ? (
-        <div className="selectable min-w-0 flex-1 pt-1 text-[13px] text-muted [&_a]:text-accent" dangerouslySetInnerHTML={{ __html: sigHtml }} />
+        <div className="selectable min-w-0 flex-1 pt-1 text-[13px] text-muted [&_a]:text-accent" dangerouslySetInnerHTML={{ __html: previewHtml(sigHtml) }} />
       ) : (
         <span className="pt-1.5 text-[12.5px] text-faint">{signature ? t('No signature for this address') : t('Signature hidden')}</span>
       )}

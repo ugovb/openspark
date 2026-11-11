@@ -1,7 +1,7 @@
 // iTIP over e-mail (RFC 6047): invitations, cancellations and replies are sent from the
 // user's mail account as multipart/alternative with a text/calendar; method=… part.
 import crypto from 'node:crypto'
-import nodemailer from 'nodemailer'
+import nodemailer, { type TransportOptions } from 'nodemailer'
 import MailComposer from 'nodemailer/lib/mail-composer'
 import { dateLocale, t } from '../../shared/i18n'
 import type { Account, Address } from '../../shared/types'
@@ -34,7 +34,7 @@ export const itipTransport = {
       secure: acc.smtp_secure,
       auth: await smtpAuth(acc),
       connectionTimeout: 30_000,
-    } as nodemailer.TransportOptions)
+    } as TransportOptions)
     await transport.sendMail({ envelope, raw })
     // Gmail files sent mail itself; other servers need an APPEND to Sent
     if (!acc.is_gmail) {

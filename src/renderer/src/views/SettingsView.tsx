@@ -17,6 +17,7 @@ import { Avatar, Button, cx, Field, IconButton, inputCls, Modal, Select, Spinner
 import { APP_VERSION } from '../../../shared/version'
 import AccountSection from './AccountSection'
 import RulesTab from './RulesTab'
+import { previewHtml } from '../lib/sanitize'
 
 type Tab =
   | 'accounts' | 'server' | 'general' | 'inbox' | 'notifications' | 'signatures' | 'templates' | 'rules' | 'swipes' | 'ai' | 'agents' | 'calendars' | 'shortcuts' | 'about'
@@ -445,7 +446,7 @@ function SignaturesTab() {
             <Field label={t('Name')}><input className={inputCls} value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>
             <Field label={t('Content (text or HTML)')}><textarea className={cx(inputCls, 'h-40 py-2 font-mono text-[12.5px]')} value={edit.html} onChange={(e) => setEdit({ ...edit, html: e.target.value })} /></Field>
             <div className="mt-2 text-[12px] text-muted">{t('Preview:')}</div>
-            <div className="mt-1 rounded-lg border border-line bg-white p-3 text-[13px] text-black" dangerouslySetInnerHTML={{ __html: /<[a-z][\s\S]*>/i.test(edit.html) ? edit.html : edit.html.replace(/</g, '&lt;').replace(/\n/g, '<br>') }} />
+            <div className="mt-1 rounded-lg border border-line bg-white p-3 text-[13px] text-black" dangerouslySetInnerHTML={{ __html: previewHtml(edit.html) }} />
           </div>
         )}
       </Modal>

@@ -15,6 +15,8 @@ import { createServerAccount, pollCodeLogin, startCodeLogin } from './server-cli
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
 import { env } from '../shared/env'
+import { isInternalUrl } from './navigation'
+import { isRiskyAttachment } from './attachments'
 
 const PROTOCOL = 'openmail'
 let win: BrowserWindow | null = null
@@ -84,7 +86,7 @@ function appWindow(opts: { width: number; height: number; minWidth: number; minH
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
-      sandbox: false,
+      sandbox: true,
       nodeIntegration: false,
       spellcheck: true,
       webviewTag: false,
@@ -102,7 +104,7 @@ function appWindow(opts: { width: number; height: number; minWidth: number; minH
     return { action: 'deny' }
   })
   w.webContents.on('will-navigate', (e, url) => {
-    if (!url.startsWith('http://localhost') && !url.startsWith('file://')) {
+    if (!isInternalUrl(url, { devUrl: process.env.ELECTRON_RENDERER_URL, indexFile: path.join(__dirname, '../renderer/index.html') })) {
       e.preventDefault()
       if (/^(https?|mailto):/i.test(url)) void shell.openExternal(url)
     }
@@ -392,6 +394,18 @@ function registerIpc(): void {
 
   ipcMain.handle('open-attachment', async (_e, attId: number) => {
     const file = await backend.attachmentFile(attId)
+    const name = path.basename(file).replace(/^\d+(_\d+)*-/, '')
+    if (isRiskyAttachment(name)) {
+      const { response } = await dialog.showMessageBox(win!, {
+        type: 'warning',
+        message: t('“{name}” can run programs on this computer.', { name }),
+        detail: t('Open it only if you trust the sender.'),
+        buttons: [t('Open anyway'), t('Cancel')],
+        defaultId: 1,
+        cancelId: 1,
+      })
+      if (response !== 0) return null
+    }
     const err = await shell.openPath(file)
     if (err) throw new Error(err)
     return file

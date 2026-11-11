@@ -44,6 +44,9 @@ const dict: Dictionary = {
     'The web interface is not available in this installation.': 'Interfejs WWW nie jest dostępny w tej instalacji.',
     'Not authorized — pair this device with the server': 'Brak autoryzacji — sparuj urządzenie z serwerem',
     'Missing X-Octo header': 'Brak nagłówka X-Octo',
+    '“{name}” can run programs on this computer.': '„{name}” może uruchamiać programy na tym komputerze.',
+    'Open it only if you trust the sender.': 'Otwieraj go tylko wtedy, gdy ufasz nadawcy.',
+    'Open anyway': 'Otwórz mimo to',
     'Not found': 'Nie znaleziono',
     file: 'plik',
 

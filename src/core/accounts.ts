@@ -1,5 +1,5 @@
 import { ImapFlow, type ImapFlowOptions } from 'imapflow'
-import nodemailer from 'nodemailer'
+import nodemailer, { type TransportOptions } from 'nodemailer'
 import { t } from '../shared/i18n'
 import type { Account, AccountInput, AgentAccess, AuthKind } from '../shared/types'
 import { all, get, insert, now, run, type Row, update } from './db'
@@ -156,7 +156,7 @@ export async function testConnection(cfg: {
         : { user: cfg.username, pass: cfg.password || '' },
       connectionTimeout: 20_000,
       tls: { rejectUnauthorized: env('INSECURE_TLS') !== '1' },
-    } as nodemailer.TransportOptions)
+    } as TransportOptions)
     await transport.verify()
     result.smtp = 'ok'
   } catch (e) {
