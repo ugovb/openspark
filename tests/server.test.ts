@@ -125,10 +125,10 @@ describe('OpenMail home server', () => {
   })
 
   it('logs browsers in with a pairing code and protects writes from other sites', async () => {
-    // the sign-in page follows the browser language
-    const page = await fetch(`${base}/`)
+    // the pairing page follows the browser language (without an account, `/` itself offers account creation)
+    const page = await fetch(`${base}/?pair=1`)
     assert.match(await page.text(), /pairing code/i)
-    const pagePl = await fetch(`${base}/`, { headers: { 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8' } })
+    const pagePl = await fetch(`${base}/?pair=1`, { headers: { 'Accept-Language': 'pl-PL,pl;q=0.9,en;q=0.8' } })
     assert.match(await pagePl.text(), /kod parowania/i)
     const { code } = createPairingCode()
     const login = await fetch(`${base}/api/login`, { method: 'POST', body: new URLSearchParams({ code }), redirect: 'manual' })
