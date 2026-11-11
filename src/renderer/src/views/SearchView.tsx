@@ -64,7 +64,7 @@ export default function SearchView() {
           <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface px-3 transition-colors focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20">
             <Search size={16} className="shrink-0 text-faint" />
             <input
-              id="octo-search"
+              id="openmail-search"
               ref={input}
               value={q}
               onChange={(e) => setQ(e.target.value)}

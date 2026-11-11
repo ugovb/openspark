@@ -13,7 +13,7 @@ import path from 'node:path'
 const root = path.resolve(import.meta.dirname, '..')
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'octo-i18n-'))
 const load = async (rel) => {
-  const out = path.join(tmp, rel.replace(/[\/]/g, '_') + '.cjs')
+  const out = path.join(tmp, rel.replace(/[/]/g, '_') + '.cjs')
   await build({ entryPoints: [path.join(root, rel)], outfile: out, bundle: true, platform: 'node', format: 'cjs', logLevel: 'error' })
   return createRequire(import.meta.url)(out).default
 }
@@ -49,7 +49,7 @@ walk(path.join(root, 'src'))
 const STR = String.raw`'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|` + '`((?:[^`\\\\$]|\\\\.)*)`'
 const T_RE = new RegExp(String.raw`\bt\(\s*(?:${STR})`, 'g')
 const TP_RE = new RegExp(String.raw`\btp\(\s*[^,]+,\s*(?:${STR})`, 'g')
-const unescape = (s) => s.replace(/\\n/g, '\n').replace(/\\(['"`\\])/g, '$1')
+const unescapeStr = (s) => s.replace(/\\n/g, '\n').replace(/\\(['"`\\])/g, '$1')
 
 const used = new Map() // key → first location
 const usedPlural = new Map()
@@ -60,11 +60,11 @@ for (const f of files) {
   const isDict = rel.startsWith('src/shared/locales/')
   if (!isDict) {
     for (const m of src.matchAll(T_RE)) {
-      const key = unescape(m[1] ?? m[2] ?? m[3])
+      const key = unescapeStr(m[1] ?? m[2] ?? m[3])
       if (!used.has(key)) used.set(key, `${rel}:${src.slice(0, m.index).split('\n').length}`)
     }
     for (const m of src.matchAll(TP_RE)) {
-      const key = unescape(m[1] ?? m[2] ?? m[3])
+      const key = unescapeStr(m[1] ?? m[2] ?? m[3])
       if (!usedPlural.has(key)) usedPlural.set(key, `${rel}:${src.slice(0, m.index).split('\n').length}`)
     }
     src.split('\n').forEach((line, i) => {

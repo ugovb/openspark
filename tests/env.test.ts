@@ -3,7 +3,11 @@ import { afterEach, describe, it } from 'node:test'
 import { env, envFlag } from '../src/shared/env'
 
 const KEYS = ['OPENMAIL_HOME', 'OCTO_HOME', 'OPENMAIL_QUIET', 'OCTO_QUIET']
-afterEach(() => KEYS.forEach((k) => delete process.env[k]))
+afterEach(() => {
+  KEYS.forEach((k) => {
+    delete process.env[k]
+  })
+})
 
 describe('env()', () => {
   it('OPENMAIL_ wins over OCTO_', () => {

@@ -52,7 +52,7 @@ i nazwa są własne; publiczna lista funkcji Sparka posłużyła tylko jako list
 - Bezpieczny podgląd HTML: blokada zdalnych obrazów i **pikseli śledzących**, zwijane cytaty.
 - **Reguły** z testem na istniejącej poczcie, paleta poleceń **Ctrl+K**, skróty klawiszowe, tryb
   jasny/ciemny, ikona w zasobniku z licznikiem.
-- Interfejs **po polsku i po angielsku** — według języka systemu albo do wyboru w Ustawieniach.
+- Interfejs **po polsku, angielsku, francusku i hiszpańsku** — według języka systemu albo do wyboru w Ustawieniach.
 
 **AI** (lokalnie przez [Ollamę](https://ollama.com) albo Claude z Twoim kluczem)
 - Podsumowanie wątku, odpowiedź w Twoim stylu, poprawianie i zmiana tonu, tłumaczenie, szybkie
@@ -108,7 +108,7 @@ adres serwera i kod parowania. Aktualizacja: to samo z nowym archiwum. Odinstalo
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml exec octopus openmail server pair
+docker compose -f deploy/docker-compose.yml exec openmail openmail server pair
 ```
 
 **Podłączanie urządzeń**
@@ -132,7 +132,7 @@ npm run dist:server   # archiwum serwera domowego → dist/
 npm run icon          # ikony z resources/brand/*.svg (pip install -r scripts/requirements-brand.txt)
 ```
 
-Dane programu: Windows `%APPDATA%\Octopus Mail`, Linux `~/.config/Octopus Mail`. Hasła i tokeny trafiają
+Dane programu: Windows `%APPDATA%\OpenMail`, Linux `~/.config/OpenMail`, macOS `~/Library/Application Support/OpenMail`. Hasła i tokeny trafiają
 do systemowego magazynu haseł (Menedżer poświadczeń Windows, GNOME Keyring / KWallet), nigdy do bazy.
 
 Antywirusy przechwytujące pocztę (np. Kaspersky) podmieniają certyfikaty serwerów — OpenMail ufa

@@ -132,7 +132,7 @@ describe('home-server account', () => {
     const r = await json('/api/auth/device/poll', { deviceCode: s.deviceCode, cookie: '1' })
     const body = (await r.json()) as { status: string; token?: string }
     assert.deepEqual(body, { status: 'approved' })
-    assert.match(r.headers.get('set-cookie') || '', /^octo_token=octo_[^;]+; Path=\/; HttpOnly; SameSite=Strict/)
+    assert.match(r.headers.get('set-cookie') || '', /^openmail_token=octo_[^;]+; Path=\/; HttpOnly; SameSite=Strict/)
   })
 
   it('the setup page asks for the setup code, not a terminal command', async () => {

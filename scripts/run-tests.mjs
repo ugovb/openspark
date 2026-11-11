@@ -3,15 +3,15 @@ import { build } from 'esbuild'
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { selectTests } from './test-files.mjs'
 
 const root = path.resolve(import.meta.dirname, '..')
 const outDir = path.join(root, 'out', 'tests')
 fs.rmSync(outDir, { recursive: true, force: true })
-const filter = process.argv[2]
-const entries = fs
-  .readdirSync(path.join(root, 'tests'))
-  .filter((f) => f.endsWith('.test.ts') && (!filter || f.includes(filter)))
-  .map((f) => path.join(root, 'tests', f))
+const args = process.argv.slice(2)
+const unit = args.includes('--unit')
+const filter = args.find((a) => !a.startsWith('--'))
+const entries = selectTests(fs.readdirSync(path.join(root, 'tests')), { unit, filter }).map((f) => path.join(root, 'tests', f))
 
 await build({
   entryPoints: entries,

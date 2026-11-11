@@ -84,7 +84,9 @@ export function analyzeStructure(root: StructNode | undefined): Structure {
         return
       }
       if (type === 'multipart/related') {
-        kids.forEach((k, i) => visit(k, inAlternative, i === 0))
+        kids.forEach((k, i) => {
+          visit(k, inAlternative, i === 0)
+        })
         return
       }
       for (const k of kids) visit(k, inAlternative, false)

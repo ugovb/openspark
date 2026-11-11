@@ -134,13 +134,17 @@ describe('OpenMail home server', () => {
     const login = await fetch(`${base}/api/login`, { method: 'POST', body: new URLSearchParams({ code }), redirect: 'manual' })
     assert.equal(login.status, 303)
     const cookie = (login.headers.get('set-cookie') || '').split(';')[0]
-    assert.match(cookie, /^octo_token=/)
+    assert.match(cookie, /^openmail_token=octo_/)
     const app = await fetch(`${base}/`, { headers: { cookie } })
     assert.match(await app.text(), /<title>OpenMail<\/title>/)
     const forged = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie }, body: encodeWire({ method: 'listAccounts', args: [] }) })
-    assert.equal(forged.status, 403, 'cookie-only writes need the X-Octo header')
-    const ok = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie, 'X-Octo': '1' }, body: encodeWire({ method: 'listAccounts', args: [] }) })
+    assert.equal(forged.status, 403, 'cookie-only writes need the X-OpenMail header')
+    const ok = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie, 'X-OpenMail': '1' }, body: encodeWire({ method: 'listAccounts', args: [] }) })
     assert.equal(ok.status, 200)
+    // a browser signed in before the update still has the old cookie and an open page that sends the old header
+    const legacyCookie = cookie.replace(/^openmail_token=/, 'octo_token=')
+    const legacy = await fetch(`${base}/api/call`, { method: 'POST', headers: { cookie: legacyCookie, 'X-Octo': '1' }, body: encodeWire({ method: 'listAccounts', args: [] }) })
+    assert.equal(legacy.status, 200)
   })
 
   it('revoking a device cuts it off', async () => {

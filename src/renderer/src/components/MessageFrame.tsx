@@ -23,7 +23,7 @@ function textToHtml(text: string): string {
   const out: string[] = []
   let quote: string[] = []
   const flush = () => {
-    if (quote.length) out.push(`<details class="octo-q"><summary>•••</summary><blockquote>${quote.join('<br>')}</blockquote></details>`)
+    if (quote.length) out.push(`<details class="om-q"><summary>•••</summary><blockquote>${quote.join('<br>')}</blockquote></details>`)
     quote = []
   }
   for (const l of lines) {
@@ -35,7 +35,7 @@ function textToHtml(text: string): string {
     }
   }
   flush()
-  return `<div class="octo-plain">${out.join('<br>')}</div>`
+  return `<div class="om-plain">${out.join('<br>')}</div>`
 }
 
 export const QUOTE_SELECTORS = ['.gmail_quote', 'blockquote[type="cite"]', '.octo-quote', '.yahoo_quoted', '#divRplyFwdMsg', 'div.moz-cite-prefix', '.protonmail_quote']
@@ -82,7 +82,7 @@ export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers
         remoteCount++
         if (!allowRemote) {
           // hidden rather than replaced: a placeholder with only a width would render as a big blank square
-          el.setAttribute('data-octo-src', src)
+          el.setAttribute('data-om-src', src)
           el.removeAttribute('src')
           el.setAttribute('style', 'display:none')
         }
@@ -105,13 +105,13 @@ export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers
   // collapse quoted history behind "•••" (only when the message has something else to show)
   const doc = new DOMParser().parseFromString(`<body>${clean}</body>`, 'text/html')
   if (quotes === 'remove') {
-    doc.querySelectorAll('details.octo-q').forEach((d) => {
+    doc.querySelectorAll('details.om-q').forEach((d) => {
       if ((doc.body.textContent || '').replace(d.textContent || '', '').trim().length >= 2) d.remove()
     })
   }
   for (const sel of QUOTE_SELECTORS) {
     for (const q of Array.from(doc.querySelectorAll(sel))) {
-      if (q.closest('details.octo-q')) continue
+      if (q.closest('details.om-q')) continue
       const before = (doc.body.textContent || '').replace(q.textContent || '', '').trim()
       if (before.length < 2) continue
       if (quotes === 'remove') {
@@ -119,7 +119,7 @@ export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers
         continue
       }
       const d = doc.createElement('details')
-      d.className = 'octo-q'
+      d.className = 'om-q'
       d.innerHTML = '<summary>•••</summary>'
       q.replaceWith(d)
       d.appendChild(q)
@@ -133,7 +133,7 @@ export function sanitizeMail(m: MessageView, allowRemote: boolean, blockTrackers
 export function mailCsp(allowRemote: boolean): string {
   return [
     "default-src 'none'",
-    `img-src octo-cid: data: ${window.__OPENMAIL_WEB__ ? "'self'" : ''} ${allowRemote ? 'https: http:' : ''}`,
+    `img-src openmail-cid: data: ${window.__OPENMAIL_WEB__ ? "'self'" : ''} ${allowRemote ? 'https: http:' : ''}`,
     `style-src 'unsafe-inline' ${allowRemote ? 'https:' : ''}`,
     `font-src data: ${allowRemote ? 'https:' : ''}`,
     `media-src ${allowRemote ? 'https:' : "'none'"}`,
@@ -156,10 +156,10 @@ img{max-width:100%;height:auto;}
 table{max-width:100%;}
 pre{white-space:pre-wrap;}
 a{color:${plain && dark ? '#a99fff' : '#4f46e5'};}
-.octo-plain{white-space:normal;}
+.om-plain{white-space:normal;}
 blockquote{margin:6px 0 6px 2px;border-left:3px solid #d4d4dc;padding-left:10px;color:${plain && dark ? '#a0a0ad' : '#555'};}
-details.octo-q>summary{display:inline-block;list-style:none;cursor:default;padding:0 8px;margin:6px 0;border-radius:8px;background:${plain && dark ? '#2e2e37' : '#ececf1'};color:#888;font-size:13px;line-height:18px;letter-spacing:1px;}
-details.octo-q>summary::-webkit-details-marker{display:none;}
+details.om-q>summary{display:inline-block;list-style:none;cursor:default;padding:0 8px;margin:6px 0;border-radius:8px;background:${plain && dark ? '#2e2e37' : '#ececf1'};color:#888;font-size:13px;line-height:18px;letter-spacing:1px;}
+details.om-q>summary::-webkit-details-marker{display:none;}
 </style></head><body>${body}</body></html>`
   return { html, remoteCount, trackers }
 }
@@ -189,7 +189,9 @@ export default function MessageFrame({
       measure()
       ro = new ResizeObserver(measure)
       ro.observe(doc.documentElement)
-      doc.querySelectorAll('details').forEach((d) => d.addEventListener('toggle', measure))
+      doc.querySelectorAll('details').forEach((d) => {
+        d.addEventListener('toggle', measure)
+      })
       doc.addEventListener('click', (e) => {
         const a = (e.target as Element).closest('a')
         const href = a?.getAttribute('href') || ''

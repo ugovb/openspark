@@ -43,7 +43,7 @@ const dict: Dictionary = {
     'Invalid or expired pairing code': 'Code de jumelage invalide ou expiré',
     'The web interface is not available in this installation.': 'L’interface web n’est pas disponible dans cette installation.',
     'Not authorized — pair this device with the server': 'Non autorisé — jumelez cet appareil avec le serveur',
-    'Missing X-Octo header': 'En-tête X-Octo manquant',
+    'Missing X-OpenMail header': 'En-tête X-OpenMail manquant',
     '“{name}” can run programs on this computer.': '« {name} » peut lancer des programmes sur cet ordinateur.',
     'Open it only if you trust the sender.': 'Ouvrez-le seulement si vous faites confiance à l’expéditeur.',
     'Open anyway': 'Ouvrir quand même',

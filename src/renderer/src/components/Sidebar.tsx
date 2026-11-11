@@ -17,6 +17,7 @@ function sameRef(a: MailboxRef, b: MailboxRef): boolean {
 }
 
 function useIsActive(refTo: MailboxRef | undefined, accountFilter: number | null): boolean {
+  // biome-ignore lint/correctness/useHookAtTopLevel: false positive, called at the top level of a hook
   const { mailbox, accountFilter: af, view } = useStore()
   return (view === 'mail' || view === 'search') && !!refTo && sameRef(mailbox, refTo) && af === accountFilter
 }
@@ -409,6 +410,7 @@ function RailButton({ label, kbd, active, onClick, children }: { label: string; 
 
 function Rail({ onMore }: { onMore: () => void }) {
   const { setMailbox, setView, view, counts } = useStore()
+  // biome-ignore lint/correctness/useHookAtTopLevel: useIsActive is called in a fixed order on every render of Rail
   const at = (r: MailboxRef) => useIsActive(r, null)
   const inbox = at({ kind: 'smart' })
   const pins = at({ kind: 'pinned' })

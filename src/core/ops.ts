@@ -120,7 +120,9 @@ export async function processOps(): Promise<number> {
     running = false
     const w = onIdleWaiters
     onIdleWaiters = []
-    w.forEach((f) => f())
+    w.forEach((f) => {
+      f()
+    })
   }
   return done
 }

@@ -30,6 +30,7 @@
     "start": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "node scripts/run-tests.mjs && node --test tests/calendar.test.mjs",
+    "test:unit": "node scripts/run-tests.mjs --unit && node --test tests/calendar.test.mjs",
     "dist": "npm run build && electron-builder --win --x64",
     "icon": "node scripts/make-icons.mjs",
     "greenmail": "node scripts/greenmail.mjs",
@@ -38,6 +39,7 @@
     "dist:linux": "npm run build && electron-builder --linux",
     "dist:server": "npm run build && node scripts/pack-server.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
+    "lint": "biome lint",
     "dist:mac": "npm run build && electron-builder --mac --arm64 --publish never"
   },
   "dependencies": {
@@ -53,6 +55,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.3",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-virtual": "^3.14.17",
     "@tiptap/extension-link": "^3.31.4",

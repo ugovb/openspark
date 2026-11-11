@@ -100,7 +100,7 @@ table{max-width:100%;}
 pre{white-space:pre-wrap;}
 a{color:#111;}
 blockquote{margin:6px 0 6px 2px;border-left:3px solid #ccc;padding-left:10px;color:#555;}
-details.octo-q{display:none;}
+details.om-q{display:none;}
 </style></head><body><h1>${esc(subject)}</h1>${messages.join('\n')}</body></html>`
 }
 

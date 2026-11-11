@@ -13,8 +13,8 @@ npm test             # mail engine, home server and calendar tests
 npm run demo:seed && npm run demo   # demo profile with sample mail
 ```
 
-Tests and the demo never touch your real profile: they run with `OCTO_HOME` pointing to a
-temporary folder and `OCTO_SECRETS=memory|file`. Please keep it that way in new tests.
+Tests and the demo never touch your real profile: they run with `OPENMAIL_HOME` pointing to a
+temporary folder and `OPENMAIL_SECRETS=memory|file`. Please keep it that way in new tests.
 
 ## Guidelines
 

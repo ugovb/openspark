@@ -717,6 +717,7 @@ function CalendarList({ sources, calendars, hidden, onToggle, onAdd, onSourceMen
               const visible = !hidden.has(c.id)
               const color = c.color || 'var(--accent)'
               return (
+                // biome-ignore lint/a11y/useSemanticElements: styled toggle button with checkbox semantics
                 <button
                   key={c.id}
                   role="checkbox"

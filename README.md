@@ -25,7 +25,7 @@ snooze, send later, follow-up reminders, templates, AI writing help, calendar) t
 accounts, **without sending your mailbox to a vendor's cloud**. Your mail, passwords and AI data stay
 on your computer, or on a small server in your home if you want sync and a phone view.
 
-The app speaks **English and Polish**: it follows your system language, and you can switch it in
+The app speaks **English, Polish, French and Spanish**: it follows your system language, and you can switch it in
 *Settings → Appearance & general*.
 
 ## Why
@@ -135,7 +135,7 @@ npm run dist:linux    # AppImage + .deb (build on Linux)
 npm run dist:server   # home server archive → dist/
 ```
 
-App data: Windows `%APPDATA%\Octopus Mail`, Linux `~/.config/Octopus Mail`. Passwords and tokens go to
+App data: Windows `%APPDATA%\OpenMail`, Linux `~/.config/OpenMail`, macOS `~/Library/Application Support/OpenMail`. Passwords and tokens go to
 the system secret store (Windows Credential Manager, GNOME Keyring / KWallet), never to the database.
 
 ## AI agents: CLI and MCP

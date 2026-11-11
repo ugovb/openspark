@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-const H = { 'X-Octo': '1' }
+const H = { 'X-OpenMail': '1' }
 
 async function call(method: string, ...args: unknown[]): Promise<unknown> {
   const r = await fetch('/api/call', { method: 'POST', headers: H, body: encodeWire({ method, args }) })
@@ -57,17 +57,23 @@ function ensureEvents(): void {
   source.onmessage = (m) => {
     try {
       const ev = decodeWire<CoreEvent>(m.data)
-      eventListeners.forEach((l) => l(ev))
+      eventListeners.forEach((l) => {
+        l(ev)
+      })
     } catch {
       /* ignore malformed */
     }
   }
   source.onopen = () => {
-    if (wasDown) eventListeners.forEach((l) => l({ type: 'server-connection', online: true, url: location.origin }))
+    if (wasDown) eventListeners.forEach((l) => {
+      l({ type: 'server-connection', online: true, url: location.origin })
+    })
     wasDown = false
   }
   source.onerror = () => {
-    if (!wasDown) eventListeners.forEach((l) => l({ type: 'server-connection', online: false, url: location.origin }))
+    if (!wasDown) eventListeners.forEach((l) => {
+      l({ type: 'server-connection', online: false, url: location.origin })
+    })
     wasDown = true
   }
 }
@@ -153,7 +159,9 @@ export function installWebBridge(): void {
       return ''
     },
     saveAllAttachments: async (ids: number[]) => {
-      ids.forEach((id, i) => setTimeout(() => download(`/api/attachment/${id}?download=1`), i * 400))
+      ids.forEach((id, i) => {
+        setTimeout(() => download(`/api/attachment/${id}?download=1`), i * 400)
+      })
       return ids.length
     },
     openExternal: async (url: string) => {
@@ -231,11 +239,10 @@ export function installWebBridge(): void {
       return true
     },
   }
-  ;(window as unknown as { openmail: typeof bridge; octo: typeof bridge }).openmail = bridge
-  ;(window as unknown as { octo: typeof bridge }).octo = bridge
+  ;(window as unknown as { openmail: typeof bridge }).openmail = bridge
 }
 
 /** URL of an inline (cid:) image: a custom protocol in the desktop app, the server API in a browser. */
 export function cidUrl(messageId: number, cid: string): string {
-  return window.__OPENMAIL_WEB__ ? `/api/cid/${messageId}/${encodeURIComponent(cid)}` : `octo-cid://${messageId}/${encodeURIComponent(cid)}`
+  return window.__OPENMAIL_WEB__ ? `/api/cid/${messageId}/${encodeURIComponent(cid)}` : `openmail-cid://${messageId}/${encodeURIComponent(cid)}`
 }

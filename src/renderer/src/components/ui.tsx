@@ -191,6 +191,7 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
 
 export function Field({ label, children, hint }: { label: ReactNode; children: ReactNode; hint?: ReactNode }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: the control is passed as children
     <label className="flex flex-col gap-1.5 py-1.5">
       <span className="text-[12.5px] font-medium text-muted">{label}</span>
       {children}

@@ -6,7 +6,7 @@ import { openSettings, useStore } from './store'
 /** Search view, or focus its field when already there. */
 export function openSearch(): void {
   const st = useStore.getState()
-  if (st.view === 'search') document.getElementById('octo-search')?.focus()
+  if (st.view === 'search') document.getElementById('openmail-search')?.focus()
   else st.setView('search')
 }
 

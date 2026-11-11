@@ -538,7 +538,7 @@ export class AccountSync {
       .map((h) => (headerValue(headers, h) ? `${h}:${headerValue(headers, h)}` : ''))
       .join(' ')
     // drafts saved by older builds carry the legacy X-Octopus-Draft header
-    const octoDraft = headerValue(headers, 'x-openmail-draft') || headerValue(headers, 'x-octopus-draft')
+    const draftHeader = headerValue(headers, 'x-openmail-draft') || headerValue(headers, 'x-octopus-draft')
 
     const over = from ? contactOverride(from.email) : { category: null, status: 'unknown' }
     const category = over.category || categorize({
@@ -580,7 +580,7 @@ export class AccountSync {
       seen: fl.seen,
       flagged: fl.flagged,
       answered: fl.answered,
-      draft: fl.draft || !!octoDraft,
+      draft: fl.draft || !!draftHeader,
       keywords: JSON.stringify(fl.keywords),
       snippet,
       has_attachments: s.attachments.some((a) => !a.inline) ? 1 : 0,
@@ -593,7 +593,7 @@ export class AccountSync {
       auto_submitted: autoSubmitted,
       precedence,
       calendar_part: s.calendar,
-      hidden: octoDraft ? 1 : 0,
+      hidden: draftHeader ? 1 : 0,
       created_at: now(),
     })
     for (const a of s.attachments) {
@@ -613,7 +613,7 @@ export class AccountSync {
   }
 
   /** Gmail already sorts mail into Promotions/Social/Updates/Forums — reuse that verdict. */
-  private async gmailCategories(c: ImapFlow, f: Row, ids: number[]) {
+  private async gmailCategories(c: ImapFlow, _f: Row, ids: number[]) {
     const rows = all<{ id: number; uid: number; from_email: string | null }>(
       `SELECT id, uid, from_email FROM messages WHERE id IN (${inList(ids)})`,
       ...ids,

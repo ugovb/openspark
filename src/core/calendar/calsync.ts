@@ -233,7 +233,7 @@ export function importFeed(cal: CalRow, body: string): boolean {
   tx(() => {
     const keep = new Set<string>()
     for (const [uid, ics] of groups) {
-      let res
+      let res: ReturnType<typeof parseResource>
       try {
         res = parseResource(ics, uid)
       } catch {

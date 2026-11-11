@@ -84,7 +84,7 @@ export function parseQuery(q: string): ParsedQuery {
     const key = op[1].toLowerCase()
     const val = unq(op[2]).trim()
     const v = val.toLowerCase()
-    const N = (c: Clause): Clause => (neg ? { sql: `NOT (${c.sql})`, params: c.params } : c)
+    const neg1 = (c: Clause): Clause => (neg ? { sql: `NOT (${c.sql})`, params: c.params } : c)
     switch (key) {
       case 'from':
       case 'to':
@@ -93,57 +93,57 @@ export function parseQuery(q: string): ParsedQuery {
         out.where.push(addrClause(key, val, neg))
         break
       case 'with':
-        out.where.push(N({
+        out.where.push(neg1({
           sql: "(LOWER(m.from_email) LIKE ? OR LOWER(COALESCE(m.to_json,'')) LIKE ? OR LOWER(COALESCE(m.cc_json,'')) LIKE ?)",
           params: [`%${v}%`, `%${v}%`, `%${v}%`],
         }))
         break
       case 'subject':
-        out.where.push(N({ sql: "LOWER(COALESCE(m.subject,'')) LIKE ?", params: [`%${v}%`] }))
+        out.where.push(neg1({ sql: "LOWER(COALESCE(m.subject,'')) LIKE ?", params: [`%${v}%`] }))
         break
       case 'after':
       case 'since': {
         const d = parseDate(val) ?? relative(val)
-        if (d) out.where.push(N({ sql: 'm.date >= ?', params: [d] }))
+        if (d) out.where.push(neg1({ sql: 'm.date >= ?', params: [d] }))
         break
       }
       case 'before':
       case 'until': {
         const d = parseDate(val)
-        if (d) out.where.push(N({ sql: 'm.date < ?', params: [d] }))
+        if (d) out.where.push(neg1({ sql: 'm.date < ?', params: [d] }))
         break
       }
       case 'on': {
         const d = parseDate(val)
-        if (d) out.where.push(N({ sql: 'm.date >= ? AND m.date < ?', params: [d, d + 86400_000] }))
+        if (d) out.where.push(neg1({ sql: 'm.date >= ? AND m.date < ?', params: [d, d + 86400_000] }))
         break
       }
       case 'newer_than':
       case 'newer': {
         const d = relative(val)
-        if (d) out.where.push(N({ sql: 'm.date >= ?', params: [d] }))
+        if (d) out.where.push(neg1({ sql: 'm.date >= ?', params: [d] }))
         break
       }
       case 'older_than':
       case 'older': {
         const d = relative(val)
-        if (d) out.where.push(N({ sql: 'm.date < ?', params: [d] }))
+        if (d) out.where.push(neg1({ sql: 'm.date < ?', params: [d] }))
         break
       }
       case 'larger':
-        out.where.push(N({ sql: 'm.size > ?', params: [sizeBytes(val)] }))
+        out.where.push(neg1({ sql: 'm.size > ?', params: [sizeBytes(val)] }))
         break
       case 'smaller':
-        out.where.push(N({ sql: 'm.size < ?', params: [sizeBytes(val)] }))
+        out.where.push(neg1({ sql: 'm.size < ?', params: [sizeBytes(val)] }))
         break
       case 'has': {
-        if (v === 'attachment' || v === 'attachments') out.where.push(N({ sql: 'm.has_attachments = 1', params: [] }))
-        else if (v === 'reminder') out.threadWhere.push(N({ sql: 't.reminder_at IS NOT NULL', params: [] }))
-        else if (v === 'link' || v === 'links') out.where.push(N({ sql: "EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = m.id AND b.html LIKE '%href=\"http%')", params: [] }))
-        else if (v === 'invite' || v === 'invitation') out.where.push(N({ sql: 'm.calendar_part IS NOT NULL', params: [] }))
+        if (v === 'attachment' || v === 'attachments') out.where.push(neg1({ sql: 'm.has_attachments = 1', params: [] }))
+        else if (v === 'reminder') out.threadWhere.push(neg1({ sql: 't.reminder_at IS NOT NULL', params: [] }))
+        else if (v === 'link' || v === 'links') out.where.push(neg1({ sql: "EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = m.id AND b.html LIKE '%href=\"http%')", params: [] }))
+        else if (v === 'invite' || v === 'invitation') out.where.push(neg1({ sql: 'm.calendar_part IS NOT NULL', params: [] }))
         else if (DOC_EXT[v.replace(/s$/, '')] || DOC_EXT[v]) {
           const exts = DOC_EXT[v] || DOC_EXT[v.replace(/s$/, '')]
-          out.where.push(N({
+          out.where.push(neg1({
             sql: `EXISTS (SELECT 1 FROM attachments a WHERE a.message_id = m.id AND a.inline = 0 AND (${exts.map(() => 'LOWER(a.filename) LIKE ?').join(' OR ')}))`,
             params: exts.map((e) => `%.${e}`),
           }))
@@ -151,7 +151,7 @@ export function parseQuery(q: string): ParsedQuery {
         break
       }
       case 'filename':
-        out.where.push(N({ sql: 'EXISTS (SELECT 1 FROM attachments a WHERE a.message_id = m.id AND LOWER(a.filename) LIKE ?)', params: [`%${v}%`] }))
+        out.where.push(neg1({ sql: 'EXISTS (SELECT 1 FROM attachments a WHERE a.message_id = m.id AND LOWER(a.filename) LIKE ?)', params: [`%${v}%`] }))
         break
       case 'is': {
         const map: Record<string, Clause> = {
@@ -173,14 +173,14 @@ export function parseQuery(q: string): ParsedQuery {
           priority: { sql: 't.priority = 1', params: [] },
           blocked: { sql: BLOCKED_THREAD, params: [] },
         }
-        if (map[v]) out.where.push(N(map[v]))
-        else if (tmap[v]) out.threadWhere.push(N(tmap[v]))
+        if (map[v]) out.where.push(neg1(map[v]))
+        else if (tmap[v]) out.threadWhere.push(neg1(tmap[v]))
         break
       }
       case 'category': {
         const cat = { personal: 'people', people: 'people', priority: 'people', notification: 'notification', notifications: 'notification', newsletter: 'newsletter', newsletters: 'newsletter' }[v]
-        if (cat) out.threadWhere.push(N({ sql: 't.category = ?', params: [cat] }))
-        else if (v === 'invitation' || v === 'invitation_response') out.where.push(N({ sql: 'm.calendar_part IS NOT NULL', params: [] }))
+        if (cat) out.threadWhere.push(neg1({ sql: 't.category = ?', params: [cat] }))
+        else if (v === 'invitation' || v === 'invitation_response') out.where.push(neg1({ sql: 'm.calendar_part IS NOT NULL', params: [] }))
         break
       }
       case 'in':
@@ -192,13 +192,13 @@ export function parseQuery(q: string): ParsedQuery {
         } else if (roles.includes(v)) {
           const role = v === 'spam' ? 'junk' : v
           if (role === 'trash' || role === 'junk' || role === 'blocked') out.includeTrash = true
-          out.where.push(N({ sql: 'f.role = ?', params: [role] }))
+          out.where.push(neg1({ sql: 'f.role = ?', params: [role] }))
         } else if (val.includes('@') && !val.includes(':')) {
-          out.where.push(N({ sql: 'm.account_id = (SELECT id FROM accounts WHERE email = ? COLLATE NOCASE)', params: [v] }))
+          out.where.push(neg1({ sql: 'm.account_id = (SELECT id FROM accounts WHERE email = ? COLLATE NOCASE)', params: [v] }))
         } else {
           // "account@x.com:Folder/Path" or a bare folder/label name
           const [accPart, folderPart] = val.includes('@') && val.includes(':') ? [val.slice(0, val.indexOf(':')), val.slice(val.indexOf(':') + 1)] : [null, val]
-          out.where.push(N({
+          out.where.push(neg1({
             sql: `(m.folder_id IN (SELECT fo.id FROM folders fo JOIN accounts ac ON ac.id = fo.account_id
                     WHERE (LOWER(fo.path) = ? OR LOWER(fo.name) = ?) ${accPart ? 'AND ac.email = ? COLLATE NOCASE' : ''})
                    OR LOWER(COALESCE(m.gm_labels,'')) LIKE ?)`,
@@ -209,16 +209,16 @@ export function parseQuery(q: string): ParsedQuery {
         break
       }
       case 'account':
-        out.where.push(N({ sql: 'm.account_id = (SELECT id FROM accounts WHERE email = ? COLLATE NOCASE)', params: [v] }))
+        out.where.push(neg1({ sql: 'm.account_id = (SELECT id FROM accounts WHERE email = ? COLLATE NOCASE)', params: [v] }))
         break
       case 'list':
-        out.where.push(N({ sql: "LOWER(COALESCE(m.list_id,'')) LIKE ?", params: [`%${v}%`] }))
+        out.where.push(neg1({ sql: "LOWER(COALESCE(m.list_id,'')) LIKE ?", params: [`%${v}%`] }))
         break
       case 'id':
-        out.where.push(N({ sql: 'm.id = ?', params: [Number(val)] }))
+        out.where.push(neg1({ sql: 'm.id = ?', params: [Number(val)] }))
         break
       case 'thread':
-        out.where.push(N({ sql: 'm.thread_id = ?', params: [Number(val)] }))
+        out.where.push(neg1({ sql: 'm.thread_id = ?', params: [Number(val)] }))
         break
       default:
         // unknown operator: treat the whole token as text

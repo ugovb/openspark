@@ -258,7 +258,7 @@ function QuickReplies({ threadId, messageId }: { threadId: number; messageId: nu
 export default function ThreadView() {
   const s = useStore()
   const one = useOnePane()
-  const { selected, act, composer, settings, toast } = s
+  const { selected, act, composer, toast } = s
   const [data, setData] = useState<TV | null>(null)
   const [openIds, setOpenIds] = useState<Set<number>>(new Set())
   const [allowRemote, setAllowRemote] = useState(false)
@@ -478,6 +478,7 @@ function AutoSummary({ threadId, onClose }: { threadId: number; onClose: () => v
         {!busy && <button className="font-normal hover:underline" onClick={() => void run(true)}>{t('Refresh')}</button>}
         <button onClick={onClose}><X size={14} /></button>
       </div>
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitised by previewHtml/mdToHtml before rendering */}
       <div className="ai-text selectable text-[13.5px] leading-relaxed" dangerouslySetInnerHTML={{ __html: mdToHtml(text || '…') }} />
     </div>
   )

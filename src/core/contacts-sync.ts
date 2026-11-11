@@ -99,7 +99,7 @@ export async function syncGoogleContacts(accountId: number): Promise<number> {
 /** Sync every Google OAuth account; never throws (offline / revoked accounts are logged and skipped). */
 export async function syncAllContacts(): Promise<number> {
   let total = 0
-  let accounts
+  let accounts: ReturnType<typeof listAccounts>
   try {
     accounts = listAccounts(false)
   } catch (e) {

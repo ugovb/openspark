@@ -269,15 +269,14 @@ describe('rule schedules', () => {
 })
 
 describe('scheduled rule clock reset', () => {
-  const at = (s: string) => new Date(s).getTime()
   const daily = { at: '09:00', days: [] as number[] }
   const mk = (email: string) => {
     seedMessage({ subject: `${email}-1`, fromEmail: email })
     return saveRule({ name: email, conditions: byFrom(email), actions: [{ type: 'archive' }], schedule: daily })
   }
   // back-dated relative to the real clock (3 days), and the check time is the stamp the code wrote: no dependence on today's date
-  const STALE = () => Date.now() - 3 * 86_400_000
-  const stale = (id: number) => run('UPDATE rules SET last_run_at = ? WHERE id = ?', STALE(), id)
+  const staleAt = () => Date.now() - 3 * 86_400_000
+  const stale = (id: number) => run('UPDATE rules SET last_run_at = ? WHERE id = ?', staleAt(), id)
   const due = (id: number) => runDueScheduledRules(lastRun(id) + 1).filter((x) => x.ruleId === id)
   const lastRun = (id: number) => get<{ last_run_at: number }>('SELECT last_run_at FROM rules WHERE id = ?', id)!.last_run_at
 

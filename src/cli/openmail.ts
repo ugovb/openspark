@@ -709,7 +709,7 @@ Choose the code yourself with OPENMAIL_SETUP_CODE. Device list: openmail server 
       } else {
         if (!a._.length) throw new CliError(t('Give address(es) or @domain'))
         const fn = { accept: svc.acceptSenders, block: svc.blockSenders, unblock: svc.unblockSenders }[act || '']
-        let r
+        let r: ReturnType<typeof svc.prioritySender>
         if (fn) r = fn(a._)
         else if (act === 'vip' || act === 'unvip') r = svc.prioritySender(a._, act === 'vip')
         else throw new CliError('openmail sender accept|block|unblock|vip|unvip|category …')

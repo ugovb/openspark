@@ -3,11 +3,11 @@ import { dbPath } from './paths'
 
 // node:sqlite prints an ExperimentalWarning once per process; it is noise for CLI users.
 const origEmit = process.emitWarning
-process.emitWarning = function (warning: string | Error, ...rest: unknown[]) {
+process.emitWarning = ((warning: string | Error, ...rest: unknown[]) => {
   const msg = typeof warning === 'string' ? warning : warning?.message
   if (msg && msg.includes('SQLite is an experimental feature')) return
   return (origEmit as (...a: unknown[]) => void).call(process, warning, ...rest)
-} as typeof process.emitWarning
+}) as typeof process.emitWarning
 
 export type Row = Record<string, any>
 type Param = string | number | bigint | null | Uint8Array

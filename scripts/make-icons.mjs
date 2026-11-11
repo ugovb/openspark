@@ -40,6 +40,7 @@ function raster(jobs) {
   } finally {
     handles.forEach(closeSync)
     if (path.dirname(path.resolve(dir)) !== tempRoot || !path.basename(dir).startsWith('octopus-brand-')) {
+      // biome-ignore lint/correctness/noUnsafeFinally: guard before deleting a directory; aborting here is intended
       throw new Error(`Unexpected temporary directory: ${dir}`)
     }
     rmSync(dir, { recursive: true, force: true })
@@ -93,7 +94,7 @@ function resolveTokens(svg, tokens) {
 }
 
 function placeSvg(svg, x, y, width, height) {
-  const [, attributes, content] = svg.match(/<svg\b([^>]*)>([^]*)<\/svg>/) || []
+  const [, attributes, content] = svg.match(/<svg\b([^>]*)>([\s\S]*)<\/svg>/) || []
   const viewBox = attributes?.match(/viewBox="([^"]+)"/)?.[1].split(/\s+/).map(Number)
   if (!viewBox || viewBox.length !== 4) throw new Error('SVG source must define a viewBox')
   const scale = Math.min(width / viewBox[2], height / viewBox[3])
@@ -120,7 +121,9 @@ function proofSvg(appFrames, trayFrames, unreadFrames, illustrations, themes, in
     content.push(`<rect x="${x}" y="100" width="568" height="1232" rx="16" fill="${t['--bg']}" stroke="${t['--border']}"/>`)
     content.push(text(x + 24, 137, theme.name, t['--text'], 18, 600), text(x + 365, 137, '01 / ZNAK APLIKACJI', muted, 10))
     content.push(sample(appFrames, 256, x + 36, 166, muted))
-    ;[[64, 336, 178], [48, 438, 194], [32, 346, 290], [24, 450, 298], [16, 354, 368]].forEach(([size, dx, y]) => content.push(sample(appFrames, size, x + dx, y, muted)))
+    ;[[64, 336, 178], [48, 438, 194], [32, 346, 290], [24, 450, 298], [16, 354, 368]].forEach(([size, dx, y]) => {
+      content.push(sample(appFrames, size, x + dx, y, muted))
+    })
     content.push(`<path d="M${x + 24} 462H${x + 544}M${x + 24} 574H${x + 544}" stroke="${t['--border']}"/>`)
     content.push(text(x + 24, 487, '02 / ZASOBNIK', muted, 10), text(x + 300, 487, 'NOWA POCZTA', muted, 10))
     ;[16, 24, 32].forEach((size, index) => {
@@ -163,12 +166,12 @@ const [installerPng, installerBmp] = raster([
 ])
 const css = await read(path.join(root, 'src/renderer/src/index.css'))
 const themes = [
-  { name: 'Motyw jasny', tokens: themeTokens(css, /:root\s*\{([^]*?)\}/) },
-  { name: 'Motyw ciemny', tokens: themeTokens(css, /\[data-theme="dark"\]\s*\{([^]*?)\}/) },
+  { name: 'Motyw jasny', tokens: themeTokens(css, /:root\s*\{([\s\S]*?)\}/) },
+  { name: 'Motyw ciemny', tokens: themeTokens(css, /\[data-theme="dark"\]\s*\{([\s\S]*?)\}/) },
 ]
 const proof = proofSvg(appFrames, trayFrames, unreadFrames, await illustrationMarkup(), themes, installerPng)
 const [preview] = raster([{ svg: proof, width: 1200, height: 1560 }])
-const logo = small.replace(/<!--[^]*?-->/g, '').replace(/>\s+</g, '><').trim() + '\n'
+const logo = small.replace(/<!--[\s\S]*?-->/g, '').replace(/>\s+</g, '><').trim() + '\n'
 await fs.mkdir(path.join(root, 'src/renderer/src/assets'), { recursive: true })
 await fs.mkdir(path.join(root, 'out'), { recursive: true })
 // Write only after every source has rendered successfully.

@@ -25,6 +25,7 @@ import {
 } from './users'
 import { APP_VERSION } from '../shared/version'
 import { env } from '../shared/env'
+import { clearSessionCookies, isAppRequest, sessionCookie, sessionToken } from './web-session'
 
 export const SERVER_VERSION = APP_VERSION
 
@@ -60,16 +61,11 @@ export function secureFlag(req: http.IncomingMessage): string {
   return env('TRUST_PROXY') === '1' && req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''
 }
 
-function cookie(req: http.IncomingMessage, name: string): string | null {
-  const m = (req.headers.cookie || '').match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`))
-  return m ? decodeURIComponent(m[1]) : null
-}
-
 /** 303 back to the app with the device token in an HttpOnly cookie. */
 function signedIn(req: http.IncomingMessage, res: http.ServerResponse, token: string): void {
   res.writeHead(303, {
     Location: '/',
-    'Set-Cookie': `octo_token=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secureFlag(req)}`,
+    'Set-Cookie': sessionCookie(token, secureFlag(req) !== ''),
   })
   res.end()
 }
@@ -85,7 +81,7 @@ function parseFields(raw: string): { fields: Record<string, string>; json: boole
 
 const HTML = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
 
-function send(res: http.ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
+function send(res: http.ServerResponse, status: number, body: unknown, headers: Record<string, string | string[]> = {}): void {
   const text = typeof body === 'string' ? body : encodeWire(body)
   res.writeHead(status, {
     'Content-Type': typeof body === 'string' ? 'text/plain; charset=utf-8' : 'application/json; charset=utf-8',
@@ -208,6 +204,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
             : key === 'bad-totp' ? page(status, { view: 'totp', ticket: fields.ticket || '', error: key })
               : page(status, { view: 'login', error: key, allowPairing: pairingAllowed() })
         if (tooManyFailures(ip)) return fail(429, 'too-many')
+        // biome-ignore lint/correctness/useHookAtTopLevel: useTicket is a login-ticket helper, not a React hook
         const k = useTicket(fields.ticket || '')
         if (!k) return fail(401, 'expired')
         if (isLocked(k.userId)) return fail(429, 'locked')
@@ -237,7 +234,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
         if (r.status === 'approved') log('server', `signed in with a code "${r.device.name}" from ${ip}`)
         // the sign-in page asks for the cookie instead of the token, so the token never reaches its script
         if (r.status === 'approved' && fields.cookie === '1') {
-          return send(res, 200, { status: 'approved' }, { 'Set-Cookie': `octo_token=${encodeURIComponent(r.token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secureFlag(req)}` })
+          return send(res, 200, { status: 'approved' }, { 'Set-Cookie': sessionCookie(r.token, secureFlag(req) !== '') })
         }
         return send(res, 200, r)
       }
@@ -280,7 +277,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
       // ---------- authentication ----------
       const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '') || null
       const viaCookie = !bearer
-      const device = authenticate(bearer || cookie(req, 'octo_token'), ip)
+      const device = authenticate(bearer || sessionToken(req.headers.cookie), ip)
 
       if (!url.pathname.startsWith('/api/')) {
         // web UI (desktop browsers and phones)
@@ -305,12 +302,12 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
 
       if (!device) return send(res, 401, { error: t('Not authorized — pair this device with the server') })
       // cookie-authenticated writes must come from our own page (custom header = no cross-site forms)
-      if (viaCookie && req.method !== 'GET' && req.headers['x-octo'] !== '1') return send(res, 403, { error: t('Missing X-Octo header') })
+      if (viaCookie && req.method !== 'GET' && !isAppRequest(req.headers)) return send(res, 403, { error: t('Missing X-OpenMail header') })
 
       if (url.pathname === '/api/me') return send(res, 200, { device })
       if (url.pathname === '/api/logout' && req.method === 'POST') {
         revokeDevice(device.id)
-        return send(res, 200, { ok: true }, { 'Set-Cookie': `octo_token=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secureFlag(req)}` })
+        return send(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookies(secureFlag(req) !== '') })
       }
       if (url.pathname === '/api/devices' && req.method === 'GET') return send(res, 200, { devices: listDevices() })
       if (url.pathname === '/api/devices/pair' && req.method === 'POST') {
@@ -423,7 +420,7 @@ export async function runServer(opts: ServeOptions = {}): Promise<http.Server> {
               const bad = await confirm(true)
               if (bad) return refuse(bad)
               revokeAllDevices()
-              return send(res, 200, { ok: true }, { 'Set-Cookie': `octo_token=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secureFlag(req)}` })
+              return send(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookies(secureFlag(req) !== '') })
             }
           }
         } catch (e) {

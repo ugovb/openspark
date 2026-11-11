@@ -63,6 +63,38 @@ jobs:
           node out/cli/openmail.js accounts --no-sync
           node out/cli/openmail.js status
 
+  unit:
+    name: Testy jednostkowe (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Zależności
+        run: npm ci
+
+      - name: Kontrola typów
+        run: |
+          npx tsc --noEmit -p tsconfig.node.json
+          npx tsc --noEmit -p tsconfig.web.json
+
+      - name: Lintowanie (Biome)
+        run: npm run lint
+
+      - name: Kontrola tłumaczeń
+        run: npm run i18n:check
+
+      - name: Testy jednostkowe (bez GreenMail)
+        run: npm run test:unit
+
   home-server:
     name: Instalator serwera domowego (Linux + systemd)
     runs-on: ubuntu-latest

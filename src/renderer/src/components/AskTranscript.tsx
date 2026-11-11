@@ -26,6 +26,7 @@ export function AskTurnView({ turn, compact }: { turn: AskTurn; compact?: boolea
               if (id) void openAskSource(Number(id))
               else if (/^https?:/i.test(href)) void window.openmail.openExternal(href)
             }}
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitised by mdToHtml before rendering
             dangerouslySetInnerHTML={{ __html: mdToHtml(turn.a) }}
           />
         )}

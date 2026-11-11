@@ -446,6 +446,7 @@ function SignaturesTab() {
             <Field label={t('Name')}><input className={inputCls} value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>
             <Field label={t('Content (text or HTML)')}><textarea className={cx(inputCls, 'h-40 py-2 font-mono text-[12.5px]')} value={edit.html} onChange={(e) => setEdit({ ...edit, html: e.target.value })} /></Field>
             <div className="mt-2 text-[12px] text-muted">{t('Preview:')}</div>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitised by previewHtml/mdToHtml before rendering */}
             <div className="mt-1 rounded-lg border border-line bg-white p-3 text-[13px] text-black" dangerouslySetInnerHTML={{ __html: previewHtml(edit.html) }} />
           </div>
         )}

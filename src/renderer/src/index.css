@@ -290,7 +290,7 @@ button {
   color: var(--accent);
 }
 
-@keyframes octo-in {
+@keyframes om-in {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -301,11 +301,11 @@ button {
   }
 }
 .anim-in {
-  animation: octo-in 0.16s ease-out;
+  animation: om-in 0.16s ease-out;
 }
 
 /* phone layout: sidebar slides in from the left */
-@keyframes octo-drawer {
+@keyframes om-drawer {
   from {
     transform: translateX(-100%);
   }
@@ -314,11 +314,11 @@ button {
   }
 }
 .anim-drawer {
-  animation: octo-drawer 0.18s ease-out;
+  animation: om-drawer 0.18s ease-out;
 }
 
 /* panels sliding in from the right (Ask) */
-@keyframes octo-slide-right {
+@keyframes om-slide-right {
   from {
     transform: translateX(24px);
     opacity: 0;
@@ -329,7 +329,7 @@ button {
   }
 }
 .anim-right {
-  animation: octo-slide-right 0.2s ease-out;
+  animation: om-slide-right 0.2s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

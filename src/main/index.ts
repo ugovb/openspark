@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {
-  app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, Notification, protocol, net, shell, Tray, type MenuItemConstructorOptions,
+  app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, Notification, protocol, shell, Tray, type MenuItemConstructorOptions,
 } from 'electron'
 import os from 'node:os'
 import type { AppCommand } from '../shared/commands'
@@ -24,6 +24,7 @@ const PROTOCOL = 'openmail'
 let win: BrowserWindow | null = null
 let tray: Tray | null = null
 let quitting = false
+let engineStopped = false
 
 // Test/demo profiles (OCTO_HOME) get their own Chromium profile and single-instance lock,
 // so they never collide with — or wake up — the installed app running on the real profile.
@@ -62,7 +63,7 @@ function trayIcon(unread: boolean): string {
   return iconPath(process.platform === 'win32' ? `${base}.ico` : `${base}.png`)
 }
 
-protocol.registerSchemesAsPrivileged([{ scheme: 'octo-cid', privileges: { standard: true, secure: true, supportFetchAPI: true, bypassCSP: false } }])
+protocol.registerSchemesAsPrivileged([{ scheme: 'openmail-cid', privileges: { standard: true, secure: true, supportFetchAPI: true, bypassCSP: false } }])
 
 const demoTitle = () => t('OpenMail — DEMO (test profile)')
 
@@ -162,7 +163,7 @@ function openThreadWindow(threadId: number): void {
 
 /** Print an HTML document (built and sanitized by the renderer) from a hidden window, with scripts off. */
 async function printHtml(html: string): Promise<void> {
-  const file = path.join(app.getPath('temp'), `octo-print-${Date.now()}-${Math.random().toString(36).slice(2)}.html`)
+  const file = path.join(app.getPath('temp'), `openmail-print-${Date.now()}-${Math.random().toString(36).slice(2)}.html`)
   fs.writeFileSync(file, html, 'utf8')
   const w = new BrowserWindow({ show: false, webPreferences: { javascript: false, sandbox: true, contextIsolation: true, nodeIntegration: false } })
   w.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
@@ -231,7 +232,10 @@ function sendMenuCommand(c: AppCommand): void {
 
 function openDeepLink(link: string): void {
   const target = parseConnectLink(link)
-  if (target) return send('deep-link', { kind: 'connect', url: target })
+  if (target) {
+    send('deep-link', { kind: 'connect', url: target })
+    return
+  }
   const m = link.match(/^openmail:\/\/(draft|thread|message)\/(\d+)/)
   if (m) send('deep-link', { kind: m[1], id: Number(m[2]) })
 }
@@ -511,7 +515,7 @@ function setLaunchAtLogin(on: boolean): void {
 
 // inline images (cid:) from e-mails, fetched lazily from the IMAP server
 function registerCidProtocol(): void {
-  protocol.handle('octo-cid', async (req) => {
+  protocol.handle('openmail-cid', async (req) => {
     const u = new URL(req.url)
     try {
       return await backend.cid(Number(u.hostname), decodeURIComponent(u.pathname.slice(1)))
@@ -523,7 +527,10 @@ function registerCidProtocol(): void {
 
 /** macOS needs a real menu bar (Cmd+C/V/Q/W come from its roles); Windows/Linux keep the window menu-less. */
 function setupMenu(): void {
-  if (process.platform !== 'darwin') return Menu.setApplicationMenu(null)
+  if (process.platform !== 'darwin') {
+    Menu.setApplicationMenu(null)
+    return
+  }
   Menu.setApplicationMenu(Menu.buildFromTemplate(appMenuTemplate(app.name, sendMenuCommand)))
 }
 
@@ -613,9 +620,9 @@ app.on('before-quit', () => {
 })
 
 app.on('will-quit', (e) => {
-  if ((app as unknown as { _octoStopped?: boolean })._octoStopped) return
+  if (engineStopped) return
   e.preventDefault()
-  ;(app as unknown as { _octoStopped?: boolean })._octoStopped = true
+  engineStopped = true
   void backend.stop().finally(() => app.quit())
 })
 

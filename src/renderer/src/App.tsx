@@ -260,22 +260,20 @@ export default function App() {
       )}
       <main className="flex min-w-0 flex-1 flex-col">
         {mailBehind && (
-          <>
-            <div className="relative flex min-h-0 flex-1 bg-surface">
-              {!phoneThread && <ThreadList />}
-              {(!one || phoneThread) && <ThreadView />}
-              {narrow && !phoneThread && (
-                <button
-                  title={t('New message')}
-                  onClick={() => useStore.getState().compose({ mode: 'new' })}
-                  className="absolute bottom-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform active:scale-95"
-                  style={{ boxShadow: 'var(--shadow)' }}
-                >
-                  <PenSquare size={22} />
-                </button>
-              )}
-            </div>
-          </>
+          <div className="relative flex min-h-0 flex-1 bg-surface">
+            {!phoneThread && <ThreadList />}
+            {(!one || phoneThread) && <ThreadView />}
+            {narrow && !phoneThread && (
+              <button
+                title={t('New message')}
+                onClick={() => useStore.getState().compose({ mode: 'new' })}
+                className="absolute bottom-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform active:scale-95"
+                style={{ boxShadow: 'var(--shadow)' }}
+              >
+                <PenSquare size={22} />
+              </button>
+            )}
+          </div>
         )}
         <Suspense fallback={<div className="flex flex-1 items-center justify-center text-muted"><Spinner /></div>}>
           {view === 'settings' && <SettingsView />}

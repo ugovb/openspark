@@ -141,7 +141,9 @@ export function LabelPicker() {
   const gmailIds = new Set(gmail.map((a) => a.id))
   const all = useMemo(() => {
     const names = new Set<string>()
-    for (const th of threads) if (gmailIds.has(th.account_id)) th.labels.forEach((l) => names.add(l))
+    for (const th of threads) if (gmailIds.has(th.account_id)) th.labels.forEach((l) => {
+      names.add(l)
+    })
     for (const f of folders) {
       if (!gmailIds.has(f.account_id) || f.role) continue
       if (f.path === 'INBOX' || f.path.startsWith('[Gmail]') || f.path.startsWith('[Google Mail]')) continue

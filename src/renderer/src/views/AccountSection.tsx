@@ -152,6 +152,8 @@ function SetupTotp({ secret, uri, onConfirmed, onClose }: { secret: string; uri:
       footer={<><Button variant="ghost" onClick={onClose}>{t('Cancel')}</Button><Button variant="primary" disabled={busy || code.trim().length < 6} onClick={() => void go()}>{busy && <Spinner />} {t('Verify and turn on')}</Button></>}>
       <form className="p-5" onSubmit={(e) => (e.preventDefault(), code.trim().length >= 6 && void go())}>
         <div className="mb-3 text-[13px] leading-relaxed">{t('1. Scan this code with an authenticator app (Google Authenticator, 1Password, Authy…).')}</div>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: SVG QR code generated locally from the TOTP secret */}
+        {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: labels the QR code container */}
         <div className="mx-auto mb-3 w-[190px] rounded-xl bg-white p-3" aria-label={t('QR code')} dangerouslySetInnerHTML={{ __html: svg }} />
         <div className="mb-4 text-center text-[12px] text-muted">
           {t('Or type this key:')} <code className="selectable font-mono text-[12.5px] text-fg">{spaced}</code>

@@ -1,4 +1,4 @@
-// The renderer talks to the app through window.openmail; window.octo is only an alias kept for one version.
+// The renderer talks to the app through window.openmail; window.octo no longer exists.
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -14,5 +14,8 @@ describe('window.octo', () => {
       .filter((f) => /\.(ts|tsx)$/.test(f))
       .filter((f) => /window\.octo\b/.test(fs.readFileSync(f, 'utf8')))
     assert.deepEqual(hits.map((f) => path.relative(root, f)), [])
+  })
+  it('the preload does not expose window.octo', () => {
+    assert.ok(!fs.readFileSync(path.join(root, 'src', 'preload', 'index.ts'), 'utf8').includes("exposeInMainWorld('octo'"))
   })
 })
