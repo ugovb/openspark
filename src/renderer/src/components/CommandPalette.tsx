@@ -93,7 +93,7 @@ export default function CommandPalette() {
       }
       list.push(
         th?.pinned ? act('unpin', t('Unpin'), <PinOff size={I} />, 'unpin odepnij', 'S') : act('pin', t('Pin'), <Pin size={I} />, 'pin star flag gwiazdka przypnij', 'S'),
-        { id: 'snooze', label: t('Snooze…'), hint: 'H', icon: <Clock size={I} />, keywords: 'snooze pozniej odloz read later', group: MSG, run: () => runCommand('snooze') },
+        { id: 'snooze', label: t('Snooze…'), hint: 'H', icon: <Clock size={I} />, keywords: 'snooze pozniej odloz read later', group: MSG, run: () => useStore.setState({ snoozeFor: targets, pickerMode: 'snooze' }) },
         { id: 'move', label: t('Move to…'), hint: 'V', icon: <FolderInput size={I} />, keywords: 'move folder przenies', group: MSG, run: () => useStore.setState({ moveFor: targets }) },
         th?.set_aside ? act('unaside', t('Back to Inbox'), <Coffee size={I} />, 'set aside odloz', 'Y') : act('aside', t('Set aside'), <Coffee size={I} />, 'set aside odloz', 'Y'),
       )

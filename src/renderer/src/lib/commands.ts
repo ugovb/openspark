@@ -25,7 +25,8 @@ export function runCommand(c: AppCommand): void {
   }
   switch (c) {
     case 'compose': st.compose({ mode: 'new' }); return
-    case 'settings': openSettings('general'); return
+    // a conversation window only renders its thread in the mail view: opening Settings there would blank it
+    case 'settings': if (!st.standalone) openSettings('general'); return
     // a conversation window only renders its thread in the mail view: searching there would blank it (as the old Ctrl+F guard did)
     case 'search': if (!st.standalone) openSearch(); return
     case 'palette': useStore.setState({ palette: !st.palette }); return

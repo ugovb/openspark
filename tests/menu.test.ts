@@ -23,6 +23,7 @@ it('only the four CmdOrCtrl shortcuts are real accelerators', () => {
 it('menuHandlesKey skips only meta combos on darwin', () => {
   const k = (key: string, o = {}) => ({ key, ctrlKey: false, metaKey: false, altKey: false, ...o })
   assert.equal(menuHandlesKey('darwin', k('n', { metaKey: true })), true)
+  assert.equal(menuHandlesKey('darwin', k('n', { metaKey: true, shiftKey: true })), false)
   assert.equal(menuHandlesKey('darwin', k('r', { metaKey: true })), false)
   assert.equal(menuHandlesKey('linux', k('n', { ctrlKey: true })), false)
   assert.equal(menuHandlesKey('darwin', k('n', { metaKey: true, altKey: true })), false)

@@ -202,7 +202,24 @@ it('accepts both app headers', () => {
 
 ## Règles désactivées
 
-(à remplir pendant la tâche 2 : règle Biome, nombre de diagnostics)
+Règles Biome mises à `"off"` dans `biome.json` (nombre de diagnostics initiaux, 715 au total) :
+
+- `lint/style/noNonNullAssertion` : 175
+- `lint/complexity/noCommaOperator` : 120
+- `lint/a11y/useButtonType` : 111
+- `lint/correctness/useExhaustiveDependencies` : 73
+- `lint/style/useTemplate` : 46
+- `lint/a11y/noStaticElementInteractions` : 33
+- `lint/a11y/noAutofocus` : 20
+- `lint/suspicious/noExplicitAny` : 19
+- `lint/a11y/useKeyWithClickEvents` : 18
+- `lint/complexity/useOptionalChain` : 14
+- `lint/suspicious/noAssignInExpressions` : 14
+- `lint/suspicious/noArrayIndexKey` : 11
+- `lint/suspicious/noControlCharactersInRegex` : 8 (sous le seuil, mais le corriger changerait le comportement des regex)
+- `lint/complexity/noImportantStyles` : 2 (sous le seuil, `!important` voulu dans le CSS)
+
+Le champ `recommended` de Biome est déprécié : migrer vers `preset` dans un plan ultérieur.
 
 ## Hors périmètre
 

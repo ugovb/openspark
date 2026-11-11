@@ -19,6 +19,11 @@ describe('sanitizeFragment', () => {
 describe('previewHtml', () => {
   it('shows plain text with an address as text', () =>
     assert.equal(previewHtml('Ugo <ugo@x.test>\nCEO'), 'Ugo &lt;ugo@x.test&gt;<br>CEO'))
+  it('knows the less common formatting tags', () => {
+    assert.equal(looksLikeHtml('<small>x</small>'), true)
+    assert.equal(looksLikeHtml('<center>x</center>'), true)
+    assert.equal(looksLikeHtml('Ugo <ugo@x.test>'), false)
+  })
   it('treats real markup as HTML', () => {
     assert.equal(looksLikeHtml('<p>Hi</p>'), true)
     assert.equal(looksLikeHtml('Ugo <ugo@x.test>'), false)

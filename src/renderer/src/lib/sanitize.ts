@@ -13,7 +13,7 @@ export function sanitizeFragment(html: string): string {
   })
 }
 
-const HTML_TAG = /<\/?(p|div|br|span|a|b|i|u|strong|em|img|table|tr|td|font|ul|ol|li|h[1-6]|hr|blockquote)\b[^>]*>/i
+const HTML_TAG = /<\/?(p|div|br|span|a|b|i|u|strong|em|img|table|tr|td|font|ul|ol|li|h[1-6]|hr|blockquote|small|center|pre|code|sub|sup|s|strike|del|ins|mark)\b[^>]*>/i
 
 export function looksLikeHtml(s: string): boolean {
   return HTML_TAG.test(s)

@@ -26,7 +26,7 @@ let tray: Tray | null = null
 let quitting = false
 let engineStopped = false
 
-// Test/demo profiles (OCTO_HOME) get their own Chromium profile and single-instance lock,
+// Test/demo profiles (OPENMAIL_HOME) get their own Chromium profile and single-instance lock,
 // so they never collide with — or wake up — the installed app running on the real profile.
 const isolatedProfile = !!env('HOME')
 if (isolatedProfile) app.setPath('userData', path.join(env('HOME')!, 'electron-profile'))
@@ -180,8 +180,8 @@ async function printHtml(html: string): Promise<void> {
 }
 
 /**
- * Development aid: OCTO_SCREENSHOT=<dir> captures the window to PNG files after load.
- * OCTO_SCREENSHOT_STEPS is a JSON array of {js?: string, wait?: number, name: string}
+ * Development aid: OPENMAIL_SCREENSHOT=<dir> captures the window to PNG files after load.
+ * OPENMAIL_SCREENSHOT_STEPS is a JSON array of {js?: string, wait?: number, name: string}
  * evaluated in the renderer before each capture. The app quits afterwards.
  */
 function scheduleScreenshots(w: BrowserWindow): void {
