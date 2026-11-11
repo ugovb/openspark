@@ -215,12 +215,12 @@ function FullSidebar({ onMore, moreOpen }: { onMore: () => void; moreOpen: boole
 
       <div className="shrink-0 px-2 pb-2 pt-1">
         {server && !server.online && (
-          <button onClick={() => setView('settings')} className="mb-1.5 flex w-full items-center gap-2 rounded-lg bg-warning/15 px-2.5 py-1.5 text-left text-[12px] text-warning" title={server.url}>
+          <button onClick={() => setView('settings')} className="mb-1.5 flex w-full items-center gap-2 rounded-lg bg-warning/15 px-2.5 py-1.5 text-left text-[12px] text-rail-warning" title={server.url}>
             <TriangleAlert size={14} /> <span className="truncate">{t('No connection to the home server')}</span>
           </button>
         )}
         {errors.length > 0 && (
-          <button onClick={() => setView('settings')} className="mb-1.5 flex w-full items-center gap-2 rounded-lg bg-danger/15 px-2.5 py-1.5 text-left text-[12px] text-danger">
+          <button onClick={() => setView('settings')} className="mb-1.5 flex w-full items-center gap-2 rounded-lg bg-danger/15 px-2.5 py-1.5 text-left text-[12px] text-rail-danger">
             <TriangleAlert size={14} /> <span className="truncate">{errors[0].email}: {errors[0].error}</span>
           </button>
         )}

@@ -39,9 +39,9 @@ function Attachments({ list }: { list: AttachmentInfo[] }) {
           <FileText size={16} className="shrink-0 text-muted" />
           <button className="min-w-0 flex-1 text-left" title={t('Open')} onClick={() => void run(window.openmail.openAttachment(a.id))}>
             <div className="truncate text-[12.5px] font-medium">{a.filename}</div>
-            <div className="text-[11px] text-muted">{fileSize(a.size)}</div>
+            <div className="text-[11.5px] text-muted">{fileSize(a.size)}</div>
           </button>
-          <IconButton size="sm" title={t('Save as…')} onClick={() => void run(window.openmail.saveAttachment(a.id))}><Download size={14} /></IconButton>
+          <IconButton size="sm" label={t('Save as…')} onClick={() => void run(window.openmail.saveAttachment(a.id))}><Download size={14} /></IconButton>
         </div>
       ))}
       {files.length > 1 && (
@@ -160,8 +160,8 @@ function MessageCard({
         </div>
         {open && (
           <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-            <IconButton title={t('Reply (R)')} onClick={() => compose({ mode: 'reply', messageId: m.id, threadId: thread.thread.thread_id })}><Reply size={16} /></IconButton>
-            <IconButton title={t('More')} onClick={(e) => setMenu({ x: e.clientX - 180, y: e.clientY + 10 })}><MoreHorizontal size={16} /></IconButton>
+            <IconButton label={t('Reply (R)')} onClick={() => compose({ mode: 'reply', messageId: m.id, threadId: thread.thread.thread_id })}><Reply size={16} /></IconButton>
+            <IconButton label={t('More')} onClick={(e) => setMenu({ x: e.clientX - 180, y: e.clientY + 10 })}><MoreHorizontal size={16} /></IconButton>
           </div>
         )}
       </div>
@@ -432,7 +432,7 @@ export default function ThreadView() {
                   </div>
                   {d.status === 'scheduled' && <Button size="sm" onClick={() => void api.cancelSend(d.id).catch((e) => toast({ level: 'error', message: errorText(e) }))}>{t('Cancel sending')}</Button>}
                   <Button size="sm" onClick={() => s.compose({ mode: 'edit', draftId: d.id, threadId: thread.thread_id, inline: true })}>{t('Edit')}</Button>
-                  <IconButton title={t('Delete')} onClick={() => void api.deleteDraft(d.id)}><Trash2 size={15} /></IconButton>
+                  <IconButton label={t('Delete')} onClick={() => void api.deleteDraft(d.id)}><Trash2 size={15} /></IconButton>
                 </div>
               ))}
           </div>

@@ -426,7 +426,7 @@ function SignaturesTab() {
             <div className="truncate text-[12px] text-muted">{s.html.replace(/<[^>]+>/g, ' ')}</div>
           </div>
           <Button size="sm" onClick={() => setEdit(s)}>{t('Edit')}</Button>
-          <IconButton onClick={async () => window.confirm(t('Delete this signature?')) && (await api.deleteSignature(s.id), void load())}><Trash2 size={14} /></IconButton>
+          <IconButton label={t('Delete signature')} onClick={async () => window.confirm(t('Delete this signature?')) && (await api.deleteSignature(s.id), void load())}><Trash2 size={14} /></IconButton>
         </div>
       ))}
       <div className="py-2"><Button size="sm" variant="ghost" onClick={() => setEdit({ name: t('My signature'), html: '' })}><Plus size={14} /> {t('New signature')}</Button></div>
@@ -476,7 +476,7 @@ function TemplatesTab() {
             <div className="truncate text-[12px] text-muted">{tpl.subject} {tpl.placeholders.length ? `· ${t('fields: {list}', { list: tpl.placeholders.join(', ') })}` : ''}</div>
           </div>
           <Button size="sm" onClick={() => setEdit({ ...tpl, body: (tpl.html || '').replace(/<br\s*\/?>/g, '\n').replace(/<\/p>\s*<p>/g, '\n\n').replace(/<[^>]+>/g, '') })}>{t('Edit')}</Button>
-          <IconButton onClick={async () => window.confirm(t('Delete this template?')) && (await api.deleteTemplate(tpl.id), void load())}><Trash2 size={14} /></IconButton>
+          <IconButton label={t('Delete template')} onClick={async () => window.confirm(t('Delete this template?')) && (await api.deleteTemplate(tpl.id), void load())}><Trash2 size={14} /></IconButton>
         </div>
       ))}
       <div className="py-2"><Button size="sm" variant="ghost" onClick={() => setEdit({ name: t('New template'), subject: '', body: '' })}><Plus size={14} /> {t('New template')}</Button></div>
@@ -513,9 +513,9 @@ function ProviderHeader({ title, active, onUse }: { title: string; active: boole
     <span className="flex items-center gap-2">
       {title}
       {active ? (
-        <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent">{t('Used by default')}</span>
+        <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11.5px] font-medium text-accent">{t('Used by default')}</span>
       ) : (
-        <button type="button" className="rounded-full border border-line px-2 py-0.5 text-[11px] font-normal text-muted hover:text-accent" onClick={onUse}>{t('Use by default')}</button>
+        <button type="button" className="rounded-full border border-line px-2 py-0.5 text-[11.5px] font-normal text-muted hover:text-accent" onClick={onUse}>{t('Use by default')}</button>
       )}
     </span>
   )
@@ -545,7 +545,7 @@ function AiTab() {
         <Field label="Model" hint={status && !status.ollamaModels.length ? t('Ollama is not responding — start it to see the models.') : t('gemma3:12b and qwen3:8b work well, also for Polish.')}>
           <div className="flex gap-2">
             <Select className="flex-1" value={s.ai.ollamaModel} onChange={(v) => ai({ ollamaModel: v })} options={[...(status?.ollamaModels || []).map((m) => ({ value: m.name, label: `${m.name} (${(m.size / 1e9).toFixed(1)} GB)` })), ...(status?.ollamaModels.some((m) => m.name === s.ai.ollamaModel) ? [] : [{ value: s.ai.ollamaModel, label: s.ai.ollamaModel }])]} />
-            <IconButton title={t('Refresh list')} onClick={() => void load()}><RefreshCw size={14} /></IconButton>
+            <IconButton label={t('Refresh list')} onClick={() => void load()}><RefreshCw size={14} /></IconButton>
           </div>
         </Field>
       </Section>
@@ -634,7 +634,7 @@ function AgentsTab() {
       <Section title={t('Connect to Claude Code')} hint={t('Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.')}>
         <div className="flex items-center gap-2 py-1">
           <code className="selectable flex-1 break-all rounded-lg bg-surface-2 px-2 py-1.5 text-[12px]">{mcpCmd}</code>
-          <IconButton title={t('Copy')} onClick={() => copy(mcpCmd)}><Copy size={14} /></IconButton>
+          <IconButton label={t('Copy')} onClick={() => copy(mcpCmd)}><Copy size={14} /></IconButton>
         </div>
         <div className="py-1 text-[12.5px] text-muted">
           {rich(t('Command line: {cmd}. The CLI also works when the app is closed and prints times in local time with the UTC offset.'), { cmd: <code className="selectable">{openmailCmd} help</code> })}
@@ -666,8 +666,8 @@ function CalendarsTab() {
             <div className="font-medium">{s.name} <span className="text-[12px] font-normal text-muted">({s.kind})</span></div>
             <div className="text-[12px] text-muted">{s.last_error ? <span className="text-danger">{s.last_error}</span> : s.last_sync ? t('synced {when}', { when: fullDate(s.last_sync) }) : ''}</div>
           </div>
-          <IconButton title={t('Sync')} onClick={() => void api.syncCalendars(s.id).then(load).catch((e) => toast({ level: 'error', message: errorText(e) }))}><RefreshCw size={14} /></IconButton>
-          <IconButton title={t('Remove')} onClick={async () => window.confirm(t('Remove this calendar source?')) && (await api.removeCalendarSource(s.id), void load())}><Trash2 size={14} /></IconButton>
+          <IconButton label={t('Sync')} onClick={() => void api.syncCalendars(s.id).then(load).catch((e) => toast({ level: 'error', message: errorText(e) }))}><RefreshCw size={14} /></IconButton>
+          <IconButton label={t('Remove')} onClick={async () => window.confirm(t('Remove this calendar source?')) && (await api.removeCalendarSource(s.id), void load())}><Trash2 size={14} /></IconButton>
         </div>
       ))}
       {!sources.length && <div className="py-2 text-[12.5px] text-muted">{t('No calendars.')}</div>}
@@ -1102,7 +1102,7 @@ export default function SettingsView() {
       <div className="anim-in flex h-full max-h-[700px] w-full max-w-[1000px] overflow-hidden rounded-2xl bg-surface" style={{ boxShadow: 'var(--shadow)' }} role="dialog" aria-label={t('Settings')}>
         <div className="flex w-[230px] shrink-0 flex-col overflow-y-auto border-r border-line bg-panel p-3">
           <div className="-ml-1 mb-2">
-            <IconButton aria-label={t('Close')} title={t('Close (Esc)')} onClick={close}><X size={16} /></IconButton>
+            <IconButton label={t('Close')} title={t('Close (Esc)')} onClick={close}><X size={16} /></IconButton>
           </div>
           {profile}
           {nav}

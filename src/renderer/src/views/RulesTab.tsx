@@ -62,7 +62,7 @@ function scheduleText(s: RuleSchedule): string {
 /** One condition row, or a group card holding more of them. */
 function ConditionNodeEditor({ node, path, root, setRoot }: { node: RuleNode; path: NodePath; root: RuleNode[]; setRoot: (n: RuleNode[]) => void }) {
   const remove = (
-    <IconButton onClick={() => setRoot(removeAt(root, path))} disabled={root.length === 1 && path.length === 1} aria-label={t('Remove')}><X size={14} /></IconButton>
+    <IconButton onClick={() => setRoot(removeAt(root, path))} disabled={root.length === 1 && path.length === 1} label={t('Remove')}><X size={14} /></IconButton>
   )
   if (isGroup(node)) {
     return (
@@ -176,7 +176,7 @@ export default function RulesTab() {
             </div>
             <Button size="sm" onClick={() => void applyNow(r)}>{t('Apply now')}</Button>
             <Button size="sm" onClick={() => open(r)}>{t('Edit')}</Button>
-            <IconButton onClick={async () => window.confirm(t('Delete this rule?')) && (await api.deleteRule(r.id), void load())}><Trash2 size={14} /></IconButton>
+            <IconButton label={t('Delete rule')} onClick={async () => window.confirm(t('Delete this rule?')) && (await api.deleteRule(r.id), void load())}><Trash2 size={14} /></IconButton>
           </div>
         ))}
         <div className="py-2"><Button size="sm" variant="ghost" onClick={() => open({ name: t('New rule'), match: 'all', conditions: [newCondition()], actions: [{ type: 'archive' }], schedule: null })}><Plus size={14} /> {t('New rule')}</Button></div>
@@ -213,7 +213,7 @@ export default function RulesTab() {
                 {ACTIONS.find((x) => x.value === a.type)?.needs && (
                   <input className={inputCls} placeholder={ACTIONS.find((x) => x.value === a.type)?.needs} value={a.value || ''} onChange={(e) => setEdit({ ...edit, actions: edit.actions.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)) })} />
                 )}
-                <IconButton disabled={edit.actions.length === 1} onClick={() => setEdit({ ...edit, actions: edit.actions.filter((_, j) => j !== i) })} aria-label={t('Remove')}><X size={14} /></IconButton>
+                <IconButton disabled={edit.actions.length === 1} onClick={() => setEdit({ ...edit, actions: edit.actions.filter((_, j) => j !== i) })} label={t('Remove')}><X size={14} /></IconButton>
               </div>
             ))}
             <Button className="mt-2" size="sm" variant="ghost" onClick={() => setEdit({ ...edit, actions: [...edit.actions, { type: 'mark_read' }] })}><Plus size={13} /> {t('Action')}</Button>

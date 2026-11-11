@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MessageView } from '../../../shared/types'
+import { MAIL_FONT } from '../lib/format'
 import { cidUrl } from '../lib/web-bridge'
 import { t } from '../../../shared/i18n'
 
@@ -150,7 +151,7 @@ export function prepareHtml(m: MessageView, allowRemote: boolean, blockTrackers:
 <style>
 :root{color-scheme:${plain && dark ? 'dark' : 'light'};}
 html,body{margin:0;padding:0;background:${bg};}
-body{padding:14px 18px;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.5;color:${fg};overflow-wrap:anywhere;}
+body{padding:14px 18px;font-family:${MAIL_FONT};font-size:14px;line-height:1.5;color:${fg};overflow-wrap:anywhere;}
 img{max-width:100%;height:auto;}
 table{max-width:100%;}
 pre{white-space:pre-wrap;}

@@ -12,9 +12,11 @@ import ThreadView from './components/ThreadView'
 import Toasts from './components/Toasts'
 import { PromptHost, Spinner } from './components/ui'
 import { api } from './lib/api'
+import { menuHandlesKey, runCommand } from './lib/commands'
 import { useNarrow } from './lib/narrow'
 import { useOnePane, useStore } from './lib/store'
 import { t } from '../../shared/i18n'
+import { isAppCommand } from '../../shared/commands'
 import AccountWizard from './views/AccountWizard'
 import { SignInScreen } from './views/SignInScreen'
 import AskView from './views/AskView'
@@ -23,12 +25,6 @@ const SettingsView = lazy(() => import('./views/SettingsView'))
 const CalendarView = lazy(() => import('./views/CalendarView'))
 const ContactsView = lazy(() => import('./views/ContactsView'))
 const SearchView = lazy(() => import('./views/SearchView'))
-
-function openSearch() {
-  const st = useStore.getState()
-  if (st.view === 'search') document.getElementById('octo-search')?.focus()
-  else st.setView('search')
-}
 
 /** Conversation named in the address: ?thread=<id> (conversation window) or #/thread/<id> (copied web link). */
 function threadFromUrl(): number | null {
@@ -59,19 +55,26 @@ function useShortcuts() {
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       const st = useStore.getState()
+      // on macOS the menu bar already fires Cmd+N/,/F/K
+      if (menuHandlesKey(document.documentElement.dataset.platform ?? '', e)) return
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        useStore.setState({ palette: !st.palette })
+        runCommand('palette')
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault()
+        runCommand('settings')
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
-        st.compose({ mode: 'new' })
+        runCommand('compose')
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && !isTyping(e) && !st.standalone) {
         e.preventDefault()
-        openSearch()
+        runCommand('search')
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !isTyping(e)) {
@@ -111,16 +114,16 @@ function useShortcuts() {
       }
       switch (key) {
         case 'g': gPressed.current = Date.now(); return
-        case 'c': e.preventDefault(); st.compose({ mode: 'new' }); return
-        case '/': e.preventDefault(); openSearch(); return
+        case 'c': e.preventDefault(); runCommand('compose'); return
+        case '/': e.preventDefault(); runCommand('search'); return
         case 'j': case 'ArrowDown': e.preventDefault(); go(1); return
         case 'k': case 'ArrowUp': e.preventDefault(); go(-1); return
-        case 'e': case 'd': if (st.targets().length) void st.act('archive'); return
-        case '#': case 'Delete': if (st.targets().length) void st.act('trash'); return
-        case 's': if (sel) void st.act(sel.pinned ? 'unpin' : 'pin'); return
-        case 'h': case 'b': if (st.targets().length) useStore.setState({ snoozeFor: st.targets(), pickerMode: 'snooze' }); return
+        case 'e': case 'd': runCommand('archive'); return
+        case '#': case 'Delete': runCommand('trash'); return
+        case 's': runCommand('pin'); return
+        case 'h': case 'b': runCommand('snooze'); return
         case 'v': if (st.targets().length) useStore.setState({ moveFor: st.targets() }); return
-        case 'u': if (sel) void st.act(sel.unread ? 'read' : 'unread'); return
+        case 'u': runCommand('toggleRead'); return
         case 'I': if (st.targets().length) void st.act('read'); return
         case 'm': if (sel) void st.act(sel.muted ? 'unmute' : 'mute'); return
         case 'p': if (sel) void st.act(sel.priority ? 'unpriority' : 'priority'); return
@@ -128,9 +131,9 @@ function useShortcuts() {
         case 'l': if (st.targets().length && st.accounts.find((a) => a.id === sel?.account_id)?.is_gmail) useStore.setState({ labelFor: st.targets() }); return
         case 'x': if (sel) st.toggleCheck(sel.thread_id); return
         case '!': if (st.targets().length) void st.act('spam'); return
-        case 'r': if (sel) st.compose({ mode: 'reply', messageId: sel.latest_message_id, threadId: sel.thread_id }); return
-        case 'a': if (sel) st.compose({ mode: 'replyall', messageId: sel.latest_message_id, threadId: sel.thread_id }); return
-        case 'f': if (sel) st.compose({ mode: 'forward', messageId: sel.latest_message_id, threadId: sel.thread_id }); return
+        case 'r': runCommand('reply'); return
+        case 'a': runCommand('replyall'); return
+        case 'f': runCommand('forward'); return
         case 'Escape': if (st.checked.length) st.clearChecks(); else st.select(null); return
       }
     }
@@ -188,7 +191,7 @@ export default function App() {
         if (m) (st.setView('mail'), st.select(m.thread_id))
       }
     })
-    const offCmd = window.openmail.on('command', (c: string) => c === 'compose' && useStore.getState().compose({ mode: 'new' }))
+    const offCmd = window.openmail.on('command', (c: string) => isAppCommand(c) && runCommand(c))
     return () => {
       window.removeEventListener('hashchange', openThreadFromUrl)
       offLink()

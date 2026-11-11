@@ -4,6 +4,8 @@ import {
   app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, Notification, protocol, net, shell, Tray, type MenuItemConstructorOptions,
 } from 'electron'
 import os from 'node:os'
+import type { AppCommand } from '../shared/commands'
+import { appMenuTemplate } from './menu'
 import { getLang, initLang, t, tp, type Lang, type LangSetting } from '../shared/i18n'
 import type { CoreEvent } from '../shared/types'
 import { log } from '../core/events'
@@ -214,6 +216,17 @@ function send(channel: string, payload: unknown): void {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload)
   // conversation windows only need to follow data changes
   if (channel === 'core-event') for (const w of threadWindows) if (!w.isDestroyed()) w.webContents.send(channel, payload)
+}
+
+/** Menu bar command: to the focused window (a conversation window too); compose/settings first bring the main window up. */
+function sendMenuCommand(c: AppCommand): void {
+  let target = BrowserWindow.getFocusedWindow()
+  if (c === 'compose' || c === 'settings') {
+    showWindow()
+    target = win
+  }
+  target ??= win
+  if (target && !target.isDestroyed()) target.webContents.send('command', c)
 }
 
 function openDeepLink(link: string): void {
@@ -511,14 +524,7 @@ function registerCidProtocol(): void {
 /** macOS needs a real menu bar (Cmd+C/V/Q/W come from its roles); Windows/Linux keep the window menu-less. */
 function setupMenu(): void {
   if (process.platform !== 'darwin') return Menu.setApplicationMenu(null)
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate([
-      { role: 'appMenu' },
-      { role: 'editMenu' },
-      { label: t('View'), submenu: [{ role: 'reload' }, { role: 'togglefullscreen' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }] },
-      { role: 'windowMenu' },
-    ]),
-  )
+  Menu.setApplicationMenu(Menu.buildFromTemplate(appMenuTemplate(app.name, sendMenuCommand)))
 }
 
 function createTray(): void {
@@ -565,6 +571,7 @@ function applyLanguage(): void {
   initLang(setting, osLocale())
   if (getLang() === labelsLang) return
   labelsLang = getLang()
+  setupMenu() // macOS menu bar: relabel without a restart
   if (tray) {
     buildTrayMenu()
     void updateBadge() // tooltip

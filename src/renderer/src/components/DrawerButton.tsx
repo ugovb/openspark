@@ -9,7 +9,7 @@ export default function DrawerButton() {
   const narrow = useNarrow()
   if (!narrow) return null
   return (
-    <IconButton title={t('Menu')} onClick={() => useStore.setState({ drawer: true })}>
+    <IconButton label={t('Menu')} onClick={() => useStore.setState({ drawer: true })}>
       <Menu size={18} />
     </IconButton>
   )

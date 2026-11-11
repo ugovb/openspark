@@ -7,6 +7,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { MailboxRef, ThreadSummary } from '../../../shared/types'
 import { api } from '../lib/api'
+import { runCommand } from '../lib/commands'
 import { type ThreadAction, useStore } from '../lib/store'
 import {
   canSendAgain, copyThreadHyperlink, copyThreadLink, copyThreadMarkdown, groupBySender, openInNewWindow, printThread, searchBySender, sendAgain,
@@ -92,7 +93,7 @@ export default function CommandPalette() {
       }
       list.push(
         th?.pinned ? act('unpin', t('Unpin'), <PinOff size={I} />, 'unpin odepnij', 'S') : act('pin', t('Pin'), <Pin size={I} />, 'pin star flag gwiazdka przypnij', 'S'),
-        { id: 'snooze', label: t('Snooze…'), hint: 'H', icon: <Clock size={I} />, keywords: 'snooze pozniej odloz read later', group: MSG, run: () => useStore.setState({ snoozeFor: targets, pickerMode: 'snooze' }) },
+        { id: 'snooze', label: t('Snooze…'), hint: 'H', icon: <Clock size={I} />, keywords: 'snooze pozniej odloz read later', group: MSG, run: () => runCommand('snooze') },
         { id: 'move', label: t('Move to…'), hint: 'V', icon: <FolderInput size={I} />, keywords: 'move folder przenies', group: MSG, run: () => useStore.setState({ moveFor: targets }) },
         th?.set_aside ? act('unaside', t('Back to Inbox'), <Coffee size={I} />, 'set aside odloz', 'Y') : act('aside', t('Set aside'), <Coffee size={I} />, 'set aside odloz', 'Y'),
       )
@@ -150,13 +151,13 @@ export default function CommandPalette() {
     // ---- general ----
     const G = t('General')
     list.push(
-      { id: 'compose', label: t('New message'), hint: 'C', icon: <PenSquare size={I} />, keywords: 'napisz utworz compose new email mail', group: G, run: () => st.compose({ mode: 'new' }) },
+      { id: 'compose', label: t('New message'), hint: 'C', icon: <PenSquare size={I} />, keywords: 'napisz utworz compose new email mail', group: G, run: () => runCommand('compose') },
       {
         id: 'search', label: t('Search mail'), hint: '/', icon: <Search size={I} />, keywords: 'znajdz search find szukaj', group: G,
-        run: () => (useStore.getState().view === 'search' ? document.getElementById('octo-search')?.focus() : st.setView('search')),
+        run: () => runCommand('search'),
       },
       { id: 'ask', label: t('Ask AI about your mail'), icon: <Bot size={I} />, keywords: 'asystent ai ask pytanie', group: G, run: () => st.setView('ask') },
-      { id: 'sync', label: t('Sync now'), icon: <RefreshCw size={I} />, keywords: 'pobierz odswiez fetch refresh', group: G, run: () => void api.syncNow() },
+      { id: 'sync', label: t('Sync now'), icon: <RefreshCw size={I} />, keywords: 'pobierz odswiez fetch refresh', group: G, run: () => runCommand('sync') },
       { id: 'cal', label: t('Open calendar'), hint: 'G C', icon: <CalendarDays size={I} />, keywords: 'calendar wydarzenia spotkania', group: G, run: () => st.setView('calendar') },
       { id: 'contacts', label: t('Open contacts'), icon: <Contact size={I} />, keywords: 'contacts ludzie adresy', group: G, run: () => st.setView('contacts') },
       { id: 'settings', label: t('Settings'), icon: <Settings size={I} />, keywords: 'preferences opcje settings ustawienia', group: G, run: () => st.setView('settings') },
@@ -256,7 +257,7 @@ export default function CommandPalette() {
           {results.map((c, i) => (
             <div key={c.id}>
               {grouped && c.group !== results[i - 1]?.group && (
-                <div className={cx('px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-palette-fg/55', i === 0 ? 'pt-1' : 'pt-3')}>{c.group}</div>
+                <div className={cx('px-3 pb-1 text-[11.5px] font-medium uppercase tracking-wide text-palette-fg/55', i === 0 ? 'pt-1' : 'pt-3')}>{c.group}</div>
               )}
               <button
                 data-active={i === hi}
@@ -267,7 +268,7 @@ export default function CommandPalette() {
                 <span className="flex w-4 shrink-0 justify-center text-palette-fg/80">{c.icon}</span>
                 <span className="min-w-0 flex-1 truncate">{c.label}</span>
                 {c.note && <span className="max-w-[45%] shrink truncate text-[11.5px] text-palette-fg/55">{c.note}</span>}
-                {c.hint && <span className="shrink-0 rounded-md bg-palette-fg/15 px-1.5 py-px font-mono text-[11px] text-palette-fg/85">{c.hint}</span>}
+                {c.hint && <span className="shrink-0 rounded-md bg-palette-fg/15 px-1.5 py-px font-mono text-[11.5px] text-palette-fg/85">{c.hint}</span>}
               </button>
             </div>
           ))}

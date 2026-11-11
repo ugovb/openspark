@@ -6,7 +6,7 @@ import { t } from '../../../shared/i18n'
 import { mailCsp, sanitizeMail } from '../components/MessageFrame'
 import type { MenuItem } from '../components/ui'
 import { api, errorText } from './api'
-import { displayName, fileSize, fullDate } from './format'
+import { MAIL_FONT, displayName, fileSize, fullDate } from './format'
 import { htmlToMarkdown } from './markdown'
 import { useStore } from './store'
 
@@ -89,7 +89,7 @@ ${files.length ? `<div class="files">📎 ${files.map((a) => `${esc(a.filename)}
 <style>
 @page{margin:16mm;}
 html,body{margin:0;background:#fff;color:#111;}
-body{font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;font-size:12.5px;line-height:1.5;overflow-wrap:anywhere;}
+body{font-family:${MAIL_FONT};font-size:12.5px;line-height:1.5;overflow-wrap:anywhere;}
 h1{font-size:18px;margin:0 0 12px;}
 .msg{border-top:1px solid #bbb;padding:10px 0 14px;break-inside:auto;}
 .head{display:flex;justify-content:space-between;gap:12px;}

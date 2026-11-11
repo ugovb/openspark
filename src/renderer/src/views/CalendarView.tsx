@@ -359,7 +359,7 @@ function SideSection({ title, right, children }: { title: string; right?: ReactN
   return (
     <div className="mt-4">
       <div className="flex items-center px-2 pb-1">
-        <span className="flex-1 text-[11px] font-semibold uppercase tracking-wide text-faint">{title}</span>
+        <span className="flex-1 text-[11.5px] font-semibold uppercase tracking-wide text-faint">{title}</span>
         {right}
       </div>
       {children}
@@ -479,7 +479,7 @@ function TimeGrid({ days, events, now, onSlot, onOpen, onDay: openDay }: {
         })}
       </div>
       <div className="grid shrink-0 border-b border-line pr-[10px]" style={cols}>
-        <div className="pr-2 pt-1 text-right text-[10.5px] text-faint">{t('all day')}</div>
+        <div className="pr-2 pt-1 text-right text-[11.5px] text-faint">{t('all day')}</div>
         <div className="relative max-h-[104px] overflow-y-auto" style={{ gridColumn: `2 / span ${n}` }} onClick={clickAllDay}>
           <div className="relative" style={{ height: Math.max(1, lanes) * 22 + 4 }}>
             {days.map((d, i) => (
@@ -503,7 +503,7 @@ function TimeGrid({ days, events, now, onSlot, onOpen, onDay: openDay }: {
         <div className="relative grid" style={{ ...cols, height: 24 * HOUR_PX }}>
           <div className="relative">
             {Array.from({ length: 23 }, (_, i) => i + 1).map((h) => (
-              <div key={h} className="absolute right-2 text-[10.5px] tabular-nums text-faint" style={{ top: h * HOUR_PX - 7 }}>
+              <div key={h} className="absolute right-2 text-[11.5px] tabular-nums text-faint" style={{ top: h * HOUR_PX - 7 }}>
                 {pad(h)}:00
               </div>
             ))}
@@ -659,7 +659,7 @@ function MiniMonth({ anchor, weekStartsOn, now, selFrom, selTo, onPick }: {
         <SmallIconButton title={t('Previous month')} onClick={() => setMonth(addMonths(month, -1))}><ChevronLeft size={14} /></SmallIconButton>
         <SmallIconButton title={t('Next month')} onClick={() => setMonth(addMonths(month, 1))}><ChevronRight size={14} /></SmallIconButton>
       </div>
-      <div className="grid grid-cols-7 text-center text-[10.5px] text-faint">
+      <div className="grid grid-cols-7 text-center text-[11.5px] text-faint">
         {days.slice(0, 7).map((d) => (
           <span key={d} className="py-0.5">{weekdayShort(d).slice(0, 2)}</span>
         ))}
@@ -1698,17 +1698,17 @@ export default function CalendarView() {
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col bg-surface">
       <div className="flex h-12 shrink-0 items-center gap-1.5 border-b border-line px-3 max-md:h-auto max-md:flex-wrap max-md:px-2 max-md:py-1.5">
         <DrawerButton />
-        {!narrow && <IconButton title={side ? t('Hide sidebar') : t('Show sidebar')} active={side} onClick={toggleSide}><PanelLeft size={16} /></IconButton>}
+        {!narrow && <IconButton label={side ? t('Hide sidebar') : t('Show sidebar')} active={side} onClick={toggleSide}><PanelLeft size={16} /></IconButton>}
         <Button size="sm" variant="outline" onClick={() => setAnchor(startOfDay(Date.now()))} title={t('Today (T)')}>{t('Today')}</Button>
-        <IconButton title={t('Previous (←)')} onClick={() => step(-1)}><ChevronLeft size={17} /></IconButton>
-        <IconButton title={t('Next (→)')} onClick={() => step(1)}><ChevronRight size={17} /></IconButton>
+        <IconButton label={t('Previous (←)')} onClick={() => step(-1)}><ChevronLeft size={17} /></IconButton>
+        <IconButton label={t('Next (→)')} onClick={() => step(1)}><ChevronRight size={17} /></IconButton>
         <div className="ml-1 min-w-0 truncate text-[15px] font-semibold">{viewTitle(mode, anchor, days)}</div>
         {loading && <Spinner className="ml-1 text-muted" />}
         <span className="flex-1" />
         <div className="max-md:order-last max-md:flex max-md:basis-full max-md:justify-center">
           <Seg value={mode} onChange={setMode} options={narrow ? MODES.filter((m) => m.value !== 'week') : MODES} />
         </div>
-        <IconButton title={t('Sync calendars')} disabled={syncing} onClick={() => void syncAll()}>
+        <IconButton label={t('Sync calendars')} disabled={syncing} onClick={() => void syncAll()}>
           <RefreshCw size={15} className={cx(syncing && 'animate-spin')} />
         </IconButton>
         <Button variant="primary" size="sm" onClick={newEvent} title={t('New event (N)')}>

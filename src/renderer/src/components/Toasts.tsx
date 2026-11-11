@@ -12,7 +12,7 @@ export default function Toasts() {
           key={item.id}
           className={cx(
             'anim-in pointer-events-auto flex min-w-[280px] max-w-[560px] items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] shadow-lg',
-            item.level === 'error' ? 'bg-danger text-white' : 'bg-fg text-bg',
+            item.level === 'error' ? 'bg-danger text-danger-fg' : 'bg-fg text-bg',
           )}
         >
           {item.level === 'error' ? <TriangleAlert size={16} /> : item.level === 'success' ? <CheckCircle2 size={16} /> : <Info size={16} />}

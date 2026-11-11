@@ -128,3 +128,5 @@ export async function copyText(text: string): Promise<void> {
   ta.remove()
   if (!ok) throw new Error(t('Clipboard unavailable'))
 }
+
+export const MAIL_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif'

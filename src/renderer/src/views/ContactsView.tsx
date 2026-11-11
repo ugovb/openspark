@@ -53,7 +53,7 @@ function isTyping(e: KeyboardEvent): boolean {
 
 function Badge({ children, cls, title }: { children: ReactNode; cls: string; title?: string }) {
   return (
-    <span title={title} className={cx('inline-flex items-center gap-1 rounded-md px-1.5 py-[1px] text-[10.5px] font-medium', cls)}>
+    <span title={title} className={cx('inline-flex items-center gap-1 rounded-md px-1.5 py-[1px] text-[11.5px] font-medium', cls)}>
       {children}
     </span>
   )
@@ -217,7 +217,7 @@ function ContactCard({ email, version, onChanged }: { email: string; version: nu
             </div>
             <div className="flex items-center gap-1">
               <span className="selectable truncate text-[13.5px] text-muted">{email}</span>
-              <IconButton title={t('Copy address')} onClick={() => void copy()}><Copy size={13} /></IconButton>
+              <IconButton label={t('Copy address')} onClick={() => void copy()}><Copy size={13} /></IconButton>
             </div>
             <div className="mt-1 flex flex-wrap gap-1">
               <Badge cls={status === 'blocked' ? 'bg-danger/12 text-danger' : status === 'accepted' ? 'bg-success/12 text-success' : 'bg-warning/15 text-warning'}>

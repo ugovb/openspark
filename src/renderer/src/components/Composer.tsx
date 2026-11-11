@@ -111,7 +111,7 @@ function RecipientInput({ label, value, onChange, autoFocus }: { label: string; 
 function Toolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null
   const b = (active: boolean, onClick: () => void, icon: React.ReactNode, title: string) => (
-    <IconButton size="sm" active={active} title={title} onMouseDown={(e) => e.preventDefault()} onClick={onClick}>{icon}</IconButton>
+    <IconButton size="sm" active={active} label={title} onMouseDown={(e) => e.preventDefault()} onClick={onClick}>{icon}</IconButton>
   )
   return (
     <div className="flex items-center gap-0.5">
@@ -181,7 +181,7 @@ function IdentityMenu({ identities, value, onChange, above }: { identities: Iden
           <Avatar addr={{ email: cur?.email || value || '?', name: cur?.name }} size={24} className="md:hidden" />
           <span className="flex min-w-0 flex-col leading-tight max-md:hidden">
             <span className="truncate text-[12px] font-medium">{cur?.email || value || '…'}</span>
-            {cur?.name && <span className="truncate text-[11px] text-muted">{cur.name}</span>}
+            {cur?.name && <span className="truncate text-[11.5px] text-muted">{cur.name}</span>}
           </span>
           <ChevronDown size={13} className="shrink-0 text-muted" />
         </button>

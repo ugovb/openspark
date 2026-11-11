@@ -23,17 +23,19 @@ export function Button({ variant = 'soft', size = 'md', className, ...p }: BtnPr
         variant === 'soft' && 'bg-surface-2 text-fg border border-line hover:bg-hover',
         variant === 'ghost' && 'text-fg hover:bg-hover',
         variant === 'outline' && 'border border-line text-fg hover:bg-hover',
-        variant === 'danger' && 'bg-danger text-white hover:brightness-110',
+        variant === 'danger' && 'bg-danger text-danger-fg hover:brightness-110',
         className,
       )}
     />
   )
 }
 
-export function IconButton({ className, active, size = 'md', ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean; size?: 'sm' | 'md' }) {
+export function IconButton({ className, active, size = 'md', label, noTitle, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; noTitle?: boolean; active?: boolean; size?: 'sm' | 'md' }) {
   return (
     <button
       {...p}
+      aria-label={label}
+      title={noTitle ? p.title : p.title ?? label}
       className={cx(
         'inline-flex items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-fg disabled:opacity-40',
         size === 'sm' ? 'h-7 w-7' : 'h-8 w-8',
@@ -85,7 +87,7 @@ export function Modal({
         {title !== undefined && (
           <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
             <div className="text-[15px] font-semibold">{title}</div>
-            <IconButton onClick={onClose} aria-label={t('Close')}>
+            <IconButton onClick={onClose} label={t('Close')}>
               <X size={16} />
             </IconButton>
           </div>
@@ -156,7 +158,7 @@ export function Menu({ items, anchor, onClose }: { items: MenuItem[]; anchor: { 
           >
             <span className="flex w-4 justify-center text-muted">{it.icon}</span>
             <span className="flex-1">{it.label}</span>
-            {it.hint && <span className="text-[11px] text-faint">{it.hint}</span>}
+            {it.hint && <span className="text-[11.5px] text-faint">{it.hint}</span>}
           </button>
         ),
       )}
@@ -291,7 +293,7 @@ export function Tip({ label, kbd, side = 'bottom', children, className }: { labe
         createPortal(
           <div role="tooltip" className="anim-in pointer-events-none fixed z-[70] flex items-center gap-2 whitespace-nowrap rounded-lg bg-tip px-2 py-1 text-[12px] text-white" style={{ ...style, boxShadow: 'var(--shadow)' }}>
             {label}
-            {kbd && <span className="rounded bg-white/15 px-1.5 text-[10.5px] text-white/80">{kbd}</span>}
+            {kbd && <span className="rounded bg-white/15 px-1.5 text-[11.5px] text-white/80">{kbd}</span>}
           </div>,
           document.body,
         )}
@@ -303,7 +305,7 @@ export function Tip({ label, kbd, side = 'bottom', children, className }: { labe
 export function TipButton({ label, kbd, side, children, className, active, size, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; kbd?: string; side?: TipSide; active?: boolean; size?: 'sm' | 'md' }) {
   return (
     <Tip label={label} kbd={kbd} side={side}>
-      <IconButton aria-label={label} active={active} size={size} className={className} {...p}>
+      <IconButton label={label} noTitle active={active} size={size} className={className} {...p}>
         {children}
       </IconButton>
     </Tip>

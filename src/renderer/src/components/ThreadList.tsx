@@ -204,7 +204,7 @@ const ThreadRow = memo(function ThreadRow({
         <span className={cx('w-[210px] shrink-0 truncate text-[13.5px]', th.unread ? 'font-semibold text-fg' : 'text-fg/85')}>{names(th)}</span>
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className={cx('max-w-[46%] shrink-0 truncate text-[13.5px]', th.unread ? 'font-medium text-fg' : 'text-fg/90')}>{th.subject || t('(no subject)')}</span>
-          {th.message_count > 1 && <span className="tabular shrink-0 rounded-md bg-surface-2 px-1.5 text-[11px] text-muted">{th.message_count}</span>}
+          {th.message_count > 1 && <span className="tabular shrink-0 rounded-md bg-surface-2 px-1.5 text-[11.5px] text-muted">{th.message_count}</span>}
           {th.has_draft && <span className="shrink-0 text-[11.5px] font-medium text-danger">{t('Draft')}</span>}
           {th.has_attachments && <Paperclip size={13} className="shrink-0 text-faint" />}
           {th.muted && <BellOff size={12.5} className="shrink-0 text-faint" />}
@@ -232,7 +232,7 @@ const ThreadRow = memo(function ThreadRow({
           className={cx('absolute inset-0 flex items-center px-6 text-white transition-opacity', sw.dx > 0 ? 'justify-start' : 'justify-end', !sw.armed && 'opacity-60')}
           style={{ background: shown.color }}
         >
-          <span className="flex flex-col items-center gap-0.5 text-[11px] font-medium">{shown.icon}{shown.label(th)}</span>
+          <span className="flex flex-col items-center gap-0.5 text-[11.5px] font-medium">{shown.icon}{shown.label(th)}</span>
         </div>
       )}
     <div
@@ -307,7 +307,7 @@ const ThreadRow = memo(function ThreadRow({
 function Chip({ children, icon, tone }: { children: React.ReactNode; icon?: React.ReactNode; tone?: 'warn' | 'accent' }) {
   return (
     <span className={cx(
-      'inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-[1px] text-[11px]',
+      'inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-[1px] text-[11.5px]',
       tone === 'warn' ? 'bg-warning/15 text-warning' : tone === 'accent' ? 'bg-accent-soft text-accent' : 'bg-surface-2 text-muted',
     )}>
       {icon}
@@ -350,7 +350,7 @@ function GroupRow({ category, threads, expanded, variant, onToggle }: { category
         <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full" style={{ color: meta.color, background: `color-mix(in srgb, ${meta.color} 14%, transparent)` }}>{meta.icon}</span>
         <span className="flex w-[210px] shrink-0 items-baseline gap-1.5">
           <span className={cx('truncate text-[13.5px]', unread ? 'font-semibold' : '')}>{meta.label}</span>
-          <span className="tabular text-[11px] text-faint">{threads.length}</span>
+          <span className="tabular text-[11.5px] text-faint">{threads.length}</span>
         </span>
         <span className="flex min-w-0 flex-1 items-center gap-4 overflow-hidden">
           {senders.map(({ th, n, unread: u }) => (
@@ -358,7 +358,7 @@ function GroupRow({ category, threads, expanded, variant, onToggle }: { category
               {u && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
               <Avatar addr={th.from} size={16} />
               <span className={cx('max-w-[160px] truncate', u ? 'font-medium' : 'text-fg/85')}>{displayName(th.from)}</span>
-              {n > 1 && <span className="tabular text-[11px] text-faint">{n}</span>}
+              {n > 1 && <span className="tabular text-[11.5px] text-faint">{n}</span>}
             </span>
           ))}
         </span>
@@ -391,7 +391,7 @@ function DayIcon() {
   return (
     <span className="relative flex h-[24px] w-[23px] flex-col overflow-hidden rounded-[6px] border-[1.75px] border-current">
       <span className="h-[4px] shrink-0 border-b-[1.75px] border-current" />
-      <span className="tabular flex flex-1 items-center justify-center text-[11px] font-semibold leading-none">{new Date().getDate()}</span>
+      <span className="tabular flex flex-1 items-center justify-center text-[11.5px] font-semibold leading-none">{new Date().getDate()}</span>
     </span>
   )
 }
@@ -572,7 +572,7 @@ export default function ThreadList() {
       <TipButton size="sm" label={t('Snooze')} onClick={() => useStore.setState({ snoozeFor: checked, pickerMode: 'snooze' })}><Clock size={15} /></TipButton>
       <TipButton size="sm" label={t('Move')} onClick={() => useStore.setState({ moveFor: checked })}><FolderInput size={15} /></TipButton>
       <TipButton size="sm" label={t('Move to Trash')} onClick={() => void act('trash')}><Trash2 size={15} /></TipButton>
-      <IconButton size="sm" aria-label={t('Clear selection')} title={t('Clear selection')} onClick={clearChecks}><X size={15} /></IconButton>
+      <IconButton size="sm" label={t('Clear selection')} onClick={clearChecks}><X size={15} /></IconButton>
     </div>
   )
 

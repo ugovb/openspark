@@ -54,11 +54,11 @@ export default function DraftList({ kind }: { kind: 'scheduled' | 'local-drafts'
               {d.error && <div className="mt-0.5 flex items-center gap-1 text-[12px] text-danger"><TriangleAlert size={12} /> {d.error}</div>}
               <div className="absolute right-2 top-1.5 hidden gap-0.5 rounded-lg border border-line bg-surface px-0.5 shadow-sm group-hover:flex" onClick={(e) => e.stopPropagation()}>
                 {d.status === 'scheduled' ? (
-                  <IconButton title={t('Cancel sending (moves back to Drafts)')} onClick={() => void guard(() => api.cancelSend(d.id), t('Sending cancelled'))}><Undo2 size={15} /></IconButton>
+                  <IconButton label={t('Cancel sending (moves back to Drafts)')} onClick={() => void guard(() => api.cancelSend(d.id), t('Sending cancelled'))}><Undo2 size={15} /></IconButton>
                 ) : (
-                  <IconButton title={t('Send now')} onClick={() => void guard(() => api.sendDraft(d.id), t('Sending…'))}><Send size={15} /></IconButton>
+                  <IconButton label={t('Send now')} onClick={() => void guard(() => api.sendDraft(d.id), t('Sending…'))}><Send size={15} /></IconButton>
                 )}
-                <IconButton title={t('Delete')} onClick={() => window.confirm(t('Delete this message?')) && void guard(() => api.deleteDraft(d.id), t('Deleted'))}><Trash2 size={15} /></IconButton>
+                <IconButton label={t('Delete')} onClick={() => window.confirm(t('Delete this message?')) && void guard(() => api.deleteDraft(d.id), t('Deleted'))}><Trash2 size={15} /></IconButton>
               </div>
             </div>
           ))

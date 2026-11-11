@@ -116,6 +116,10 @@ const dict: Dictionary = {
     'Create the account first.': 'Créez d’abord le compte.',
     'Could not create the account (HTTP {status})': 'Impossible de créer le compte (HTTP {status})',
     'Could not start the sign-in (HTTP {status})': 'Impossible de démarrer la connexion (HTTP {status})',
+    // src/main/menu.ts — macOS menu bar
+    'Settings…': 'Réglages…',
+    'File': 'Fichier',
+    'Mark as read or unread': 'Marquer comme lu ou non lu',
   },
   plurals: {
     '{n} new message': ['{n} nouveau message', '{n} nouveaux messages', '{n} nouveaux messages'],
