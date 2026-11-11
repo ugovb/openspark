@@ -131,6 +131,10 @@ function loadRenderer(w: BrowserWindow, query?: Record<string, string>): void {
 function createWindow(show = true): void {
   win = appWindow({ width: 1440, height: 900, minWidth: 960, minHeight: 600 })
   win.once('ready-to-show', () => show && win?.show())
+  const created = win
+  win.on('closed', () => {
+    if (win === created) win = null
+  })
   win.on('close', (e) => {
     if (!quitting && backend.settings().minimizeToTray) {
       e.preventDefault()
@@ -197,7 +201,8 @@ function scheduleScreenshots(w: BrowserWindow): void {
 }
 
 function showWindow(): void {
-  if (!win) createWindow()
+  if (quitting) return
+  if (!win || win.isDestroyed()) createWindow()
   if (win?.isMinimized()) win.restore()
   win?.show()
   win?.focus()
