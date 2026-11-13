@@ -172,6 +172,9 @@ export function installWebBridge(): void {
     legacyProfile: async () => null,
     deleteLegacyProfile: async () => false,
     cliPath: async () => ({ script: '', node: '', packaged: false }),
+    claudeStatus: async () => ({ cli: null, claudeCode: false, claudeDesktop: 'not-installed' as const, skill: false, onPath: false }),
+    claudeConnect: async () => ({ status: { cli: null, claudeCode: false, claudeDesktop: 'not-installed' as const, skill: false, onPath: false }, errors: [] }),
+    claudeDisconnect: async () => ({ cli: null, claudeCode: false, claudeDesktop: 'not-installed' as const, skill: false, onPath: false }),
     setBadge: async (_dataUrl: string | null, count: number) => {
       document.title = count ? `(${count}) OpenMail` : 'OpenMail'
     },

@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import type { ConnectStatus as ClaudeStatus } from '../main/claude-connect'
 
 let streamSeq = 0
 const deltaHandlers = new Map<string, (t: string) => void>()
@@ -34,6 +35,9 @@ const api = {
   legacyProfile: (): Promise<string | null> => ipcRenderer.invoke('legacy-profile'),
   deleteLegacyProfile: (): Promise<boolean> => ipcRenderer.invoke('delete-legacy-profile'),
   cliPath: () => ipcRenderer.invoke('cli-path'),
+  claudeStatus: (): Promise<ClaudeStatus> => ipcRenderer.invoke('claude-status'),
+  claudeConnect: (): Promise<{ status: ClaudeStatus; errors: string[] }> => ipcRenderer.invoke('claude-connect'),
+  claudeDisconnect: (): Promise<ClaudeStatus> => ipcRenderer.invoke('claude-disconnect'),
   setBadge: (dataUrl: string | null, count: number) => ipcRenderer.invoke('set-badge', dataUrl, count),
   setLoginItem: (on: boolean) => ipcRenderer.invoke('set-login-item', on),
   windowCmd: (cmd: 'minimize' | 'close' | 'reload') => ipcRenderer.invoke('window', cmd),

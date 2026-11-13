@@ -608,6 +608,52 @@ function AiTab() {
   )
 }
 
+/** One click: `openmail` on the PATH, MCP server in Claude Code / Desktop, and a skill so Claude reaches for it on any mail request. */
+function ClaudeConnect() {
+  const toast = useStore((s) => s.toast)
+  const [st, setSt] = useState<Awaited<ReturnType<typeof window.openmail.claudeStatus>> | null>(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => void window.openmail.claudeStatus().then(setSt), [])
+  const run = async (connect: boolean) => {
+    setBusy(true)
+    try {
+      if (connect) {
+        const r = await window.openmail.claudeConnect()
+        setSt(r.status)
+        toast(r.errors.length ? { level: 'error', message: r.errors.join(' · ') } : { level: 'success', message: t('Connected. Restart Claude Code or Claude Desktop to use it.') })
+      } else setSt(await window.openmail.claudeDisconnect())
+    } catch (e) {
+      toast({ level: 'error', message: errorText(e) })
+    } finally {
+      setBusy(false)
+    }
+  }
+  if (!st) return null
+  const rows: [string, boolean | 'not-installed' | null][] = [
+    [t('`openmail` command in your terminal'), st.cli],
+    [t('Claude Code'), st.claudeCode],
+    [t('Claude Desktop'), st.claudeDesktop],
+    [t('Skill: Claude uses OpenMail when you talk about your mail'), st.skill],
+  ]
+  const done = st.claudeCode && st.skill && st.cli !== false
+  return (
+    <Section title={t('Connect to Claude')} hint={t('One click: Claude then reads, searches, drafts and answers your mail with OpenMail whenever you mention it. Sending stays off until you allow it per account.')}>
+      {rows.filter(([, v]) => v !== null).map(([label, v]) => (
+        <div key={label} className="flex items-center gap-2 py-1 text-[13px]">
+          <span className={cx('w-4 text-center', v === true ? 'text-success' : 'text-muted')} aria-hidden>{v === true ? '✓' : '–'}</span>
+          <span className="flex-1">{label}</span>
+          <span className="text-[12px] text-muted">{v === true ? t('Connected') : v === 'not-installed' ? t('Not installed') : t('Not connected')}</span>
+        </div>
+      ))}
+      {st.cli && !st.onPath && <div className="py-1 text-[12.5px] text-muted">{rich(t('Add {dir} to your PATH to use `openmail` in a terminal.'), { dir: <code className="selectable">~/.local/bin</code> })}</div>}
+      <div className="flex gap-2 py-2">
+        <button type="button" className="rounded-lg bg-accent px-3 py-1.5 text-[13px] font-medium text-accent-fg disabled:opacity-50" disabled={busy} onClick={() => void run(true)}>{done ? t('Reinstall') : t('Connect to Claude')}</button>
+        {done && <button type="button" className="rounded-lg border border-line px-3 py-1.5 text-[13px] disabled:opacity-50" disabled={busy} onClick={() => void run(false)}>{t('Disconnect')}</button>}
+      </div>
+    </Section>
+  )
+}
+
 function AgentsTab() {
   const { accounts, refreshMeta, toast } = useStore()
   const [cli, setCli] = useState<{ script: string; node: string; packaged: boolean } | null>(null)
@@ -632,6 +678,7 @@ function AgentsTab() {
           </SettingRow>
         ))}
       </Section>
+      {cli?.script && <ClaudeConnect />}
       <Section title={t('Connect to Claude Code')} hint={t('Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.')}>
         <div className="flex items-center gap-2 py-1">
           <code className="selectable flex-1 break-all rounded-lg bg-surface-2 px-2 py-1.5 text-[12px]">{mcpCmd}</code>

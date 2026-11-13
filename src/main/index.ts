@@ -17,6 +17,7 @@ import { createServerAccount, pollCodeLogin, startCodeLogin } from './server-cli
 import { type Backend, LocalBackend, loadRemoteConfig, RemoteBackend, type RemoteConfig, remoteConfigPath } from './backend'
 import { decodeWire, encodeWire } from '../shared/wire'
 import { env } from '../shared/env'
+import { type ConnectEnv, connectClaude, connectionStatus, disconnectClaude } from './claude-connect'
 import { isInternalUrl } from './navigation'
 import { isRiskyAttachment } from './attachments'
 
@@ -469,6 +470,18 @@ function registerIpc(): void {
     }
     return { script: path.join(app.getAppPath(), 'out', 'cli', 'openmail.js'), node: 'node', packaged: false }
   })
+  // one-click "Connect to Claude": CLI on the PATH, MCP server in Claude Code / Desktop, skill
+  const claudeEnv = (): ConnectEnv => {
+    if (app.isPackaged) {
+      const dir = process.platform === 'darwin' ? process.resourcesPath : path.dirname(process.execPath)
+      const wrapper = path.join(dir, process.platform === 'win32' ? 'openmail.cmd' : 'openmail')
+      return { home: os.homedir(), platform: process.platform, wrapper: process.platform === 'win32' ? null : wrapper, launch: { command: wrapper, args: ['mcp'] } }
+    }
+    return { home: os.homedir(), platform: process.platform, wrapper: null, launch: { command: 'node', args: [path.join(app.getAppPath(), 'out', 'cli', 'openmail.js'), 'mcp'] } }
+  }
+  ipcMain.handle('claude-status', () => connectionStatus(claudeEnv()))
+  ipcMain.handle('claude-connect', () => connectClaude(claudeEnv()))
+  ipcMain.handle('claude-disconnect', () => disconnectClaude(claudeEnv()))
   ipcMain.handle('set-badge', (_e, dataUrl: string | null, count: number) => {
     if (!win) return
     if (process.platform !== 'win32') {

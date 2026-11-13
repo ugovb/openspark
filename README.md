@@ -148,7 +148,12 @@ openmail send 45 --at "tomorrow 9:00"             # send later ("mon 14:30", "in
 openmail unschedule 45
 ```
 
-To connect Claude Code, copy the ready-made `claude mcp add …` command from the app
+**One click (macOS, Linux; on Windows the installer already provides `openmail`):** *Settings → AI agents & CLI → Connect to Claude*. It puts `openmail` on your
+PATH (`~/.local/bin`), registers the MCP server in Claude Code and Claude Desktop, and installs an `openmail` skill so
+Claude uses your mail whenever you mention it: read, search, summarise, draft replies. Restart Claude afterwards.
+Sending stays off until you raise the account's agent access.
+
+To connect Claude Code by hand, copy the ready-made `claude mcp add …` command from the app
 (*Settings → AI agents & CLI*). With a home server, the agent can talk to it over SSH:
 `claude mcp add openmail --scope user -- ssh pi@raspberrypi.local openmail mcp`.
 

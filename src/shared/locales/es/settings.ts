@@ -283,6 +283,17 @@ const dict: Dictionary = {
     'AI agent access level': 'Nivel de acceso de los agentes de IA',
     'Applies to the `openmail` CLI and the MCP server (Claude Code, Claude Desktop). It can only be changed here — an agent cannot raise its own permissions.':
       'Se aplica a la CLI `openmail` y al servidor MCP (Claude Code, Claude Desktop). Solo se puede cambiar aquí — un agente no puede ampliar sus propios permisos.',
+    'Connected. Restart Claude Code or Claude Desktop to use it.': 'Conectado. Reinicie Claude Code o Claude Desktop para usarlo.',
+    '`openmail` command in your terminal': 'Comando `openmail` en su terminal',
+    'Claude Code': 'Claude Code',
+    'Claude Desktop': 'Claude Desktop',
+    'Skill: Claude uses OpenMail when you talk about your mail': 'Skill: Claude usa OpenMail cuando habla de su correo',
+    'Not installed': 'No instalado',
+    'Not connected': 'No conectado',
+    'Add {dir} to your PATH to use `openmail` in a terminal.': 'Añada {dir} a su PATH para usar `openmail` en una terminal.',
+    'Reinstall': 'Reinstalar',
+    'Connect to Claude': 'Conectar con Claude',
+    'One click: Claude then reads, searches, drafts and answers your mail with OpenMail whenever you mention it. Sending stays off until you allow it per account.': 'Un clic: Claude lee, busca, redacta borradores y responde a su correo con OpenMail cuando lo menciona. El envío sigue desactivado hasta que lo permita cuenta por cuenta.',
     'Connect to Claude Code': 'Conectar con Claude Code',
     'Once, in a terminal. Claude can then read and triage your mail and (if you allow it) send mail and manage your calendar.':
       'Una sola vez, en una terminal. Después Claude puede leer y organizar tu correo y (si lo permites) enviar correo y gestionar tu calendario.',
