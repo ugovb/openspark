@@ -1,12 +1,14 @@
 // Mail rules (Spark "Workflows" without the cloud): conditions on new incoming mail → actions.
 import { t } from '../shared/i18n'
-import { isGroup, isValidSchedule, lastOccurrence, SCHEDULE_SAFE_ACTIONS } from '../shared/rules'
+import { forwardTargets, isGroup, isValidSchedule, lastOccurrence, MAX_FORWARD_TARGETS, SCHEDULE_SAFE_ACTIONS, validForwardAddress } from '../shared/rules'
 import type { Category, Rule, RuleAction, RuleApplyResult, RuleCondition, RuleNode, RulePreview, RuleSchedule } from '../shared/types'
 import * as A from './actions'
 import { all, get, insert, inList, now, parseJson, type Row, run, update } from './db'
 import { bus, log } from './events'
 import { record } from './history'
 import { contactOverride } from './smart'
+import { myAddresses } from './accounts'
+import { saveDraft, sendDraft } from './drafts'
 
 /** Stands in for a stored schedule that cannot be read: truthy so the rule never runs live, invalid so it never runs on schedule. */
 const BROKEN_SCHEDULE: RuleSchedule = { at: '', days: [] }
@@ -46,6 +48,14 @@ export function listRules(): Rule[] {
 
 export function validateRule(r: Pick<Rule, 'conditions' | 'actions' | 'schedule'>): void {
   validateConditions(r.conditions)
+  for (const a of r.actions) {
+    if (a.type !== 'forward') continue
+    const to = forwardTargets(a.value)
+    if (!to.length) throw new Error(t('Enter at least one address to forward to'))
+    if (to.length > MAX_FORWARD_TARGETS) throw new Error(t('A rule can forward to at most {n} addresses', { n: MAX_FORWARD_TARGETS }))
+    const bad = to.find((x) => !validForwardAddress(x))
+    if (bad) throw new Error(t('Invalid address: {email}', { email: bad }))
+  }
   const s = r.schedule
   if (!s) return
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(s.at || '')) throw new Error(t('Schedule time must look like 09:00'))
@@ -53,10 +63,10 @@ export function validateRule(r: Pick<Rule, 'conditions' | 'actions' | 'schedule'
   if (r.actions.some((a) => !SCHEDULE_SAFE_ACTIONS.includes(a.type))) throw new Error(t('This action cannot be used in a scheduled rule'))
 }
 
-/** Agents need "send" for rules that run unattended or destroy/block. */
+/** Agents need "send" for rules that run unattended, destroy/block or send mail out (forward). */
 export function requiredAccess(r: Pick<Rule, 'actions'> & { schedule?: RuleSchedule | null }): 'triage' | 'send' {
   if (r.schedule) return 'send'
-  return r.actions.some((a) => a.type === 'trash' || a.type === 'block' || (a.type === 'move' && movesToRiskyFolder(a.value))) ? 'send' : 'triage'
+  return r.actions.some((a) => a.type === 'trash' || a.type === 'block' || a.type === 'forward' || (a.type === 'move' && movesToRiskyFolder(a.value))) ? 'send' : 'triage'
 }
 
 function movesToRiskyFolder(target: string | undefined): boolean {
@@ -200,11 +210,16 @@ export function validateConditions(nodes: RuleNode[]): void {
 }
 
 /** Runs every action on a message's conversation. A failing action is logged and the rest still run. */
-export function applyActions(actions: RuleAction[], m: Row): { suppressNotify: boolean } {
+export function applyActions(actions: RuleAction[], m: Row, opts: { live?: boolean } = {}): { suppressNotify: boolean } {
   let suppressNotify = false
   for (const a of actions) {
     try {
       if (a.type === 'no_notify') suppressNotify = true
+      // forwarding only reacts to mail as it arrives: "apply to existing" never mass-forwards old mail
+      if (a.type === 'forward') {
+        if (opts.live) forwardMessage(m, forwardTargets(a.value))
+        continue
+      }
       applyAction(a, m)
     } catch (e) {
       log('rules', 'action failed', (e as Error).message)
@@ -258,10 +273,34 @@ function applyAction(a: RuleAction, m: Row): void {
       if (m.from_email) A.blockSenders([m.from_email], 'rule')
       break
     default:
-      // no_notify is handled by applyActions; actions saved by older versions (notify, forward) are skipped
+      // no_notify and forward are handled by applyActions; actions saved by older versions (notify) are skipped
       if (a.type !== 'no_notify') log('rules', `skipped stored action type "${String(a.type)}"`)
       break
   }
+}
+
+export const FORWARD_LIMIT_PER_HOUR = 30
+const HOUR_MS = 3600_000
+
+/**
+ * Forward a message as it arrives (attachments included) and send it right away, as the rule.
+ * Guards: never forward mail sent by one of our own addresses or by a target (no ping-pong loop),
+ * and at most FORWARD_LIMIT_PER_HOUR forwards per hour across all rules.
+ */
+export function forwardMessage(m: Row, targets: string[]): number | null {
+  const from = String(m.from_email || '').toLowerCase()
+  const to = targets.filter((x) => validForwardAddress(x) && x !== from)
+  if (!to.length || myAddresses().has(from)) return null
+  const sent = get<{ n: number }>("SELECT COUNT(*) AS n FROM history WHERE actor = 'rule' AND action = 'rule-forward' AND at > ?", now() - HOUR_MS)?.n ?? 0
+  if (sent >= FORWARD_LIMIT_PER_HOUR) {
+    log('rules', `forward of message ${m.id} skipped: ${FORWARD_LIMIT_PER_HOUR} forwards in the last hour`)
+    record('rule', 'rule-forward-skipped', m.id, { reason: 'hourly limit' }, false)
+    return null
+  }
+  const d = saveDraft({ forward_of_message_id: m.id, account_id: m.account_id, to, html: '', signature: false, source: 'rule' })
+  sendDraft(d.id, { actor: 'rule', immediate: true })
+  record('rule', 'rule-forward', m.id, { to, draft: d.id })
+  return d.id
 }
 
 /** Newest inbox messages, incoming and visible only. */
@@ -304,7 +343,7 @@ export function processNewMessages(accountId: number, ids: number[], initial: bo
         if (!ruleMatches(rule, m)) continue
         log('rules', `rule "${rule.name}" matched message ${m.id}`)
         run('UPDATE rules SET hits = hits + 1 WHERE id = ?', rule.id)
-        if (applyActions(rule.actions, m).suppressNotify) suppressed.add(m.id)
+        if (applyActions(rule.actions, m, { live: true }).suppressNotify) suppressed.add(m.id)
         record('rule', 'rule-applied', m.id, { rule: rule.name })
         if (rule.stop) break
       }

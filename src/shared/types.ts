@@ -276,7 +276,7 @@ export type RuleNode = RuleCondition | RuleGroup
 export interface RuleAction {
   type:
     | 'move' | 'archive' | 'trash' | 'mark_read' | 'pin' | 'mute' | 'categorize' | 'snooze'
-    | 'label' | 'block' | 'no_notify' | 'set_aside' | 'priority'
+    | 'label' | 'block' | 'no_notify' | 'set_aside' | 'priority' | 'forward'
   value?: string
 }
 

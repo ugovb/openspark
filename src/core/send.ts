@@ -139,6 +139,15 @@ export async function sendDraftNow(draftId: number): Promise<void> {
   if (!claimed) return
   const acc = getAccount(claimed.account_id)
   try {
+    // a forward made by a rule right after sync: the original body may not be downloaded yet
+    const ref = claimed.forward_of_message_id ? get<{ id: number; account_id: number; body_state: number }>('SELECT id, account_id, body_state FROM messages WHERE id = ?', claimed.forward_of_message_id) : undefined
+    if (ref && ref.body_state !== 1) {
+      try {
+        await sync.get(ref.account_id).fetchBody(ref.id)
+      } catch (e) {
+        log('send', 'could not fetch the body of the forwarded message', (e as Error).message)
+      }
+    }
     const built = await buildMime(draftId)
     if (!built.envelope.to.length) throw new Error(t('No recipients'))
     const transport = nodemailer.createTransport((await smtpTransportOptions(acc)) as TransportOptions)

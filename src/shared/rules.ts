@@ -8,6 +8,14 @@ export function isGroup(n: RuleNode): n is RuleGroup {
 /** Actions a scheduled rule may use: safe to repeat, and trash keeps mail recoverable in Trash until the server purge window. */
 export const SCHEDULE_SAFE_ACTIONS: RuleAction['type'][] = ['archive', 'mark_read', 'move', 'label', 'categorize', 'set_aside', 'trash']
 
+/** Addresses of a "forward" action: comma, semicolon or space separated. */
+export function forwardTargets(value: string | undefined): string[] {
+  return [...new Set((value || '').split(/[\s,;]+/).map((s) => s.trim().toLowerCase()).filter(Boolean))]
+}
+
+export const MAX_FORWARD_TARGETS = 10
+export const validForwardAddress = (a: string): boolean => /^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/.test(a)
+
 export function isValidSchedule(s: unknown): s is RuleSchedule {
   const x = s as Partial<RuleSchedule> | null
   return !!x && typeof x === 'object' && typeof x.at === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(x.at) &&

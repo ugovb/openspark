@@ -54,7 +54,8 @@ Spark's public feature set was only the to-do list.
 - Full-text search with Gmail-style operators (`from: has:attachment newer_than:7d in: filename:` …),
   accent-insensitive, plus **smart folders**.
 - Safe HTML view: remote images and **tracking pixels blocked** until you allow them.
-- **Rules** with a dry run on existing mail, **Ctrl+K** command palette, Gmail-style shortcuts,
+- **Rules** with a dry run on existing mail, including **forward to** (if mail from X arrives, forward it to Y,
+  attachments included; runs in the app or 24/7 on the home server), **Ctrl+K** command palette, Gmail-style shortcuts,
   light and dark theme, tray icon with unread count.
 
 **AI** (local with [Ollama](https://ollama.com), or Claude with your own API key)

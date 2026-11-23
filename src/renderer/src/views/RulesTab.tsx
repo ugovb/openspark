@@ -27,6 +27,7 @@ const ACTIONS: { value: RuleAction['type']; label: string; needs?: string }[] = 
   { value: 'categorize', label: t('Set category'), needs: 'people / notification / newsletter' }, { value: 'snooze', label: t('Snooze for N hours'), needs: t('number of hours') },
   { value: 'mute', label: t('Mute conversation') }, { value: 'set_aside', label: t('Set aside') }, { value: 'no_notify', label: t('No notification') },
   { value: 'priority', label: t('Mark as priority') },
+  { value: 'forward', label: t('Forward to (new mail only)'), needs: t('addresses, separated by commas') },
   { value: 'trash', label: t('Move to Trash') }, { value: 'block', label: t('Block sender') },
 ]
 const GROUPS: { value: RuleGroup['group']; label: string }[] = [

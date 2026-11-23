@@ -14,6 +14,7 @@ import type { Row } from '../src/core/db'
 import { all, get, insert, now, run } from '../src/core/db'
 import { applyRuleToExisting, listRules, previewRule, processNewMessages, requiredAccess, ruleMatches, runDueScheduledRules, saveRule, scanInbox, validateConditions, validateRule } from '../src/core/rules'
 import { lastOccurrence } from '../src/shared/rules'
+import { buildHistory } from '../src/core/send'
 import { AccessError, createService } from '../src/core/service'
 import type { Rule, RuleCondition, RuleNode } from '../src/shared/types'
 
@@ -463,5 +464,72 @@ describe('agent access hardening', () => {
     setAll('send')
     assert.doesNotThrow(() => svc.saveRule({ ...s, schedule: null }))
     assert.doesNotThrow(() => svc.deleteRule(t.id))
+  })
+})
+
+describe('forward action', () => {
+  const fwRule = (from: string, to: string) => saveRule({ name: `fw ${from}`, conditions: byFrom(from), actions: [{ type: 'forward', value: to }] })
+  const forwardsOf = (messageId: number) => all("SELECT * FROM drafts WHERE forward_of_message_id = ? AND source = 'rule'", messageId)
+  const clearForwardLog = () => run("DELETE FROM history WHERE action = 'rule-forward'")
+
+  it('validates the addresses', () => {
+    assert.throws(() => fwRule('fv@x.test', ''), /at least one address/)
+    assert.throws(() => fwRule('fv@x.test', 'not-an-address'), /Invalid address/)
+    assert.throws(() => fwRule('fv@x.test', Array.from({ length: 11 }, (_, i) => `p${i}@y.test`).join(',')), /at most 10/)
+    assert.doesNotThrow(() => fwRule('fv@x.test', 'a@y.test, b@y.test'))
+  })
+
+  it('agents need send access to create a forwarding rule', () => {
+    assert.equal(requiredAccess({ actions: [{ type: 'forward', value: 'a@y.test' }], schedule: null }), 'send')
+  })
+
+  it('a new matching message is forwarded at once to every address, attachments and all', () => {
+    clearForwardLog()
+    const a = seedMessage({ subject: 'Secure link', fromEmail: 'no-reply-abc@mail.anthropic.test' })
+    insert('attachments', { message_id: a.messageId, part: '2', filename: 'f.pdf', mime: 'application/pdf', size: 3, inline: 0 })
+    fwRule('no-reply-abc@mail.anthropic.test', 'sis@y.test, MOM@y.test')
+    processNewMessages(a.accountId, [a.messageId], false)
+    const [d] = forwardsOf(a.messageId)
+    assert.ok(d, 'a forward draft was created')
+    assert.equal(d.status, 'scheduled')
+    assert.ok(d.send_at <= now(), 'no undo delay')
+    assert.deepEqual(JSON.parse(d.to_json).map((x: { email: string }) => x.email), ['sis@y.test', 'mom@y.test'])
+    assert.equal(d.reply_kind, 'forward')
+    assert.match(d.subject, /^Fwd: Secure link/)
+    assert.deepEqual(buildHistory(d).attachments.map((x) => x.filename), ['f.pdf'])
+    assert.equal(all("SELECT 1 FROM history WHERE action = 'rule-forward' AND target = ?", String(a.messageId)).length, 1)
+  })
+
+  it('the initial sync and "apply to existing" never forward', () => {
+    clearForwardLog()
+    const a = seedMessage({ subject: 'old', fromEmail: 'fw-old@x.test' })
+    const r = fwRule('fw-old@x.test', 'sis@y.test')
+    processNewMessages(a.accountId, [a.messageId], true)
+    applyRuleToExisting(r.id, 50000)
+    assert.equal(forwardsOf(a.messageId).length, 0)
+  })
+
+  it('does not forward mail sent by the target itself or by one of our own addresses (no loop)', () => {
+    clearForwardLog()
+    const a = seedMessage({ subject: 'loop', fromEmail: 'sis@y.test' })
+    fwRule('sis@y.test', 'sis@y.test')
+    processNewMessages(a.accountId, [a.messageId], false)
+    assert.equal(forwardsOf(a.messageId).length, 0)
+    const me = get<{ email: string }>('SELECT email FROM accounts WHERE id = ?', a.accountId)!.email
+    const b = seedMessage({ subject: 'self', fromEmail: me, accountId: a.accountId })
+    fwRule(me, 'other@y.test')
+    processNewMessages(a.accountId, [b.messageId], false)
+    assert.equal(forwardsOf(b.messageId).length, 0)
+  })
+
+  it('stops after the hourly limit', () => {
+    clearForwardLog()
+    for (let i = 0; i < 30; i++) run("INSERT INTO history(at, actor, action, target, details, ok) VALUES (?, 'rule', 'rule-forward', '0', '{}', 1)", now())
+    const a = seedMessage({ subject: 'flood', fromEmail: 'flood@x.test' })
+    fwRule('flood@x.test', 'sis@y.test')
+    processNewMessages(a.accountId, [a.messageId], false)
+    assert.equal(forwardsOf(a.messageId).length, 0)
+    assert.equal(all("SELECT 1 FROM history WHERE action = 'rule-forward-skipped' AND target = ?", String(a.messageId)).length, 1)
+    clearForwardLog()
   })
 })
