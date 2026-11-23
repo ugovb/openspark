@@ -291,6 +291,10 @@ export interface RuleApplyResult {
   matched: number
   applied: number
   truncated: boolean
+  /** only for rules with a forward action */
+  forwarded?: number
+  /** forwards not sent: our own or the target's mail, the hourly limit, or an error */
+  forwardSkipped?: number
 }
 
 export interface RuleSchedule {

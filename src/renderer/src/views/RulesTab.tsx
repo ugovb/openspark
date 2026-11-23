@@ -1,6 +1,6 @@
 import { Eye, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { isGroup, SCHEDULE_SAFE_ACTIONS } from '../../../shared/rules'
+import { forwardTargets, isGroup, SCHEDULE_SAFE_ACTIONS } from '../../../shared/rules'
 import { actionsForSchedule, canAddGroup, countLeaves, insertAt, removeAt, ruleProblem, updateAt, type NodePath, type RuleProblem } from '../../../shared/rules-edit'
 import type { Rule, RuleAction, RuleCondition, RuleGroup, RuleNode, RulePreview, RuleSchedule } from '../../../shared/types'
 import { t, tp } from '../../../shared/i18n'
@@ -27,7 +27,7 @@ const ACTIONS: { value: RuleAction['type']; label: string; needs?: string }[] = 
   { value: 'categorize', label: t('Set category'), needs: 'people / notification / newsletter' }, { value: 'snooze', label: t('Snooze for N hours'), needs: t('number of hours') },
   { value: 'mute', label: t('Mute conversation') }, { value: 'set_aside', label: t('Set aside') }, { value: 'no_notify', label: t('No notification') },
   { value: 'priority', label: t('Mark as priority') },
-  { value: 'forward', label: t('Forward to (new mail only)'), needs: t('addresses, separated by commas') },
+  { value: 'forward', label: t('Forward to'), needs: t('addresses, separated by commas') },
   { value: 'trash', label: t('Move to Trash') }, { value: 'block', label: t('Block sender') },
 ]
 const GROUPS: { value: RuleGroup['group']; label: string }[] = [
@@ -151,10 +151,14 @@ export default function RulesTab() {
       const p = await api.previewRule(r)
       if (!p.matchedThreads) return toast({ level: 'info', message: t('No conversation matches this rule') })
       const more = p.truncated ? ' ' + t('Only the newest {scanned} messages were checked', { scanned: p.scanned }) + '.' : ''
-      if (!window.confirm(tp(p.matchedThreads, 'Apply “{name}” to {n} conversation?', 'Apply “{name}” to {n} conversations?', { name: r.name }) + more)) return
+      const fwd = forwardTargets(r.actions.find((a) => a.type === 'forward')?.value)
+      const fwdNote = fwd.length ? '\n\n' + tp(p.matchedThreads, 'The latest message of this conversation will be forwarded to {to}.', 'The latest message of each of these conversations will be forwarded to {to}.', { to: fwd.join(', ') }) : ''
+      if (!window.confirm(tp(p.matchedThreads, 'Apply “{name}” to {n} conversation?', 'Apply “{name}” to {n} conversations?', { name: r.name }) + more + fwdNote)) return
       const res = await api.applyRule(r.id)
-      const msg = tp(res.applied, 'Applied to {n} existing conversation', 'Applied to {n} existing conversations')
-      toast({ level: 'success', message: res.truncated ? `${msg}. ${t('Only the newest messages were checked, so older ones may remain.')}` : msg })
+      let msg = tp(res.applied, 'Applied to {n} existing conversation', 'Applied to {n} existing conversations')
+      if (res.forwarded !== undefined) msg += '. ' + tp(res.forwarded, '{n} message forwarded', '{n} messages forwarded')
+      if (res.forwardSkipped) msg += ' ' + tp(res.forwardSkipped, '({n} not forwarded: limit of 30 an hour, or mail from you or a recipient)', '({n} not forwarded: limit of 30 an hour, or mail from you or a recipient)')
+      toast({ level: res.forwardSkipped ? 'info' : 'success', message: res.truncated ? `${msg}. ${t('Only the newest messages were checked, so older ones may remain.')}` : msg })
     } catch (e) {
       toast({ level: 'error', message: errorText(e) })
     }

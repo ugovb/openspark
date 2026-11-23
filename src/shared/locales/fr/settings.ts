@@ -225,7 +225,7 @@ const dict: Dictionary = {
     'is older than': 'est plus ancien que',
     'is newer than': 'est plus récent que',
     'days': 'jours',
-    'Forward to (new mail only)': 'Transférer à (nouveaux mails uniquement)',
+    'Forward to': 'Transférer à',
     'addresses, separated by commas': 'adresses, séparées par des virgules',
     'Enter at least one address to forward to': 'Indiquez au moins une adresse de transfert',
     'A rule can forward to at most {n} addresses': 'Une règle peut transférer à {n} adresses au maximum',
@@ -435,6 +435,21 @@ const dict: Dictionary = {
     'Delete old profile': 'Supprimer l’ancien profil',
   },
   plurals: {
+    'The latest message of this conversation will be forwarded to {to}.': [
+      'Le dernier message de cette conversation sera transféré à {to}.',
+      'Le dernier message de chacune de ces conversations sera transféré à {to}.',
+      'Le dernier message de chacune de ces conversations sera transféré à {to}.',
+    ],
+    '{n} message forwarded': [
+      '{n} message transféré',
+      '{n} messages transférés',
+      '{n} messages transférés',
+    ],
+    '({n} not forwarded: limit of 30 an hour, or mail from you or a recipient)': [
+      '({n} non transféré : limite de 30 par heure, ou mail venant de vous ou d’un destinataire)',
+      '({n} non transférés : limite de 30 par heure, ou mails venant de vous ou d’un destinataire)',
+      '({n} non transférés : limite de 30 par heure, ou mails venant de vous ou d’un destinataire)',
+    ],
     'Apply “{name}” to {n} conversation?': [
       'Appliquer « {name} » à {n} conversation ?',
       'Appliquer « {name} » à {n} conversations ?',

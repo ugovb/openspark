@@ -500,13 +500,44 @@ describe('forward action', () => {
     assert.equal(all("SELECT 1 FROM history WHERE action = 'rule-forward' AND target = ?", String(a.messageId)).length, 1)
   })
 
-  it('the initial sync and "apply to existing" never forward', () => {
+  it('the initial sync never forwards', () => {
     clearForwardLog()
-    const a = seedMessage({ subject: 'old', fromEmail: 'fw-old@x.test' })
-    const r = fwRule('fw-old@x.test', 'sis@y.test')
+    const a = seedMessage({ subject: 'old', fromEmail: 'fw-init@x.test' })
+    fwRule('fw-init@x.test', 'sis@y.test')
     processNewMessages(a.accountId, [a.messageId], true)
-    applyRuleToExisting(r.id, 50000)
     assert.equal(forwardsOf(a.messageId).length, 0)
+  })
+
+  it('"apply to existing" forwards the latest message of each matching conversation and counts it', () => {
+    clearForwardLog()
+    const a = seedMessage({ subject: 'old 1', fromEmail: 'fw-old@x.test' })
+    const a2 = seedMessage({ subject: 'old 1 bis', fromEmail: 'fw-old@x.test', thread: a.threadId, accountId: a.accountId })
+    const b = seedMessage({ subject: 'old 2', fromEmail: 'fw-old@x.test', accountId: a.accountId })
+    const r = fwRule('fw-old@x.test', 'sis@y.test')
+    const res = applyRuleToExisting(r.id, 50000)
+    assert.equal(res.forwarded, 2)
+    assert.equal(res.forwardSkipped, 0)
+    assert.equal(forwardsOf(a.messageId).length + forwardsOf(a2.messageId).length, 1, 'one forward per conversation')
+    assert.equal(forwardsOf(b.messageId).length, 1)
+  })
+
+  it('"apply to existing" reports forwards stopped by the hourly limit', () => {
+    clearForwardLog()
+    for (let i = 0; i < 29; i++) run("INSERT INTO history(at, actor, action, target, details, ok) VALUES (?, 'rule', 'rule-forward', '0', '{}', 1)", now())
+    const a = seedMessage({ subject: 'lim 1', fromEmail: 'fw-lim@x.test' })
+    seedMessage({ subject: 'lim 2', fromEmail: 'fw-lim@x.test', accountId: a.accountId })
+    const r = fwRule('fw-lim@x.test', 'sis@y.test')
+    const res = applyRuleToExisting(r.id, 50000)
+    assert.deepEqual([res.forwarded, res.forwardSkipped], [1, 1])
+    clearForwardLog()
+  })
+
+  it('rules without a forward action report no forward counts', () => {
+    const a = seedMessage({ subject: 'nf', fromEmail: 'fw-none@x.test' })
+    const r = saveRule({ name: 'nf', conditions: byFrom('fw-none@x.test'), actions: [{ type: 'archive' }] })
+    const res = applyRuleToExisting(r.id, 50000)
+    assert.equal(res.forwarded, undefined)
+    assert.equal(thread(a.threadId).done_at !== null, true)
   })
 
   it('does not forward mail sent by the target itself or by one of our own addresses (no loop)', () => {

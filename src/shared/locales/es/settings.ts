@@ -225,7 +225,7 @@ const dict: Dictionary = {
     'is older than': 'es más antiguo que',
     'is newer than': 'es más reciente que',
     'days': 'días',
-    'Forward to (new mail only)': 'Reenviar a (solo correo nuevo)',
+    'Forward to': 'Reenviar a',
     'addresses, separated by commas': 'direcciones, separadas por comas',
     'Enter at least one address to forward to': 'Indique al menos una dirección de reenvío',
     'A rule can forward to at most {n} addresses': 'Una regla puede reenviar a {n} direcciones como máximo',
@@ -435,6 +435,21 @@ const dict: Dictionary = {
     'Delete old profile': 'Eliminar perfil antiguo',
   },
   plurals: {
+    'The latest message of this conversation will be forwarded to {to}.': [
+      'El último mensaje de esta conversación se reenviará a {to}.',
+      'El último mensaje de cada una de estas conversaciones se reenviará a {to}.',
+      'El último mensaje de cada una de estas conversaciones se reenviará a {to}.',
+    ],
+    '{n} message forwarded': [
+      '{n} mensaje reenviado',
+      '{n} mensajes reenviados',
+      '{n} mensajes reenviados',
+    ],
+    '({n} not forwarded: limit of 30 an hour, or mail from you or a recipient)': [
+      '({n} no reenviado: límite de 30 por hora, o correo suyo o de un destinatario)',
+      '({n} no reenviados: límite de 30 por hora, o correos suyos o de un destinatario)',
+      '({n} no reenviados: límite de 30 por hora, o correos suyos o de un destinatario)',
+    ],
     'Apply “{name}” to {n} conversation?': [
       '¿Aplicar «{name}» a {n} conversación?',
       '¿Aplicar «{name}» a {n} conversaciones?',

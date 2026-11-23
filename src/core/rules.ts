@@ -210,22 +210,25 @@ export function validateConditions(nodes: RuleNode[]): void {
 }
 
 /** Runs every action on a message's conversation. A failing action is logged and the rest still run. */
-export function applyActions(actions: RuleAction[], m: Row, opts: { live?: boolean } = {}): { suppressNotify: boolean } {
+export function applyActions(actions: RuleAction[], m: Row, opts: { forward?: boolean } = {}): { suppressNotify: boolean; forwarded: number; forwardSkipped: number } {
   let suppressNotify = false
+  let forwarded = 0
+  let forwardSkipped = 0
   for (const a of actions) {
     try {
       if (a.type === 'no_notify') suppressNotify = true
-      // forwarding only reacts to mail as it arrives: "apply to existing" never mass-forwards old mail
+      // forwarding sends mail out: only when the caller asks for it (new mail, or "apply to existing" after the user confirmed)
       if (a.type === 'forward') {
-        if (opts.live) forwardMessage(m, forwardTargets(a.value))
+        if (opts.forward) forwardMessage(m, forwardTargets(a.value)) ? forwarded++ : forwardSkipped++
         continue
       }
       applyAction(a, m)
     } catch (e) {
       log('rules', 'action failed', (e as Error).message)
+      if (a.type === 'forward') forwardSkipped++
     }
   }
-  return { suppressNotify }
+  return { suppressNotify, forwarded, forwardSkipped }
 }
 
 function applyAction(a: RuleAction, m: Row): void {
@@ -343,7 +346,7 @@ export function processNewMessages(accountId: number, ids: number[], initial: bo
         if (!ruleMatches(rule, m)) continue
         log('rules', `rule "${rule.name}" matched message ${m.id}`)
         run('UPDATE rules SET hits = hits + 1 WHERE id = ?', rule.id)
-        if (applyActions(rule.actions, m, { live: true }).suppressNotify) suppressed.add(m.id)
+        if (applyActions(rule.actions, m, { forward: true }).suppressNotify) suppressed.add(m.id)
         record('rule', 'rule-applied', m.id, { rule: rule.name })
         if (rule.stop) break
       }
@@ -383,15 +386,21 @@ export function applyRuleToExisting(ruleId: number, limit = 500): RuleApplyResul
   const truncated = rows.length > limit
   const doneThreads = new Set<number>()
   let applied = 0
+  let forwarded = 0
+  let forwardSkipped = 0
   for (const m of rows.slice(0, limit)) {
     if (doneThreads.has(m.thread_id) || !ruleMatches(rule, m)) continue
     doneThreads.add(m.thread_id)
-    applyActions(rule.actions, m)
+    // the user confirmed in the app (with the recipients shown): existing mail is forwarded too
+    const r = applyActions(rule.actions, m, { forward: true })
+    forwarded += r.forwarded
+    forwardSkipped += r.forwardSkipped
     record('rule', 'rule-applied', m.id, { rule: rule.name, existing: true })
     applied++
   }
   if (applied) run('UPDATE rules SET hits = hits + ? WHERE id = ?', applied, rule.id)
-  return { matched: doneThreads.size, applied, truncated }
+  const hasForward = rule.actions.some((a) => a.type === 'forward')
+  return { matched: doneThreads.size, applied, truncated, ...(hasForward ? { forwarded, forwardSkipped } : {}) }
 }
 
 const SCHEDULED_SCAN_LIMIT = 5000
