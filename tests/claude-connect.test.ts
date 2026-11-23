@@ -39,14 +39,16 @@ it('keeps the other settings in ~/.claude.json and its permissions', () => {
   assert.equal(cfg.theme, 'dark')
   assert.deepEqual(cfg.mcpServers.other, { command: 'x' })
   assert.ok(cfg.mcpServers.openmail)
-  assert.equal(fs.statSync(f).mode & 0o777, 0o600)
+  // Windows has no Unix permission bits
+  if (process.platform !== 'win32') assert.equal(fs.statSync(f).mode & 0o777, 0o600)
 })
 
 it('is idempotent and follows an app that moved', () => {
   const env = mk()
   connectClaude(env)
   assert.equal(connectClaude(env).errors.length, 0)
-  const moved = { ...env, wrapper: '/Applications/OpenMail.app/Contents/Resources/openmail', launch: { command: '/Applications/OpenMail.app/Contents/Resources/openmail', args: ['mcp'] } }
+  const movedWrapper = path.join(env.home, 'Applications', 'OpenMail.app', 'Contents', 'Resources', 'openmail')
+  const moved = { ...env, wrapper: movedWrapper, launch: { command: movedWrapper, args: ['mcp'] } }
   assert.equal(connectionStatus(moved).claudeCode, false) // stale path is reported, not hidden
   connectClaude(moved)
   assert.equal(connectionStatus(moved).claudeCode, true)
